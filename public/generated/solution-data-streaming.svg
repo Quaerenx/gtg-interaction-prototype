@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen streaming signal placeholder">
+  <rect width="1800" height="1100" fill="#050505"/>
+  <rect width="1800" height="1100" fill="#141413"/>
+  <g opacity=".2" stroke="#f4efe4" stroke-width="1">
+    <path d="M0 220H1800M0 410H1800M0 600H1800M0 790H1800M0 980H1800"/>
+    <path d="M220 0V1100M440 0V1100M660 0V1100M880 0V1100M1100 0V1100M1320 0V1100M1540 0V1100"/>
+  </g>
+  <g fill="none" stroke-linecap="round">
+    <path d="M110 300C300 190 430 442 650 316C850 202 958 360 1164 260C1346 172 1510 190 1690 250" stroke="#f4efe4" stroke-opacity=".82" stroke-width="11"/>
+    <path d="M118 510C310 420 458 650 686 528C884 422 1006 572 1198 486C1362 414 1514 424 1694 500" stroke="#89867f" stroke-opacity=".7" stroke-width="7"/>
+    <path d="M124 735C334 672 448 816 690 740C902 674 1048 776 1252 704C1434 640 1564 654 1690 704" stroke="#f02018" stroke-width="7"/>
+  </g>
+  <g fill="#f02018">
+    <circle cx="650" cy="316" r="18"/><circle cx="1164" cy="260" r="18"/><circle cx="1514" cy="424" r="18"/>
+  </g>
+  <g fill="#f4efe4" opacity=".7">
+    <circle cx="300" cy="190" r="13"/><circle cx="884" cy="422" r="13"/><circle cx="1252" cy="704" r="13"/>
+  </g>
+  <rect x="1198" y="684" width="378" height="220" fill="#050505" fill-opacity=".38" stroke="#f4efe4" stroke-opacity=".16"/>
+  <path d="M1262 792h46m42 0h80m42 0h42m-252 46h96m42 0h130" stroke="#f4efe4" stroke-opacity=".46" stroke-width="8" stroke-linecap="round"/>
+</svg>

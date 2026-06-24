@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen infrastructure automation placeholder">
+  <rect width="1800" height="1100" fill="#050505"/>
+  <rect width="1800" height="1100" fill="#171716"/>
+  <g opacity=".18" stroke="#f4efe4" stroke-width="1">
+    <path d="M0 180H1800M0 360H1800M0 540H1800M0 720H1800M0 900H1800"/>
+    <path d="M180 0V1100M360 0V1100M540 0V1100M720 0V1100M900 0V1100M1080 0V1100M1260 0V1100M1440 0V1100M1620 0V1100"/>
+  </g>
+  <g stroke="#89867f" stroke-opacity=".42" stroke-width="5">
+    <path d="M280 300L560 442L850 292L1160 438L1488 300"/>
+    <path d="M280 716L560 442L850 710L1160 438L1488 716"/>
+    <path d="M560 442V858M850 292V710M1160 438V858"/>
+  </g>
+  <g fill="#22221f" stroke="#f4efe4" stroke-opacity=".36" stroke-width="5">
+    <rect x="208" y="238" width="144" height="124"/><rect x="488" y="380" width="144" height="124"/>
+    <rect x="778" y="230" width="144" height="124"/><rect x="1088" y="376" width="144" height="124"/>
+    <rect x="1416" y="238" width="144" height="124"/><rect x="208" y="654" width="144" height="124"/>
+    <rect x="778" y="648" width="144" height="124"/><rect x="1416" y="654" width="144" height="124"/>
+  </g>
+  <path d="M244 884H1538" stroke="#f02018" stroke-width="8" stroke-linecap="round"/>
+  <g fill="#f02018">
+    <circle cx="560" cy="442" r="18"/><circle cx="850" cy="710" r="18"/><circle cx="1160" cy="438" r="18"/>
+  </g>
+</svg>

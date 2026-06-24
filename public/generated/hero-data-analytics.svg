@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" role="img" aria-label="Procedural analytical grid placeholder">
+  <rect width="1400" height="640" fill="#181817"/>
+  <rect x="70" y="66" width="1260" height="508" fill="#22221f" stroke="#f4efe4" stroke-opacity=".18"/>
+  <g stroke="#89867f" stroke-opacity=".22">
+    <path d="M140 160H1260M140 240H1260M140 320H1260M140 400H1260M140 480H1260"/>
+    <path d="M230 110V530M360 110V530M490 110V530M620 110V530M750 110V530M880 110V530M1010 110V530M1140 110V530"/>
+  </g>
+  <g fill="none" stroke-linecap="round">
+    <path d="M170 460C290 410 300 282 442 318C578 352 584 226 720 252C882 284 910 164 1062 198C1162 220 1206 180 1260 132" stroke="#f4efe4" stroke-width="8"/>
+    <path d="M170 476C302 438 372 382 484 398C638 420 686 342 816 352C962 364 1054 302 1260 278" stroke="#f02018" stroke-width="5"/>
+  </g>
+  <g fill="#f4efe4">
+    <circle cx="442" cy="318" r="12"/><circle cx="720" cy="252" r="12"/><circle cx="1062" cy="198" r="12"/>
+  </g>
+  <text x="92" y="104" fill="#f4efe4" font-family="Arial, sans-serif" font-size="34" font-weight="700">DATA &amp; ANALYTICS</text>
+  <text x="92" y="546" fill="#89867f" font-family="Arial, sans-serif" font-size="22">grid / analytical layers / chart topology</text>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen analytical topology placeholder">
+  <rect width="1800" height="1100" fill="#050505"/>
+  <rect x="0" y="0" width="1800" height="1100" fill="#181817"/>
+  <g opacity=".26" stroke="#f4efe4" stroke-width="1">
+    <path d="M0 190H1800M0 340H1800M0 490H1800M0 640H1800M0 790H1800M0 940H1800"/>
+    <path d="M180 0V1100M360 0V1100M540 0V1100M720 0V1100M900 0V1100M1080 0V1100M1260 0V1100M1440 0V1100M1620 0V1100"/>
+  </g>
+  <g fill="none" stroke-linecap="round">
+    <path d="M240 790C408 632 556 704 690 542C830 372 1032 520 1162 360C1264 236 1400 268 1540 170" stroke="#f4efe4" stroke-width="12"/>
+    <path d="M292 902C470 840 610 884 758 746C922 594 1088 704 1244 578C1390 460 1510 492 1640 402" stroke="#f02018" stroke-width="7"/>
+    <path d="M218 624C392 602 510 524 674 598C834 670 926 612 1056 514C1204 402 1396 398 1574 330" stroke="#89867f" stroke-opacity=".68" stroke-width="6"/>
+  </g>
+  <g fill="#f02018">
+    <circle cx="690" cy="542" r="18"/><circle cx="1162" cy="360" r="18"/><circle cx="1540" cy="170" r="18"/>
+  </g>
+  <g fill="#f4efe4" opacity=".76">
+    <circle cx="758" cy="746" r="14"/><circle cx="1244" cy="578" r="14"/><circle cx="1640" cy="402" r="14"/>
+  </g>
+  <rect x="1070" y="712" width="520" height="236" fill="#050505" fill-opacity=".42" stroke="#f4efe4" stroke-opacity=".18"/>
+  <path d="M1130 876h84v-92h78v-52h80v112h78v-160h80" fill="none" stroke="#f4efe4" stroke-opacity=".62" stroke-width="7"/>
+</svg>

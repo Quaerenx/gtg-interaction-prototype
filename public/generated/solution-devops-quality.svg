@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen DevOps and quality placeholder">
+  <rect width="1800" height="1100" fill="#050505"/>
+  <rect width="1800" height="1100" fill="#121211"/>
+  <g opacity=".2" stroke="#f4efe4" stroke-width="1">
+    <path d="M0 210H1800M0 390H1800M0 570H1800M0 750H1800M0 930H1800"/>
+    <path d="M200 0V1100M400 0V1100M600 0V1100M800 0V1100M1000 0V1100M1200 0V1100M1400 0V1100M1600 0V1100"/>
+  </g>
+  <rect x="320" y="228" width="1160" height="590" fill="#1e1e1c" stroke="#f4efe4" stroke-opacity=".16" stroke-width="4"/>
+  <g fill="#2b2b28">
+    <rect x="410" y="330" width="170" height="112"/><rect x="650" y="330" width="170" height="112"/><rect x="890" y="330" width="170" height="112"/><rect x="1130" y="330" width="170" height="112"/>
+    <rect x="410" y="520" width="170" height="112"/><rect x="650" y="520" width="170" height="112"/><rect x="890" y="520" width="170" height="112"/><rect x="1130" y="520" width="170" height="112"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M460 384l32 32 68-82" stroke="#f4efe4" stroke-opacity=".8" stroke-width="13"/>
+    <path d="M700 574l32 32 68-82" stroke="#f4efe4" stroke-opacity=".74" stroke-width="13"/>
+    <path d="M1180 384l32 32 68-82" stroke="#f4efe4" stroke-opacity=".8" stroke-width="13"/>
+  </g>
+  <path d="M460 720H1340" stroke="#f02018" stroke-width="9" stroke-linecap="round"/>
+  <g fill="#f02018">
+    <circle cx="640" cy="720" r="18"/><circle cx="900" cy="720" r="18"/><circle cx="1160" cy="720" r="18"/>
+  </g>
+</svg>

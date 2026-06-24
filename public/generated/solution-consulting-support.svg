@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen consulting and technical support placeholder">
+  <rect width="1800" height="1100" fill="#050505"/>
+  <rect width="1800" height="1100" fill="#151514"/>
+  <g opacity=".2" stroke="#f4efe4" stroke-width="1">
+    <path d="M0 190H1800M0 370H1800M0 550H1800M0 730H1800M0 910H1800"/>
+    <path d="M210 0V1100M420 0V1100M630 0V1100M840 0V1100M1050 0V1100M1260 0V1100M1470 0V1100M1680 0V1100"/>
+  </g>
+  <path d="M210 712C360 616 460 758 612 620C750 494 872 564 1018 422C1160 282 1352 356 1532 222" fill="none" stroke="#f4efe4" stroke-opacity=".75" stroke-width="11" stroke-linecap="round"/>
+  <path d="M240 846C386 790 496 834 652 760C824 680 938 734 1098 650C1248 572 1392 580 1570 508" fill="none" stroke="#f02018" stroke-width="7" stroke-linecap="round"/>
+  <g fill="#22221f" stroke="#f4efe4" stroke-opacity=".34" stroke-width="5">
+    <circle cx="612" cy="620" r="78"/><circle cx="1018" cy="422" r="78"/><circle cx="1532" cy="222" r="78"/>
+  </g>
+  <g fill="#f02018">
+    <circle cx="612" cy="620" r="18"/><circle cx="1018" cy="422" r="18"/><circle cx="1532" cy="222" r="18"/>
+  </g>
+  <rect x="1120" y="676" width="420" height="210" fill="#050505" fill-opacity=".42" stroke="#f4efe4" stroke-opacity=".16"/>
+  <path d="M1188 770c62-72 118 80 182 0s110 72 142 10" fill="none" stroke="#89867f" stroke-opacity=".68" stroke-width="8" stroke-linecap="round"/>
+</svg>

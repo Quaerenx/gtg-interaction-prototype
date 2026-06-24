@@ -1,0 +1,38 @@
+{
+  "name": "gtg-interaction-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "test:e2e": "node scripts/run-playwright.mjs"
+  },
+  "dependencies": {
+    "@react-three/fiber": "latest",
+    "gsap": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "three": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "@playwright/test": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/three": "latest",
+    "autoprefixer": "latest",
+    "eslint": "latest",
+    "eslint-plugin-jsx-a11y": "latest",
+    "eslint-plugin-react-hooks": "latest",
+    "globals": "latest",
+    "postcss": "latest",
+    "tailwindcss": "3.4.17",
+    "typescript": "latest",
+    "typescript-eslint": "latest"
+  }
+}

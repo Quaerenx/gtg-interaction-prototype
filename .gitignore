@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+tests/artifacts/
+playwright-report/
+test-results/
+docs/reference/*.mp4
+public/clients/
+*.tsbuildinfo
