@@ -1,37 +1,192 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
-import { prototypeContent } from "@/content/site";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
+import { brandContent, navigationItems } from "@/content/site";
+
+const focusableSelector =
+  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
 export function SiteHeader() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [headerTheme, setHeaderTheme] = useState<"dark" | "light">("dark");
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-header-theme]"));
+    if (sections.length === 0) {
+      return undefined;
+    }
+
+    const resolveTheme = () => {
+      const headerHeight = Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--header-height")
+      );
+      const probeY = Number.isFinite(headerHeight) ? headerHeight + 1 : 75;
+      const containingSections = sections.filter((section) => {
+          const rect = section.getBoundingClientRect();
+          return rect.top <= probeY && rect.bottom > probeY;
+        });
+      const isAtDocumentEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+      const activeSection =
+        (isAtDocumentEnd ? sections[sections.length - 1] : undefined) ??
+        containingSections[containingSections.length - 1] ??
+        sections.find((section) => section.getBoundingClientRect().top > probeY) ??
+        sections[0];
+      const nextTheme = activeSection.dataset.headerTheme === "light" ? "light" : "dark";
+      setHeaderTheme(nextTheme);
+    };
+
+    const observer = new IntersectionObserver(resolveTheme, {
+      root: null,
+      rootMargin: "0px 0px -75% 0px",
+      threshold: [0, 0.01, 0.5, 1]
+    });
+
+    sections.forEach((section) => observer.observe(section));
+    resolveTheme();
+    window.addEventListener("scroll", resolveTheme, { passive: true });
+    window.addEventListener("resize", resolveTheme);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", resolveTheme);
+      window.removeEventListener("resize", resolveTheme);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    const restoreTarget = buttonRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const firstFocusable = overlayRef.current?.querySelector<HTMLElement>(focusableSelector);
+    firstFocusable?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      restoreTarget?.focus();
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
+  const handleOverlayKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const focusable = Array.from(overlayRef.current?.querySelectorAll<HTMLElement>(focusableSelector) ?? []).filter(
+      (element) => !element.hasAttribute("disabled")
+    );
+
+    if (focusable.length === 0) {
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  const closeMenu = () => setIsOpen(false);
+
   return (
-    <header className="site-header" aria-label="Site header">
-      <div className="header-cluster header-cluster-left" aria-label="Prototype labels">
-        <span className="header-link header-label" aria-disabled="true">
-          ABOUT
-        </span>
-        <span className="header-link header-label" aria-disabled="true">
-          CONTACT
-        </span>
-      </div>
+    <>
+      <a className="skip-link" href="#main-content">
+        본문으로 이동
+      </a>
+      <header className="site-header" data-theme={headerTheme} aria-label="Site header">
+        <nav className="header-cluster header-cluster-left" aria-label="Primary">
+          <a className="header-link" href="/#company">
+            ABOUT
+          </a>
+          <a className="header-link" href="/#contact">
+            CONTACT
+          </a>
+        </nav>
 
-      <Link className="header-brand" href="/" aria-label="GTG Solutions & Consult home">
-        {prototypeContent.companyName}
-      </Link>
+        <a className="header-brand" href="/#top" aria-label={`${brandContent.englishName} home`}>
+          {brandContent.englishName}
+        </a>
 
-      <div className="header-cluster header-cluster-right">
-        <button className="menu-button" type="button" aria-label="Open menu">
-          <span>MENU</span>
-          <span className="menu-rule" aria-hidden="true" />
-          <Image
-            className="header-logo"
-            src="/brand/gtg-logo.png"
-            alt=""
-            width={44}
-            height={44}
-            priority
-          />
-        </button>
-      </div>
-    </header>
+        <div className="header-cluster header-cluster-right">
+          <button
+            ref={buttonRef}
+            className="menu-button"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded={isOpen}
+            aria-controls="site-menu"
+            onClick={() => setIsOpen(true)}
+          >
+            <span>MENU</span>
+            <span className="menu-rule" aria-hidden="true" />
+            <Image
+              className="header-logo"
+              src={brandContent.logo}
+              alt=""
+              width={44}
+              height={44}
+              priority
+            />
+          </button>
+        </div>
+      </header>
+
+      {isOpen ? (
+        <div
+          ref={overlayRef}
+          id="site-menu"
+          className="menu-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+          onKeyDown={handleOverlayKeyDown}
+        >
+          <div className="menu-overlay-top">
+            <span>{brandContent.englishName}</span>
+            <button className="menu-close" type="button" onClick={closeMenu}>
+              Close
+            </button>
+          </div>
+          <nav className="menu-nav" aria-label="Menu sections">
+            <a href="/#top" onClick={closeMenu}>
+              Home
+            </a>
+            {navigationItems.map((item) => (
+              <a href={item.href} key={item.href} onClick={closeMenu}>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      ) : null}
+    </>
   );
 }

@@ -4,6 +4,8 @@ out/
 tests/artifacts/
 playwright-report/
 test-results/
+changed-files-*/
+*.log
 docs/reference/*.mp4
 public/clients/
 *.tsbuildinfo

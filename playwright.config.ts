@@ -1,5 +1,36 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const firefoxSmokeProject =
+  process.env.GTG_ENABLE_FIREFOX_SMOKE === "1"
+    ? [
+        {
+          name: "firefox",
+          grep: /@browser-smoke/,
+          use: {
+            ...devices["Desktop Firefox"],
+            launchOptions: {
+              env: {
+                ...process.env,
+                MOZ_DISABLE_CONTENT_SANDBOX: "1",
+                MOZ_DISABLE_GPU: "1",
+                MOZ_DISABLE_RDD_SANDBOX: "1",
+                MOZ_SANDBOX: "0",
+                MOZ_WEBRENDER: "0"
+              },
+              firefoxUserPrefs: {
+                "gfx.direct2d.disabled": true,
+                "gfx.webrender.all": false,
+                "gfx.webrender.force-disabled": true,
+                "gfx.webrender.software": false,
+                "layers.acceleration.disabled": true,
+                "media.hardware-video-decoding.enabled": false
+              }
+            }
+          }
+        }
+      ]
+    : [];
+
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 60_000,
@@ -9,16 +40,24 @@ export default defineConfig({
   fullyParallel: false,
   reporter: [["list"]],
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000",
     trace: "off"
   },
   projects: [
     {
       name: "chromium",
+      grepInvert: /@browser-smoke/,
       use: {
-        ...devices["Desktop Chrome"],
-        channel: "chrome"
+        ...devices["Desktop Chrome"]
       }
-    }
+    },
+    {
+      name: "webkit",
+      grep: /@browser-smoke/,
+      use: {
+        ...devices["Desktop Safari"]
+      }
+    },
+    ...firefoxSmokeProject
   ]
 });

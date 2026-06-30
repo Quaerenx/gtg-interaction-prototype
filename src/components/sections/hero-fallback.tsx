@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { HeroService, prototypeContent } from "@/content/site";
+import { HeroService } from "@/content/site";
 
 export function HeroFallback({
   services,
@@ -10,8 +10,6 @@ export function HeroFallback({
 }) {
   const testId =
     mode === "reduced" ? "reduced-motion-hero" : mode === "mobile" ? "mobile-fallback-hero" : "force-fallback-hero";
-  const label =
-    mode === "reduced" ? "Reduced motion service carousel" : mode === "mobile" ? "Mobile service carousel" : "Fallback service carousel";
   const featuredServices = [services[services.length - 1], services[0], services[1]];
   const railServices = [
     { service: services[services.length - 1], state: "previous" },
@@ -23,9 +21,9 @@ export function HeroFallback({
     <div
       className={`fallback-hero fallback-hero-${mode}`}
       data-testid={testId}
-      aria-label={label}
+      aria-hidden="true"
     >
-      <div className="fallback-strip">
+      <div className="fallback-strip" aria-hidden="true">
         {featuredServices.map((service, index) => (
           <article className={`fallback-card ${index === 1 ? "is-primary" : "is-adjacent"}`} key={service.id}>
             <Image src={service.visual} alt="" width={700} height={320} priority={service.id === "data-analytics"} />
@@ -33,21 +31,13 @@ export function HeroFallback({
           </article>
         ))}
       </div>
-      <div className="fallback-service-rail" aria-label="Visible service position">
+      <div className="fallback-service-rail" aria-hidden="true">
         {railServices.map(({ service, state }) => (
           <span className={`is-${state}`} key={service.id}>
             {state === "previous" ? "07" : state === "active" ? "01" : "02"} {service.label}
           </span>
         ))}
       </div>
-      <ul className="sr-only" aria-label="Available services">
-        {services.map((service) => (
-          <li key={service.id}>{service.label}</li>
-        ))}
-      </ul>
-      <a className="sr-only" href="#solution-data-analytics">
-        {prototypeContent.primaryCta}
-      </a>
     </div>
   );
 }

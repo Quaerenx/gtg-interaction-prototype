@@ -16,6 +16,21 @@ export function SolutionPreview() {
   const prefersReducedMotion = usePrefersReducedMotion();
   const staticFlow = isMobile || prefersReducedMotion;
 
+  const handleRailSelect = (index: number) => {
+    const root = rootRef.current;
+    if (!root) {
+      return;
+    }
+
+    const top = root.getBoundingClientRect().top + window.scrollY;
+    const scrollable = Math.max(root.scrollHeight - window.innerHeight, 0);
+    const progress = solutionSlides.length <= 1 ? 0 : index / (solutionSlides.length - 1);
+    window.scrollTo({
+      top: top + scrollable * progress,
+      behavior: prefersReducedMotion ? "auto" : "smooth"
+    });
+  };
+
   useEffect(() => {
     const root = rootRef.current;
 
@@ -52,6 +67,34 @@ export function SolutionPreview() {
     };
   }, [staticFlow]);
 
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) {
+      return undefined;
+    }
+
+    const slides = Array.from(root.querySelectorAll<HTMLElement>(".solution-slide"));
+    slides.forEach((slide, index) => {
+      const inactiveDesktopSlide = !staticFlow && activeIndex !== index;
+      const inertSlide = slide as HTMLElement & { inert?: boolean };
+      inertSlide.inert = inactiveDesktopSlide;
+
+      if (inactiveDesktopSlide) {
+        slide.setAttribute("inert", "");
+      } else {
+        slide.removeAttribute("inert");
+      }
+    });
+
+    return () => {
+      slides.forEach((slide) => {
+        const inertSlide = slide as HTMLElement & { inert?: boolean };
+        inertSlide.inert = false;
+        slide.removeAttribute("inert");
+      });
+    };
+  }, [activeIndex, staticFlow]);
+
   return (
     <section
       ref={rootRef}
@@ -59,6 +102,7 @@ export function SolutionPreview() {
       className={`solutions-section ${staticFlow ? "is-static-flow" : "is-hybrid-pinned"}`}
       data-testid="solutions-section"
       data-active-solution={String(activeIndex + 1).padStart(2, "0")}
+      data-header-theme="dark"
       aria-label="GTG solution sequence"
       style={{ "--solution-count": solutionSlides.length } as CSSProperties}
     >
@@ -69,6 +113,7 @@ export function SolutionPreview() {
               id={slide.id}
               className={`solution-slide ${activeIndex === index ? "is-active" : ""}`}
               data-testid={`solution-slide-${index + 1}`}
+              aria-hidden={staticFlow ? undefined : activeIndex !== index}
               aria-labelledby={`${slide.id}-title`}
               key={slide.id}
             >
@@ -89,6 +134,18 @@ export function SolutionPreview() {
                     {slide.title}
                   </h2>
                   <p className="solution-description">{slide.description}</p>
+                  <ul className="solution-related" aria-label="Related products and services">
+                    {slide.related.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                  <a
+                    className="solution-cta"
+                    href={slide.cta.href}
+                    tabIndex={!staticFlow && activeIndex !== index ? -1 : undefined}
+                  >
+                    {slide.cta.label}
+                  </a>
                 </div>
 
                 <div className="solution-index" aria-label={slide.index}>
@@ -103,14 +160,17 @@ export function SolutionPreview() {
 
         <nav className="solution-rail" aria-label="Solution progress" data-testid="solution-rail">
           {solutionSlides.map((slide, index) => (
-            <a
+            <button
+              type="button"
               className={activeIndex === index ? "is-active" : ""}
-              href={`#${slide.id}`}
-              aria-label={slide.index}
+              aria-label={`Solution ${String(index + 1).padStart(2, "0")} of 05: ${slide.title}`}
+              aria-current={activeIndex === index ? "step" : undefined}
+              data-testid={`solution-rail-${index + 1}`}
               key={slide.id}
+              onClick={() => handleRailSelect(index)}
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
-            </a>
+            </button>
           ))}
         </nav>
       </div>

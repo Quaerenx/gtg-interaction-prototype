@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prototypeContent, heroServices } from "@/content/site";
+import { heroContent, heroServices, siteContent } from "@/content/site";
 import { useMediaQuery, usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
 import { HeroCanvas } from "@/components/three/hero-canvas";
 import { supportsWebGL } from "@/lib/webgl";
@@ -152,6 +152,8 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
       data-testid="hero"
       data-hero-state={staticMode ? "initial" : heroStateForProgress(progress)}
       data-hero-progress={progress.toFixed(2)}
+      data-header-theme="dark"
+      id="top"
       aria-labelledby="hero-heading"
     >
       <div ref={stageRef} className="hero-stage" data-testid="hero-stage">
@@ -165,10 +167,11 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
         <div className="hero-blackout" data-testid="black-handoff" aria-hidden="true" />
 
         <div className="hero-copy">
+          <p className="eyebrow">{heroContent.eyebrow}</p>
           <h1 id="hero-heading" className="hero-title">
-            {prototypeContent.headline}
+            {heroContent.headline}
           </h1>
-          <div className="keyword-mask" aria-live="polite">
+          <div className="keyword-mask" aria-hidden="true">
             <span key={activeService.id} className="keyword-text">
               {activeService.keyword}
             </span>
@@ -189,9 +192,9 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
         </div>
 
         <div className="hero-support">
-          <p>{prototypeContent.description}</p>
-          <a className="hero-cta" href="#solution-data-analytics">
-            {prototypeContent.primaryCta}
+          <p>{heroContent.description}</p>
+          <a className="hero-cta" href={heroContent.primaryCta.href}>
+            {heroContent.primaryCta.label}
           </a>
         </div>
 
@@ -200,19 +203,18 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
           <span className="scroll-line" />
         </div>
 
-        <div className="sr-only" aria-label="Hero services">
-          <h2>Hero services</h2>
-          <ul>
-            {heroServices.map((service) => (
-              <li key={service.id}>{service.label}</li>
-            ))}
-          </ul>
-        </div>
+        <ul className="sr-only" aria-label="Hero services">
+          {heroServices.map((service) => (
+            <li key={service.id}>{service.label}</li>
+          ))}
+        </ul>
       </div>
 
-      <div className="prototype-mark" aria-hidden="true">
-        {prototypeContent.badge}
-      </div>
+      {siteContent.isApproved ? null : (
+        <div className="prototype-mark" aria-hidden="true">
+          {siteContent.badge}
+        </div>
+      )}
     </section>
   );
 }
