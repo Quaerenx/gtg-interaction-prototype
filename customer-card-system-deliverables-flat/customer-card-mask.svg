@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 540" aria-hidden="true">
+  <defs>
+    <mask id="customer-card-logo-safe-area" maskUnits="userSpaceOnUse">
+      <rect width="1200" height="540" fill="black"/>
+      <rect x="94" y="138" width="1012" height="270" rx="18" fill="white"/>
+    </mask>
+    <clipPath id="customer-card-logo-clip">
+      <rect x="94" y="138" width="1012" height="270" rx="18"/>
+    </clipPath>
+  </defs>
+  <rect width="1200" height="540" fill="black"/>
+  <rect x="94" y="138" width="1012" height="270" rx="18" fill="white"/>
+</svg>
