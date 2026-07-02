@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 540" role="img" aria-labelledby="title desc">
+  <title id="title">GTG customer card frame</title>
+  <desc id="desc">A charcoal technical frame with a warm-white customer logo safe field and a small red angular GTG marker outside the logo area.</desc>
+  <rect width="1200" height="540" fill="#10100f"/>
+  <rect x="54" y="54" width="1092" height="432" fill="#1b1b19" stroke="#f4efe4" stroke-opacity="0.16" stroke-width="2"/>
+  <g opacity="0.42" stroke="#f4efe4" stroke-width="1">
+    <path d="M120 92V450"/>
+    <path d="M240 92V450"/>
+    <path d="M360 92V450"/>
+    <path d="M480 92V450"/>
+    <path d="M600 92V450"/>
+    <path d="M720 92V450"/>
+    <path d="M840 92V450"/>
+    <path d="M960 92V450"/>
+    <path d="M1080 92V450"/>
+    <path d="M92 120H1108"/>
+    <path d="M92 200H1108"/>
+    <path d="M92 280H1108"/>
+    <path d="M92 360H1108"/>
+    <path d="M92 440H1108"/>
+  </g>
+  <rect x="94" y="138" width="1012" height="270" rx="18" fill="#f4efe4"/>
+  <path d="M1044 92H1116L1090 116H1018Z" fill="#f02018"/>
+  <path d="M1116 92L1138 104L1112 128L1090 116Z" fill="#9e0d0a"/>
+  <path d="M84 112H372" stroke="#f4efe4" stroke-width="2" opacity="0.34"/>
+  <text x="84" y="104" fill="#f4efe4" font-family="Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="0">REPRESENTATIVE CUSTOMER</text>
+  <text x="84" y="462" fill="#f4efe4" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="24" font-weight="600" letter-spacing="0">CUSTOMER NAME</text>
+  <text x="1048" y="462" fill="#f4efe4" fill-opacity="0.52" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="end">01 / 18</text>
+</svg>

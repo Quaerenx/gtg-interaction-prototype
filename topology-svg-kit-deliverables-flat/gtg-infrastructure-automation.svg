@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">GTG infrastructure automation topology</title>
+  <desc id="desc">Provisioning mesh with structured nodes, policy path, and repeatable platform route.</desc>
+  <defs>
+    <style>
+      .bg{fill:#040404}.grid{stroke:#89867f;stroke-opacity:.2}.mesh{fill:none;stroke:#89867f;stroke-opacity:.42;stroke-width:3}.line{fill:none;stroke:#f4efe4;stroke-opacity:.7;stroke-width:4}.red{fill:none;stroke:#f02018;stroke-width:6}.node{fill:#181817;stroke:#f4efe4;stroke-opacity:.72;stroke-width:4}.active{fill:#181817;stroke:#f02018;stroke-width:6}.label{fill:#f4efe4;font:700 24px Arial,sans-serif}.small{fill:#89867f;font:700 18px Arial,sans-serif}
+    </style>
+    <pattern id="grid" width="76" height="76" patternUnits="userSpaceOnUse"><path d="M76 0H0V76" class="grid"/></pattern>
+  </defs>
+  <rect width="1440" height="900" class="bg"/>
+  <rect x="64" y="64" width="1312" height="772" fill="url(#grid)"/>
+  <text x="96" y="126" class="label">Infrastructure Automation topology</text>
+  <text x="96" y="160" class="small">Provisioning mesh, structured nodes, policy path, repeatable route</text>
+  <path d="M300 300L520 230L760 300L980 230L1160 330" class="mesh"/>
+  <path d="M300 300L520 470L760 300L980 470L1160 330" class="mesh"/>
+  <path d="M300 600L520 470L760 600L980 470L1160 600" class="mesh"/>
+  <path d="M300 300V600M520 230V470M760 300V600M980 230V470M1160 330V600" class="mesh"/>
+  <path d="M232 450H380C490 450 496 318 618 318H838C958 318 964 450 1088 450H1220" class="line"/>
+  <path d="M232 450H380C494 450 504 518 620 518H842C960 518 974 450 1088 450" class="red"/>
+  <circle cx="300" cy="300" r="28" class="node"/>
+  <circle cx="520" cy="230" r="28" class="node"/>
+  <circle cx="760" cy="300" r="34" class="active"/>
+  <circle cx="980" cy="230" r="28" class="node"/>
+  <circle cx="1160" cy="330" r="28" class="node"/>
+  <circle cx="300" cy="600" r="28" class="node"/>
+  <circle cx="760" cy="600" r="28" class="node"/>
+  <circle cx="1160" cy="600" r="28" class="node"/>
+  <path d="M1044 192H1134L1108 222H1018Z" fill="#f02018"/>
+  <path d="M1134 192L1170 208L1144 238L1108 222Z" fill="#9e0d0a"/>
+  <text x="214" y="420" class="small">policy</text>
+  <text x="682" y="272" class="small">provision</text>
+  <text x="1086" y="420" class="small">platform route</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">GTG DevOps and quality topology</title>
+  <desc id="desc">Release confidence matrix with quality gate, test traceability, and validation path.</desc>
+  <defs>
+    <style>
+      .bg{fill:#040404}.grid{stroke:#89867f;stroke-opacity:.22}.cell{fill:#181817;stroke:#f4efe4;stroke-opacity:.24;stroke-width:2}.line{fill:none;stroke:#f4efe4;stroke-opacity:.7;stroke-width:4}.red{fill:none;stroke:#f02018;stroke-width:6}.gate{fill:#181817;stroke:#f4efe4;stroke-opacity:.74;stroke-width:4}.node{fill:#181817;stroke:#f4efe4;stroke-opacity:.72;stroke-width:4}.active{fill:#181817;stroke:#f02018;stroke-width:6}.label{fill:#f4efe4;font:700 24px Arial,sans-serif}.small{fill:#89867f;font:700 18px Arial,sans-serif}
+    </style>
+    <pattern id="grid" width="72" height="72" patternUnits="userSpaceOnUse"><path d="M72 0H0V72" class="grid"/></pattern>
+  </defs>
+  <rect width="1440" height="900" class="bg"/>
+  <rect x="64" y="64" width="1312" height="772" fill="url(#grid)"/>
+  <text x="96" y="126" class="label">DevOps &amp; Quality topology</text>
+  <text x="96" y="160" class="small">Release confidence matrix, quality gate, traceability, validation path</text>
+  <g transform="translate(260 284)">
+    <rect width="720" height="360" fill="#10100f" stroke="#f4efe4" stroke-opacity=".16"/>
+    <rect x="40" y="44" width="132" height="76" class="cell"/>
+    <rect x="204" y="44" width="132" height="76" class="cell"/>
+    <rect x="368" y="44" width="132" height="76" class="cell"/>
+    <rect x="532" y="44" width="132" height="76" class="cell"/>
+    <rect x="40" y="154" width="132" height="76" class="cell"/>
+    <rect x="204" y="154" width="132" height="76" class="cell"/>
+    <rect x="368" y="154" width="132" height="76" class="cell"/>
+    <rect x="532" y="154" width="132" height="76" class="cell"/>
+    <rect x="40" y="264" width="132" height="56" class="cell"/>
+    <rect x="204" y="264" width="132" height="56" class="cell"/>
+    <rect x="368" y="264" width="132" height="56" class="cell"/>
+    <rect x="532" y="264" width="132" height="56" class="cell"/>
+  </g>
+  <path d="M198 464H370C516 464 560 356 710 356H1062" class="line"/>
+  <path d="M370 464H584C704 464 744 548 892 548H1120" class="red"/>
+  <path d="M1042 306H1130L1160 398L1130 490H1042L1012 398Z" class="gate"/>
+  <path d="M1050 396L1076 422L1124 354" fill="none" stroke="#f02018" stroke-width="8"/>
+  <circle cx="198" cy="464" r="30" class="node"/>
+  <circle cx="584" cy="464" r="30" class="node"/>
+  <circle cx="892" cy="548" r="34" class="active"/>
+  <path d="M1044 192H1134L1108 222H1018Z" fill="#f02018"/>
+  <path d="M1134 192L1170 208L1144 238L1108 222Z" fill="#9e0d0a"/>
+  <text x="170" y="530" class="small">change</text>
+  <text x="532" y="430" class="small">trace</text>
+  <text x="838" y="612" class="small">validate</text>
+  <text x="1030" y="528" class="small">quality gate</text>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">GTG data streaming topology</title>
+  <desc id="desc">Directional event stream with pulse sequence, split and merge paths, and flow handoff.</desc>
+  <defs>
+    <style>
+      .bg{fill:#040404}.grid{stroke:#89867f;stroke-opacity:.2}.line{fill:none;stroke:#f4efe4;stroke-opacity:.68;stroke-width:4}.muted{fill:none;stroke:#89867f;stroke-opacity:.46;stroke-width:3}.red{fill:none;stroke:#f02018;stroke-width:6}.node{fill:#181817;stroke:#f4efe4;stroke-opacity:.72;stroke-width:4}.active{fill:#181817;stroke:#f02018;stroke-width:6}.label{fill:#f4efe4;font:700 24px Arial,sans-serif}.small{fill:#89867f;font:700 18px Arial,sans-serif}.pulse{fill:#f02018}
+    </style>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" class="grid"/></pattern>
+  </defs>
+  <rect width="1440" height="900" class="bg"/>
+  <rect x="64" y="64" width="1312" height="772" fill="url(#grid)"/>
+  <text x="96" y="126" class="label">Data Streaming topology</text>
+  <text x="96" y="160" class="small">Directional event stream, pulse sequence, split and merge handoff</text>
+  <path d="M180 454H424" class="line"/>
+  <path d="M424 454C548 454 574 318 720 318" class="muted"/>
+  <path d="M424 454C548 454 574 590 720 590" class="muted"/>
+  <path d="M720 318C870 318 884 454 1036 454" class="line"/>
+  <path d="M720 590C870 590 884 454 1036 454" class="line"/>
+  <path d="M1036 454H1222" class="red"/>
+  <path d="M1214 432L1250 454L1214 476Z" fill="#f02018"/>
+  <circle cx="180" cy="454" r="32" class="node"/>
+  <circle cx="424" cy="454" r="34" class="active"/>
+  <circle cx="720" cy="318" r="28" class="node"/>
+  <circle cx="720" cy="590" r="28" class="node"/>
+  <circle cx="1036" cy="454" r="34" class="node"/>
+  <circle cx="300" cy="454" r="9" class="pulse"/>
+  <circle cx="520" cy="374" r="9" class="pulse"/>
+  <circle cx="522" cy="534" r="9" class="pulse"/>
+  <circle cx="900" cy="454" r="9" class="pulse"/>
+  <path d="M1044 192H1134L1108 222H1018Z" fill="#f02018"/>
+  <path d="M1134 192L1170 208L1144 238L1108 222Z" fill="#9e0d0a"/>
+  <text x="138" y="520" class="small">event source</text>
+  <text x="360" y="418" class="small">split</text>
+  <text x="1002" y="418" class="small">merge</text>
+  <text x="1124" y="520" class="small">handoff</text>
+</svg>
