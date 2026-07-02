@@ -4,9 +4,23 @@ Date: 2026-07-01
 Branch: `codex/topology-svg-kit`  
 Status: Accept candidate
 
-## Source Availability
+## Source Review
 
-The current branch does not contain several asset-research draft documents named in the task prompt, including `docs/asset-research-index.md`, `docs/gtg-asset-qa-rubric.md`, and related asset ranking files. This report follows the task prompt, `AGENTS.md`, existing GTG visual constraints, and the approved Customer Card System baseline.
+The initial `codex/topology-svg-kit` branch was behind `main`. It was fast-forward synced to the current main baseline before this regression review.
+
+After sync, the topology kit was reviewed against:
+
+- `docs/asset-research-index.md`
+- `docs/reference-asset-ranking.md`
+- `docs/gtg-asset-style-guide-draft.md`
+- `docs/gtg-visual-motif-palette.md`
+- `docs/gtg-asset-qa-rubric.md`
+- `docs/gtg-asset-risk-register.md`
+- `docs/asset-copy-guardrails.md`
+- `docs/generated-asset-inventory.md`
+- `docs/customer-card-system-report.md`
+
+Existing `public/generated/solution-*.svg` assets were not overwritten. The approved Customer Card baseline and Hero/Solution motion baseline were preserved.
 
 ## 1. Generated SVG List
 
@@ -120,4 +134,4 @@ This task does not intentionally modify:
 - Solution section layout;
 - WebGL scope.
 
-The new topology assets live only in `public/generated/topology/`.
+The topology SVG source assets live only in `public/generated/topology/`. Delivery-copy folders are not part of the merge baseline for these SVG masters.

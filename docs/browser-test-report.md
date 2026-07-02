@@ -6,7 +6,7 @@ Note: `pnpm exec playwright test --project=chromium` was previously attempted, b
 
 - command: `pnpm run test:e2e:chromium`
 - passed / failed: passed
-- test count: 11 passed
+- test count: 13 passed
 - browser version: Chromium 149.0.7827.55
 
 ## WebKit

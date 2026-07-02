@@ -477,6 +477,42 @@ function expectTopologySvgSafe(fileName: string) {
   expect(visibleSvgText(svg)).not.toMatch(/\b\d+(?:\.\d+)?\s?(?:%|ms|s|x|k|m|gb|tb)\b/i);
 }
 
+function collectRepoFilePaths() {
+  const ignoredDirectories = new Set([".git", ".next", "node_modules", "test-results", "tests/artifacts"]);
+  const foundFiles: string[] = [];
+  const pendingDirectories = [process.cwd()];
+
+  while (pendingDirectories.length > 0) {
+    const currentDirectory = pendingDirectories.pop()!;
+    const relativeDirectory = path.relative(process.cwd(), currentDirectory).replaceAll(path.sep, "/");
+
+    if (ignoredDirectories.has(relativeDirectory) || ignoredDirectories.has(path.basename(currentDirectory))) {
+      continue;
+    }
+
+    for (const entry of fs.readdirSync(currentDirectory, { withFileTypes: true })) {
+      const entryPath = path.join(currentDirectory, entry.name);
+
+      if (entry.isDirectory()) {
+        pendingDirectories.push(entryPath);
+      } else {
+        foundFiles.push(path.relative(process.cwd(), entryPath).replaceAll(path.sep, "/"));
+      }
+    }
+  }
+
+  return foundFiles;
+}
+
+function expectTopologySvgAssetsOnlyInGeneratedTopology() {
+  const expectedPaths = topologySvgFiles.map((fileName) => `public/generated/topology/${fileName}`).sort();
+  const foundTopologySvgPaths = collectRepoFilePaths()
+    .filter((filePath) => topologySvgFiles.includes(path.basename(filePath)))
+    .sort();
+
+  expect(foundTopologySvgPaths).toEqual(expectedPaths);
+}
+
 test.beforeAll(({ browserName }, testInfo) => {
   if (browserName === "chromium" && testInfo.project.name === "chromium") {
     ensureArtifacts();
@@ -763,6 +799,8 @@ test("topology SVG kit assets are local, claim-safe, and renderable", async ({ p
   await page.setViewportSize({ width: 1440, height: 1180 });
   const errors = await attachConsoleGuards(page);
 
+  expectTopologySvgAssetsOnlyInGeneratedTopology();
+
   for (const fileName of topologySvgFiles) {
     expectTopologySvgSafe(fileName);
   }
@@ -835,6 +873,10 @@ test("topology SVG kit assets are local, claim-safe, and renderable", async ({ p
       path: path.join(topologyArtifactDir, "topology-contact-sheet.png"),
       fullPage: true
     });
+
+    const contactSheetPath = path.join(topologyArtifactDir, "topology-contact-sheet.png");
+    expect(fs.existsSync(contactSheetPath)).toBe(true);
+    expect(fs.statSync(contactSheetPath).size).toBeGreaterThan(10_000);
   });
 
   expect(errors).toEqual([]);
