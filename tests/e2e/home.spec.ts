@@ -6,6 +6,7 @@ const artifactDir = path.join(process.cwd(), "tests", "artifacts");
 const contentArtifactDir = path.join(artifactDir, "content-integration");
 const customerCardArtifactDir = path.join(artifactDir, "customer-card-system");
 const topologyArtifactDir = path.join(artifactDir, "topology-svg-kit");
+const capabilityArtifactDir = path.join(artifactDir, "capability-map");
 const officialHeadline = "데이터 분석, 스트리밍, 인프라 자동화, DevOps 품질을 함께 설계합니다.";
 const officialDescription =
   "GTG는 Bigdata Analytics, Confluent, HashiCorp, DevOps 솔루션과 DB/테스트/프로세스 컨설팅을 중심으로 기업 IT 시스템의 구축과 운영을 지원합니다.";
@@ -51,6 +52,14 @@ const topologySvgFiles = [
   "gtg-devops-quality.svg",
   "gtg-consulting-support.svg"
 ];
+const capabilitySvgFiles = ["gtg-capability-map.svg", "gtg-capability-map-mobile.svg"];
+const capabilityNodeNames = [
+  "Data & Analytics",
+  "Data Streaming",
+  "Infrastructure Automation",
+  "DevOps & Quality",
+  "Consulting & Technical Support"
+];
 const forbiddenTopologyTerms = [
   "Kafka",
   "Confluent",
@@ -67,12 +76,21 @@ const forbiddenTopologyTerms = [
   "Official partner",
   "customer logo"
 ];
+const forbiddenCapabilityWorkflowLabels = [
+  "step 1",
+  "step 2",
+  "pipeline result",
+  "pipeline output",
+  "guaranteed sequence",
+  "fixed workflow order"
+];
 
 function ensureArtifacts() {
   fs.mkdirSync(artifactDir, { recursive: true });
   fs.mkdirSync(contentArtifactDir, { recursive: true });
   fs.mkdirSync(customerCardArtifactDir, { recursive: true });
   fs.mkdirSync(topologyArtifactDir, { recursive: true });
+  fs.mkdirSync(capabilityArtifactDir, { recursive: true });
 
   for (const fileName of fs.readdirSync(artifactDir)) {
     if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
@@ -99,6 +117,12 @@ function ensureArtifacts() {
   for (const fileName of fs.readdirSync(topologyArtifactDir)) {
     if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
       fs.unlinkSync(path.join(topologyArtifactDir, fileName));
+    }
+  }
+
+  for (const fileName of fs.readdirSync(capabilityArtifactDir)) {
+    if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
+      fs.unlinkSync(path.join(capabilityArtifactDir, fileName));
     }
   }
 }
@@ -513,6 +537,43 @@ function expectTopologySvgAssetsOnlyInGeneratedTopology() {
   expect(foundTopologySvgPaths).toEqual(expectedPaths);
 }
 
+function expectCapabilitySvgSafe(fileName: string) {
+  const filePath = path.join(process.cwd(), "public", "generated", "topology", fileName);
+  expect(fs.existsSync(filePath)).toBe(true);
+  const svg = fs.readFileSync(filePath, "utf8");
+  const visibleText = visibleSvgText(svg);
+  expect(svg).toContain("<title");
+  expect(svg).toContain("<desc");
+  expect(svg).not.toContain("<image");
+  expect(svg).not.toMatch(/\b(?:href|src)=["']https?:\/\//i);
+
+  for (const term of forbiddenTopologyTerms) {
+    expect(svg.toLowerCase()).not.toContain(term.toLowerCase());
+  }
+
+  expect(svg.toLowerCase()).not.toContain("customer logo");
+  expect(svg.toLowerCase()).not.toContain("vendor logo");
+  expect(visibleText).not.toMatch(/\b\d+(?:\.\d+)?\s?(?:%|ms|s|x|k|m|gb|tb)\b/i);
+
+  for (const label of forbiddenCapabilityWorkflowLabels) {
+    expect(visibleText.toLowerCase()).not.toContain(label);
+  }
+}
+
+async function expectCapabilityMapContent(page: Page) {
+  const map = page.getByTestId("capability-map");
+  await map.scrollIntoViewIfNeeded();
+  await expectLocatorInViewport(page, map);
+  const list = page.getByRole("list", { name: "GTG capability map nodes" });
+  await expect(list).toHaveCount(1);
+  const items = list.getByRole("listitem");
+  await expect(items).toHaveCount(capabilityNodeNames.length);
+
+  for (const nodeName of capabilityNodeNames) {
+    await expect(items.filter({ hasText: nodeName })).toHaveCount(1);
+  }
+}
+
 test.beforeAll(({ browserName }, testInfo) => {
   if (browserName === "chromium" && testInfo.project.name === "chromium") {
     ensureArtifacts();
@@ -882,6 +943,122 @@ test("topology SVG kit assets are local, claim-safe, and renderable", async ({ p
   expect(errors).toEqual([]);
 });
 
+test("capability map assets and Company integration are claim-safe and responsive", async ({ page }) => {
+  const errors = await attachConsoleGuards(page);
+
+  for (const fileName of capabilitySvgFiles) {
+    expectCapabilitySvgSafe(fileName);
+  }
+
+  await expectNoExternalImageRequests(page, async () => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    await scrollTestIdToStart(page, "company-section");
+    await expectCapabilityMapContent(page);
+    await expect(page.getByTestId("capability-map").locator("img")).toHaveAttribute(
+      "src",
+      "/generated/topology/gtg-capability-map.svg"
+    );
+    await expectNoOverflow(page);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await scrollTestIdToStart(page, "company-section");
+    await expectCapabilityMapContent(page);
+    await page.waitForFunction(() =>
+      document
+        .querySelector<HTMLImageElement>('[data-testid="capability-map"] img')
+        ?.currentSrc.endsWith("/generated/topology/gtg-capability-map-mobile.svg")
+    );
+    await expectNoOverflow(page);
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await scrollTestIdToStart(page, "company-section");
+    await expectCapabilityMapContent(page);
+    await expectNoOverflow(page);
+
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/?forceFallback=1");
+    await scrollTestIdToStart(page, "company-section");
+    await expectCapabilityMapContent(page);
+    await expect(page.locator("canvas")).toHaveCount(0);
+    await expectNoOverflow(page);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setContent(`
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <style>
+            * { box-sizing: border-box; }
+            html, body {
+              width: 1440px;
+              min-height: 920px;
+              margin: 0;
+              background: #040404;
+              color: #f4efe4;
+              font-family: Arial, sans-serif;
+            }
+            main {
+              display: grid;
+              grid-template-columns: minmax(0, 1fr) 360px;
+              gap: 20px;
+              padding: 28px;
+            }
+            figure {
+              margin: 0;
+              border: 1px solid rgba(244, 239, 228, 0.16);
+              background: #10100f;
+              padding: 14px;
+            }
+            img {
+              display: block;
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+              background: #040404;
+            }
+            figcaption {
+              margin-top: 10px;
+              color: rgba(244, 239, 228, 0.72);
+              font-size: 13px;
+              font-weight: 700;
+            }
+          </style>
+        </head>
+        <body>
+          <main>
+            <figure>
+              <img src="/generated/topology/gtg-capability-map.svg" alt="desktop capability map" />
+              <figcaption>gtg-capability-map.svg</figcaption>
+            </figure>
+            <figure>
+              <img src="/generated/topology/gtg-capability-map-mobile.svg" alt="mobile capability map" />
+              <figcaption>gtg-capability-map-mobile.svg</figcaption>
+            </figure>
+          </main>
+        </body>
+      </html>
+    `);
+
+    await page.waitForFunction(() =>
+      [...document.images].every((image) => image.complete && image.naturalWidth > 0 && image.naturalHeight > 0)
+    );
+    await page.screenshot({
+      path: path.join(capabilityArtifactDir, "capability-map-contact-sheet.png"),
+      fullPage: true
+    });
+
+    const contactSheetPath = path.join(capabilityArtifactDir, "capability-map-contact-sheet.png");
+    expect(fs.existsSync(contactSheetPath)).toBe(true);
+    expect(fs.statSync(contactSheetPath).size).toBeGreaterThan(10_000);
+  });
+
+  expect(errors).toEqual([]);
+});
+
 test("official content structure, navigation, metadata, and screenshots", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await attachConsoleGuards(page);
@@ -910,6 +1087,7 @@ test("official content structure, navigation, metadata, and screenshots", async 
   await page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" }).click();
   await waitForTestIdBelowHeader(page, "contact-section");
   await expectElementBelowHeader(page, page.getByTestId("contact-section"));
+  await scrollTestIdToStart(page, "contact-section");
   await waitForHeaderTheme(page, "light");
 
   await scrollSolutionsTo(page, 0);
@@ -924,6 +1102,7 @@ test("official content structure, navigation, metadata, and screenshots", async 
   await expectLocatorInViewport(page, page.getByRole("heading", { name: "데이터 플랫폼과 소프트웨어 품질을 위한 기술 파트너" }));
   await expect(page.getByTestId("company-headline-line")).toHaveCount(3);
   await expect(page.getByText("Bigdata Analytics / Vertica")).toBeVisible();
+  await expectCapabilityMapContent(page);
   await waitForHeaderTheme(page, "dark");
   await captureContent(page, "03-desktop-company");
 

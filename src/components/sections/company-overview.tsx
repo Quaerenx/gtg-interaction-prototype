@@ -1,4 +1,4 @@
-import { companyContent } from "@/content/site";
+import { capabilityMapContent, companyContent } from "@/content/site";
 
 export function CompanyOverview() {
   return (
@@ -26,6 +26,25 @@ export function CompanyOverview() {
               ))}
             </ul>
           </div>
+        </div>
+
+        <div className="capability-map-block" data-testid="capability-map">
+          <div className="capability-map-copy">
+            <h3>{capabilityMapContent.title}</h3>
+            <p>{capabilityMapContent.description}</p>
+          </div>
+          <picture className="capability-map-visual" aria-hidden="true">
+            <source media="(max-width: 767px)" srcSet={capabilityMapContent.mobileVisual} />
+            <img src={capabilityMapContent.desktopVisual} alt="" loading="lazy" />
+          </picture>
+          <ul className="capability-map-list" aria-label="GTG capability map nodes">
+            {capabilityMapContent.nodes.map((node) => (
+              <li key={node.id}>
+                <span>{node.label}</span>
+                <small>{node.descriptor}</small>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

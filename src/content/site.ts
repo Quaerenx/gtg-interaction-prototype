@@ -52,6 +52,12 @@ export type HeadlineLines = {
   mobile?: string[];
 };
 
+export type CapabilityMapNode = {
+  id: string;
+  label: string;
+  descriptor: string;
+};
+
 export const siteContent = {
   isApproved: false,
   language: "ko",
@@ -409,6 +415,41 @@ export const companyContent = {
     "DevOps quality tooling / LoadRunner",
     "DB, performance/function testing, process, configuration-management consulting, and Vertica technical education"
   ]
+} as const;
+
+export const capabilityMapContent = {
+  title: "GTG capability map",
+  description: "Data, platform, quality, and support capabilities connected as a technical delivery system.",
+  desktopVisual: "/generated/topology/gtg-capability-map.svg",
+  mobileVisual: "/generated/topology/gtg-capability-map-mobile.svg",
+  visualAlt: "GTG capability map linking analytics, streaming, automation, DevOps quality, consulting, and technical support.",
+  nodes: [
+    {
+      id: "data-analytics",
+      label: "Data & Analytics",
+      descriptor: "analytical layers"
+    },
+    {
+      id: "data-streaming",
+      label: "Data Streaming",
+      descriptor: "event handoff"
+    },
+    {
+      id: "infrastructure-automation",
+      label: "Infrastructure Automation",
+      descriptor: "provisioning mesh"
+    },
+    {
+      id: "devops-quality",
+      label: "DevOps & Quality",
+      descriptor: "validation gate"
+    },
+    {
+      id: "consulting-technical-support",
+      label: "Consulting & Technical Support",
+      descriptor: "diagnosis and action"
+    }
+  ] satisfies CapabilityMapNode[]
 } as const;
 
 export const engagementContent = {

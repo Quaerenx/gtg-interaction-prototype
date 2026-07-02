@@ -983,6 +983,86 @@ svg {
   line-height: 1.35;
 }
 
+.capability-map-block {
+  display: grid;
+  grid-template-columns: minmax(0, 1.38fr) minmax(260px, 0.62fr);
+  gap: clamp(28px, 5vw, 72px);
+  margin-top: clamp(58px, 8vw, 104px);
+  border-top: 1px solid rgba(244, 239, 228, 0.18);
+  padding-top: clamp(28px, 4vw, 44px);
+}
+
+.capability-map-copy {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.7fr);
+  gap: clamp(24px, 5vw, 80px);
+  align-items: start;
+}
+
+.capability-map-copy h3 {
+  margin: 0;
+  color: var(--gtg-warm);
+  font-size: clamp(28px, 4.2vw, 54px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.capability-map-copy p {
+  margin: 0;
+  color: rgba(244, 239, 228, 0.72);
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.45;
+}
+
+.capability-map-visual {
+  display: block;
+  min-width: 0;
+}
+
+.capability-map-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(244, 239, 228, 0.14);
+  background: #040404;
+}
+
+.capability-map-list {
+  align-self: stretch;
+  display: grid;
+  align-content: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.capability-map-list li {
+  display: grid;
+  gap: 6px;
+  border-top: 1px solid rgba(244, 239, 228, 0.16);
+  padding: 18px 0;
+}
+
+.capability-map-list li:last-child {
+  border-bottom: 1px solid rgba(244, 239, 228, 0.16);
+}
+
+.capability-map-list span {
+  color: rgba(244, 239, 228, 0.9);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.capability-map-list small {
+  color: rgba(244, 239, 228, 0.52);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 .engagement-steps {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1451,6 +1531,34 @@ svg {
 
   .company-grid {
     gap: 34px;
+  }
+
+  .capability-map-block,
+  .capability-map-copy {
+    grid-template-columns: 1fr;
+  }
+
+  .capability-map-block {
+    gap: 24px;
+    margin-top: 52px;
+    padding-top: 26px;
+  }
+
+  .capability-map-copy {
+    gap: 14px;
+  }
+
+  .capability-map-copy h3 {
+    font-size: clamp(30px, 9vw, 40px);
+  }
+
+  .capability-map-visual img {
+    width: min(100%, 390px);
+    margin-inline: auto;
+  }
+
+  .capability-map-list li {
+    padding: 15px 0;
   }
 
   .section-title,
