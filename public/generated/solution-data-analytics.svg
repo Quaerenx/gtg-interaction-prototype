@@ -1,21 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen analytical topology placeholder">
-  <rect width="1800" height="1100" fill="#050505"/>
-  <rect x="0" y="0" width="1800" height="1100" fill="#181817"/>
-  <g opacity=".26" stroke="#f4efe4" stroke-width="1">
-    <path d="M0 190H1800M0 340H1800M0 490H1800M0 640H1800M0 790H1800M0 940H1800"/>
-    <path d="M180 0V1100M360 0V1100M540 0V1100M720 0V1100M900 0V1100M1080 0V1100M1260 0V1100M1440 0V1100M1620 0V1100"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-labelledby="title desc">
+  <title id="title">GTG data analytics operational layer asset</title>
+  <desc id="desc">A restrained graphite field with folded analytical data plates, thin flow ribbons, and small GTG red activation points.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1800" y1="0" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#090b0c"/>
+      <stop offset="0.58" stop-color="#050607"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="520" x2="1520" y1="220" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#202427"/>
+      <stop offset="0.55" stop-color="#111315"/>
+      <stop offset="1" stop-color="#08090a"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" x2="1">
+      <stop offset="0" stop-color="#e30613"/>
+      <stop offset="1" stop-color="#8f0710"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="36" stdDeviation="36" flood-color="#000000" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+
+  <rect width="1800" height="1100" fill="url(#bg)"/>
+  <g fill="none" stroke="#f3f1ea" stroke-linecap="square" opacity="0.08">
+    <path d="M-80 860L620 106L1880 106"/>
+    <path d="M-100 970L740 220L1880 220"/>
+    <path d="M-120 1080L860 336L1880 336"/>
+    <path d="M1120 -60L1840 662"/>
   </g>
+
+  <g filter="url(#shadow)">
+    <path d="M642 706L1068 582L1494 720L1064 872Z" fill="#08090a" opacity="0.92"/>
+    <path d="M594 606L1016 486L1442 620L1018 770Z" fill="url(#plate)" stroke="#f3f1ea" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M668 514L1034 406L1362 506L998 630Z" fill="#161a1c" stroke="#f3f1ea" stroke-opacity="0.18" stroke-width="2"/>
+    <path d="M756 428L1042 344L1288 420L1002 516Z" fill="#1d2022" stroke="#f3f1ea" stroke-opacity="0.2" stroke-width="2"/>
+    <path d="M858 354L1046 298L1198 344L1010 410Z" fill="#24272a" stroke="#f3f1ea" stroke-opacity="0.2" stroke-width="2"/>
+  </g>
+
   <g fill="none" stroke-linecap="round">
-    <path d="M240 790C408 632 556 704 690 542C830 372 1032 520 1162 360C1264 236 1400 268 1540 170" stroke="#f4efe4" stroke-width="12"/>
-    <path d="M292 902C470 840 610 884 758 746C922 594 1088 704 1244 578C1390 460 1510 492 1640 402" stroke="#f02018" stroke-width="7"/>
-    <path d="M218 624C392 602 510 524 674 598C834 670 926 612 1056 514C1204 402 1396 398 1574 330" stroke="#89867f" stroke-opacity=".68" stroke-width="6"/>
+    <path d="M520 740C702 700 818 642 962 584C1112 524 1222 508 1460 430" stroke="#f3f1ea" stroke-opacity="0.28" stroke-width="5"/>
+    <path d="M612 808C790 766 900 718 1030 666C1188 604 1320 612 1512 558" stroke="#878a86" stroke-opacity="0.24" stroke-width="4"/>
+    <path d="M760 464L956 536L1154 476L1354 538" stroke="#e30613" stroke-opacity="0.36" stroke-width="4"/>
   </g>
-  <g fill="#f02018">
-    <circle cx="690" cy="542" r="18"/><circle cx="1162" cy="360" r="18"/><circle cx="1540" cy="170" r="18"/>
+
+  <g transform="rotate(45)" fill="url(#red)">
+    <rect x="772" y="-430" width="18" height="18" rx="2" opacity="0.82"/>
+    <rect x="1006" y="-482" width="14" height="14" rx="2" opacity="0.66"/>
+    <rect x="1164" y="-334" width="12" height="12" rx="2" opacity="0.48"/>
   </g>
-  <g fill="#f4efe4" opacity=".76">
-    <circle cx="758" cy="746" r="14"/><circle cx="1244" cy="578" r="14"/><circle cx="1640" cy="402" r="14"/>
+
+  <g fill="#f3f1ea" opacity="0.12">
+    <path d="M1410 242H1542L1500 284H1368Z"/>
+    <path d="M1260 856H1388L1350 894H1222Z"/>
   </g>
-  <rect x="1070" y="712" width="520" height="236" fill="#050505" fill-opacity=".42" stroke="#f4efe4" stroke-opacity=".18"/>
-  <path d="M1130 876h84v-92h78v-52h80v112h78v-160h80" fill="none" stroke="#f4efe4" stroke-opacity=".62" stroke-width="7"/>
 </svg>

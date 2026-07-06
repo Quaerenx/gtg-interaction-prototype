@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" role="img" aria-label="Procedural database consulting placeholder">
   <rect width="1400" height="640" fill="#151514"/>
-  <g transform="translate(170 120)" fill="#22221f" stroke="#f4efe4" stroke-opacity=".32" stroke-width="3">
+  <g transform="translate(170 120)" fill="#1d2022" stroke="#f3f1ea" stroke-opacity=".32" stroke-width="3">
     <ellipse cx="170" cy="70" rx="142" ry="46"/>
     <path d="M28 70v238c0 26 64 46 142 46s142-20 142-46V70"/>
     <ellipse cx="170" cy="308" rx="142" ry="46"/>
@@ -9,14 +9,14 @@
     <ellipse cx="824" cy="308" rx="142" ry="46"/>
   </g>
   <g fill="none" stroke-linecap="round">
-    <path d="M490 230C580 148 680 148 770 230" stroke="#f4efe4" stroke-opacity=".75" stroke-width="7"/>
-    <path d="M492 348C590 426 688 420 770 348" stroke="#89867f" stroke-opacity=".72" stroke-width="5"/>
-    <path d="M454 290H806" stroke="#f02018" stroke-width="6"/>
+    <path d="M490 230C580 148 680 148 770 230" stroke="#f3f1ea" stroke-opacity=".75" stroke-width="7"/>
+    <path d="M492 348C590 426 688 420 770 348" stroke="#878a86" stroke-opacity=".72" stroke-width="5"/>
+    <path d="M454 290H806" stroke="#e30613" stroke-width="6"/>
   </g>
-  <g fill="#f02018">
+  <g fill="#e30613">
     <circle cx="490" cy="230" r="12"/><circle cx="770" cy="230" r="12"/><circle cx="806" cy="290" r="12"/>
   </g>
-  <path d="M960 478c70-160 138-116 184-220 36-82 86-80 122-112" fill="none" stroke="#f4efe4" stroke-opacity=".4" stroke-width="5"/>
-  <text x="92" y="104" fill="#f4efe4" font-family="Arial, sans-serif" font-size="34" font-weight="700">DATABASE CONSULTING</text>
-  <text x="92" y="546" fill="#89867f" font-family="Arial, sans-serif" font-size="22">database cylinders / query paths / performance graph</text>
+  <path d="M960 478c70-160 138-116 184-220 36-82 86-80 122-112" fill="none" stroke="#f3f1ea" stroke-opacity=".4" stroke-width="5"/>
+  <text x="92" y="104" fill="#f3f1ea" font-family="Arial, sans-serif" font-size="34" font-weight="700">DATABASE CONSULTING</text>
+  <text x="92" y="546" fill="#878a86" font-family="Arial, sans-serif" font-size="22">database cylinders / query paths / performance graph</text>
 </svg>

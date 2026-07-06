@@ -3,16 +3,16 @@
   <desc id="desc">Reusable charcoal, warm-white, neutral gray, and red topology primitives for GTG solution diagrams.</desc>
   <defs>
     <style>
-      .bg{fill:#040404}.panel{fill:#181817;stroke:#f4efe4;stroke-opacity:.14}.line{fill:none;stroke:#f4efe4;stroke-opacity:.62;stroke-width:3}.muted{fill:none;stroke:#89867f;stroke-opacity:.42;stroke-width:2}.active{fill:#f02018}.warm{fill:#f4efe4}.label{fill:#f4efe4;font:700 24px Arial,sans-serif}.small{fill:#89867f;font:700 18px Arial,sans-serif}
+      .bg{fill:#050607}.panel{fill:#111315;stroke:#f3f1ea;stroke-opacity:.14}.line{fill:none;stroke:#f3f1ea;stroke-opacity:.62;stroke-width:3}.muted{fill:none;stroke:#878a86;stroke-opacity:.42;stroke-width:2}.active{fill:#e30613}.warm{fill:#f3f1ea}.label{fill:#f3f1ea;font:700 24px Arial,sans-serif}.small{fill:#878a86;font:700 18px Arial,sans-serif}
     </style>
     <pattern id="grid" width="72" height="72" patternUnits="userSpaceOnUse">
       <path d="M72 0H0V72" class="muted"/>
     </pattern>
     <symbol id="node" viewBox="-18 -18 36 36">
-      <circle r="16" fill="#181817" stroke="#f4efe4" stroke-opacity=".72" stroke-width="3"/>
+      <circle r="16" fill="#111315" stroke="#f3f1ea" stroke-opacity=".72" stroke-width="3"/>
     </symbol>
     <symbol id="active-node" viewBox="-22 -22 44 44">
-      <circle r="19" fill="#181817" stroke="#f02018" stroke-width="5"/>
+      <circle r="19" fill="#111315" stroke="#e30613" stroke-width="5"/>
       <circle r="6" class="active"/>
     </symbol>
     <symbol id="edge" viewBox="0 0 160 24">
@@ -23,38 +23,38 @@
       <path d="M152 8L170 18L152 28Z" class="warm"/>
     </symbol>
     <symbol id="layer-plane" viewBox="0 0 220 112">
-      <path d="M18 20H198L218 88H38Z" fill="#181817" stroke="#f4efe4" stroke-opacity=".44" stroke-width="3"/>
+      <path d="M18 20H198L218 88H38Z" fill="#111315" stroke="#f3f1ea" stroke-opacity=".44" stroke-width="3"/>
       <path d="M38 88H218" class="muted"/>
     </symbol>
     <symbol id="queue-segment" viewBox="0 0 220 84">
-      <rect x="10" y="16" width="56" height="52" fill="#181817" stroke="#f4efe4" stroke-opacity=".52" stroke-width="3"/>
-      <rect x="82" y="16" width="56" height="52" fill="#181817" stroke="#f4efe4" stroke-opacity=".52" stroke-width="3"/>
-      <rect x="154" y="16" width="56" height="52" fill="#181817" stroke="#f02018" stroke-width="3"/>
+      <rect x="10" y="16" width="56" height="52" fill="#111315" stroke="#f3f1ea" stroke-opacity=".52" stroke-width="3"/>
+      <rect x="82" y="16" width="56" height="52" fill="#111315" stroke="#f3f1ea" stroke-opacity=".52" stroke-width="3"/>
+      <rect x="154" y="16" width="56" height="52" fill="#111315" stroke="#e30613" stroke-width="3"/>
     </symbol>
     <symbol id="database-cylinder" viewBox="0 0 150 150">
-      <ellipse cx="75" cy="34" rx="54" ry="22" fill="#181817" stroke="#f4efe4" stroke-opacity=".72" stroke-width="3"/>
-      <path d="M21 34V108C21 120 45 130 75 130S129 120 129 108V34" fill="none" stroke="#f4efe4" stroke-opacity=".62" stroke-width="3"/>
-      <ellipse cx="75" cy="108" rx="54" ry="22" fill="none" stroke="#89867f" stroke-opacity=".44" stroke-width="2"/>
+      <ellipse cx="75" cy="34" rx="54" ry="22" fill="#111315" stroke="#f3f1ea" stroke-opacity=".72" stroke-width="3"/>
+      <path d="M21 34V108C21 120 45 130 75 130S129 120 129 108V34" fill="none" stroke="#f3f1ea" stroke-opacity=".62" stroke-width="3"/>
+      <ellipse cx="75" cy="108" rx="54" ry="22" fill="none" stroke="#878a86" stroke-opacity=".44" stroke-width="2"/>
     </symbol>
     <symbol id="quality-gate" viewBox="0 0 140 140">
-      <path d="M28 22H112L128 70L112 118H28L12 70Z" fill="#181817" stroke="#f4efe4" stroke-opacity=".7" stroke-width="3"/>
-      <path d="M43 70L62 88L98 48" fill="none" stroke="#f02018" stroke-width="8" stroke-linecap="square"/>
+      <path d="M28 22H112L128 70L112 118H28L12 70Z" fill="#111315" stroke="#f3f1ea" stroke-opacity=".7" stroke-width="3"/>
+      <path d="M43 70L62 88L98 48" fill="none" stroke="#e30613" stroke-width="8" stroke-linecap="square"/>
     </symbol>
     <symbol id="diagnostic-marker" viewBox="0 0 120 120">
-      <path d="M60 10L112 100H8Z" fill="#181817" stroke="#f4efe4" stroke-opacity=".64" stroke-width="3"/>
-      <path d="M60 42V70" stroke="#f02018" stroke-width="7"/>
+      <path d="M60 10L112 100H8Z" fill="#111315" stroke="#f3f1ea" stroke-opacity=".64" stroke-width="3"/>
+      <path d="M60 42V70" stroke="#e30613" stroke-width="7"/>
       <circle cx="60" cy="84" r="5" class="active"/>
     </symbol>
     <symbol id="angular-gtg-marker" viewBox="0 0 160 64">
       <path d="M18 10H112L92 34H0Z" class="active"/>
-      <path d="M112 10L148 26L128 50L92 34Z" fill="#9e0d0a"/>
+      <path d="M112 10L148 26L128 50L92 34Z" fill="#8f0710"/>
     </symbol>
     <symbol id="signal-trace" viewBox="0 0 220 110">
-      <path d="M8 76C42 18 70 102 104 48S168 20 212 74" fill="none" stroke="#f4efe4" stroke-opacity=".72" stroke-width="4"/>
-      <path d="M8 92C48 58 78 86 118 72S174 56 212 36" fill="none" stroke="#f02018" stroke-width="4"/>
+      <path d="M8 76C42 18 70 102 104 48S168 20 212 74" fill="none" stroke="#f3f1ea" stroke-opacity=".72" stroke-width="4"/>
+      <path d="M8 92C48 58 78 86 118 72S174 56 212 36" fill="none" stroke="#e30613" stroke-width="4"/>
     </symbol>
     <symbol id="dependency-edge" viewBox="0 0 220 100">
-      <path d="M12 84C62 18 156 18 208 84" fill="none" stroke="#89867f" stroke-opacity=".54" stroke-width="3" stroke-dasharray="10 10"/>
+      <path d="M12 84C62 18 156 18 208 84" fill="none" stroke="#878a86" stroke-opacity=".54" stroke-width="3" stroke-dasharray="10 10"/>
     </symbol>
   </defs>
   <rect width="1440" height="900" class="bg"/>

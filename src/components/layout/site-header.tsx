@@ -1,6 +1,4 @@
 "use client";
-
-import Image from "next/image";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { brandContent, navigationItems } from "@/content/site";
 
@@ -145,16 +143,11 @@ export function SiteHeader() {
             aria-controls="site-menu"
             onClick={() => setIsOpen(true)}
           >
-            <span>MENU</span>
-            <span className="menu-rule" aria-hidden="true" />
-            <Image
-              className="header-logo"
-              src={brandContent.logo}
-              alt=""
-              width={44}
-              height={44}
-              priority
-            />
+            <span className="sr-only">Menu</span>
+            <span className="menu-icon" aria-hidden="true">
+              <span />
+              <span />
+            </span>
           </button>
         </div>
       </header>
@@ -171,8 +164,9 @@ export function SiteHeader() {
         >
           <div className="menu-overlay-top">
             <span>{brandContent.englishName}</span>
-            <button className="menu-close" type="button" onClick={closeMenu}>
-              Close
+            <button className="menu-close" type="button" aria-label="Close" onClick={closeMenu}>
+              <span aria-hidden="true" />
+              <span className="sr-only">Close</span>
             </button>
           </div>
           <nav className="menu-nav" aria-label="Menu sections">

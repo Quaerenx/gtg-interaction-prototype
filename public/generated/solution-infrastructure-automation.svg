@@ -1,23 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen infrastructure automation placeholder">
-  <rect width="1800" height="1100" fill="#050505"/>
-  <rect width="1800" height="1100" fill="#171716"/>
-  <g opacity=".18" stroke="#f4efe4" stroke-width="1">
-    <path d="M0 180H1800M0 360H1800M0 540H1800M0 720H1800M0 900H1800"/>
-    <path d="M180 0V1100M360 0V1100M540 0V1100M720 0V1100M900 0V1100M1080 0V1100M1260 0V1100M1440 0V1100M1620 0V1100"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-labelledby="title desc">
+  <title id="title">GTG infrastructure automation provisioning asset</title>
+  <desc id="desc">A precise graphite provisioning structure made of repeated beveled modules, a central spine, and small red activation marks.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1800" y1="0" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#090b0c"/>
+      <stop offset="0.56" stop-color="#050607"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="module" x1="570" x2="1460" y1="210" y2="870" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#24282a"/>
+      <stop offset="0.55" stop-color="#111315"/>
+      <stop offset="1" stop-color="#08090a"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" x2="1">
+      <stop offset="0" stop-color="#e30613"/>
+      <stop offset="1" stop-color="#8f0710"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="34" stdDeviation="34" flood-color="#000000" flood-opacity="0.46"/>
+    </filter>
+  </defs>
+
+  <rect width="1800" height="1100" fill="url(#bg)"/>
+  <g fill="none" stroke="#f3f1ea" stroke-linecap="square" opacity="0.07">
+    <path d="M340 0V1100M540 0V1100M740 0V1100M940 0V1100M1140 0V1100M1340 0V1100M1540 0V1100"/>
+    <path d="M-80 278H1880M-80 518H1880M-80 758H1880"/>
   </g>
-  <g stroke="#89867f" stroke-opacity=".42" stroke-width="5">
-    <path d="M280 300L560 442L850 292L1160 438L1488 300"/>
-    <path d="M280 716L560 442L850 710L1160 438L1488 716"/>
-    <path d="M560 442V858M850 292V710M1160 438V858"/>
+
+  <g filter="url(#shadow)" stroke="#f3f1ea" stroke-opacity="0.16" stroke-width="2">
+    <path d="M690 250H948L1012 314L946 378H688L624 314Z" fill="url(#module)"/>
+    <path d="M1062 250H1320L1384 314L1318 378H1060L996 314Z" fill="url(#module)"/>
+    <path d="M690 474H948L1012 538L946 602H688L624 538Z" fill="url(#module)"/>
+    <path d="M1062 474H1320L1384 538L1318 602H1060L996 538Z" fill="url(#module)"/>
+    <path d="M690 698H948L1012 762L946 826H688L624 762Z" fill="url(#module)"/>
+    <path d="M1062 698H1320L1384 762L1318 826H1060L996 762Z" fill="url(#module)"/>
   </g>
-  <g fill="#22221f" stroke="#f4efe4" stroke-opacity=".36" stroke-width="5">
-    <rect x="208" y="238" width="144" height="124"/><rect x="488" y="380" width="144" height="124"/>
-    <rect x="778" y="230" width="144" height="124"/><rect x="1088" y="376" width="144" height="124"/>
-    <rect x="1416" y="238" width="144" height="124"/><rect x="208" y="654" width="144" height="124"/>
-    <rect x="778" y="648" width="144" height="124"/><rect x="1416" y="654" width="144" height="124"/>
+
+  <g fill="none" stroke-linecap="square">
+    <path d="M1004 314V762" stroke="#f3f1ea" stroke-opacity="0.28" stroke-width="5"/>
+    <path d="M812 378V474M1188 378V474M812 602V698M1188 602V698" stroke="#878a86" stroke-opacity="0.28" stroke-width="4"/>
+    <path d="M624 762H448L382 696V438L448 372H624" stroke="#f3f1ea" stroke-opacity="0.2" stroke-width="4"/>
+    <path d="M1384 314H1512L1568 370V650L1512 706H1384" stroke="#f3f1ea" stroke-opacity="0.18" stroke-width="4"/>
+    <path d="M1004 538H1188" stroke="#e30613" stroke-opacity="0.42" stroke-width="5"/>
   </g>
-  <path d="M244 884H1538" stroke="#f02018" stroke-width="8" stroke-linecap="round"/>
-  <g fill="#f02018">
-    <circle cx="560" cy="442" r="18"/><circle cx="850" cy="710" r="18"/><circle cx="1160" cy="438" r="18"/>
+
+  <g fill="url(#red)">
+    <rect x="990" y="300" width="28" height="28" rx="3" transform="rotate(45 1004 314)" opacity="0.76"/>
+    <rect x="990" y="524" width="28" height="28" rx="3" transform="rotate(45 1004 538)" opacity="0.62"/>
+    <rect x="990" y="748" width="28" height="28" rx="3" transform="rotate(45 1004 762)" opacity="0.5"/>
+  </g>
+
+  <g fill="#f3f1ea" opacity="0.11">
+    <path d="M1442 164H1576L1534 206H1400Z"/>
+    <path d="M468 888H620L574 934H422Z"/>
   </g>
 </svg>

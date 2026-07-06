@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 80" fill="none" aria-hidden="true" focusable="false">
+  <path
+    d="M13 30L24 18H58L69 8H92L85 27L101 36L83 45L88 62H49L37 51H14L25 39L13 30ZM67 31L79 36L67 42L71 36L67 31Z"
+    fill="#E90207"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+  />
+  <path
+    d="M28 23H55L63 15"
+    stroke="#F3F1EA"
+    stroke-width="2"
+    stroke-linecap="square"
+    stroke-linejoin="miter"
+    vector-effect="non-scaling-stroke"
+  />
+  <path
+    d="M46 56H73"
+    stroke="#B6B7B1"
+    stroke-opacity=".46"
+    stroke-width="1.5"
+    stroke-linecap="square"
+    vector-effect="non-scaling-stroke"
+  />
+</svg>

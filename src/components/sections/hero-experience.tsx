@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { customerProofContent, heroContent, heroCustomers, heroServices, siteContent } from "@/content/site";
+import {
+  customerProofContent,
+  heroContent,
+  heroCustomers,
+  heroRingCustomers,
+  heroServices,
+  siteContent
+} from "@/content/site";
 import { useMediaQuery, usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
 import { HeroCanvas } from "@/components/three/hero-canvas";
 import { supportsWebGL } from "@/lib/webgl";
@@ -20,19 +27,15 @@ function range(value: number, start: number, end: number) {
 }
 
 function heroStateForProgress(value: number) {
-  if (value < 0.08) {
+  if (value < 0.34) {
     return "initial";
   }
 
-  if (value < 0.45) {
+  if (value < 0.84) {
     return "orbit";
   }
 
-  if (value < 0.75) {
-    return "pullback";
-  }
-
-  if (value < 0.96) {
+  if (value < 0.98) {
     return "handoff";
   }
 
@@ -49,6 +52,7 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
   const [webglAvailable, setWebglAvailable] = useState(!forceFallback);
 
   const staticMode = forceFallback || prefersReducedMotion || isMobile || !webglAvailable;
+  const heroKeyword = staticMode || progress < 0.34 ? "GTG Data Core" : customerProofContent.headlineKeyword;
 
   useEffect(() => {
     if (forceFallback) {
@@ -65,12 +69,15 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
       return;
     }
 
-    const blackout = range(progress, 0.76, 1);
-    const copyFade = 1 - range(progress, 0.12, 0.62);
-    const supportFade = 1 - range(progress, 0.32, 0.78);
-    const mediaFade = 1 - range(progress, 0.9, 1);
-    const solutionPreview = range(progress, 0.75, 1);
-    const solutionText = range(progress, 0.88, 1);
+    const proofIn = range(progress, 0.36, 0.48);
+    const proofOut = range(progress, 0.78, 0.9);
+    const proofVisibility = proofIn * (1 - proofOut);
+    const blackout = range(progress, 0.9, 1);
+    const copyFade = 1 - range(progress, 0.22, 0.34);
+    const supportFade = 1 - range(progress, 0.28, 0.4);
+    const mediaFade = 1 - range(progress, 0.94, 1);
+    const solutionPreview = range(progress, 0.86, 0.98);
+    const solutionText = range(progress, 0.88, 0.98);
 
     stage.style.setProperty("--hero-progress", progress.toFixed(4));
     stage.style.setProperty("--hero-bg-top-alpha", Math.max(0.2, 0.82 - progress * 0.62).toFixed(3));
@@ -80,11 +87,13 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
     stage.style.setProperty("--hero-grid-opacity", Math.min(0.38, 0.2 + progress * 0.18).toFixed(3));
     stage.style.setProperty("--hero-blackout-opacity", (blackout * 0.84).toFixed(3));
     stage.style.setProperty("--hero-copy-y", `${Math.round(progress * -52)}px`);
-    stage.style.setProperty("--hero-copy-blur", `${(range(progress, 0.18, 0.72) * 7).toFixed(2)}px`);
+    stage.style.setProperty("--hero-copy-blur", `${(range(progress, 0.24, 0.4) * 7).toFixed(2)}px`);
     stage.style.setProperty("--hero-copy-opacity", copyFade.toFixed(3));
     stage.style.setProperty("--hero-media-opacity", mediaFade.toFixed(3));
     stage.style.setProperty("--hero-support-y", `${Math.round(progress * -18)}px`);
     stage.style.setProperty("--hero-support-opacity", supportFade.toFixed(3));
+    stage.style.setProperty("--hero-proof-y", `${Math.round((1 - proofIn) * 24 - proofOut * 22)}px`);
+    stage.style.setProperty("--hero-proof-opacity", proofVisibility.toFixed(3));
     stage.style.setProperty("--scroll-opacity", (1 - range(progress, 0, 0.33)).toFixed(3));
     stage.style.setProperty("--hero-solution-preview-opacity", (solutionPreview * 0.98).toFixed(3));
     stage.style.setProperty("--hero-solution-text-opacity", solutionText.toFixed(3));
@@ -153,23 +162,31 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
 
         <div className="hero-copy">
           <p className="eyebrow">{heroContent.eyebrow}</p>
-          <h1 id="hero-heading" className="hero-title">
-            {heroContent.headline}
+          <h1 id="hero-heading" className="hero-title" aria-label={heroContent.headline}>
+            {heroContent.headlineLines.map((line) => (
+              <span className="hero-title-line" key={line}>
+                {line}
+              </span>
+            ))}
           </h1>
           <div className="keyword-mask" aria-hidden="true">
-            <span key={customerProofContent.headlineKeyword} className="keyword-text">
-              {customerProofContent.headlineKeyword}
+            <span key={heroKeyword} className="keyword-text">
+              {heroKeyword}
             </span>
           </div>
         </div>
 
+        <div className="hero-proof-copy" aria-hidden="true">
+          <p className="eyebrow">{customerProofContent.cardLabel}</p>
+          <strong>{customerProofContent.headlineKeyword}</strong>
+        </div>
+
         <div className="hero-media">
           {staticMode ? (
-            <HeroFallback customers={heroCustomers} mode={fallbackMode} />
+            <HeroFallback customers={heroRingCustomers} mode={fallbackMode} />
           ) : (
             <HeroCanvas
-              services={heroServices}
-              mediaItems={heroCustomers}
+              mediaItems={heroRingCustomers}
               progressRef={progressRef}
               isMobile={isMobile}
               onFailure={() => setWebglAvailable(false)}

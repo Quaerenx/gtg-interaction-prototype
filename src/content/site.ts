@@ -81,9 +81,10 @@ export const navigationItems: NavigationItem[] = [
 
 export const heroContent = {
   eyebrow: "GTG Solutions & Consult",
-  headline: "데이터 분석, 스트리밍, 인프라 자동화, DevOps 품질을 함께 설계합니다.",
+  headline: "데이터와 인프라를 하나의 운영 구조로",
+  headlineLines: ["데이터와 인프라를", "하나의 운영 구조로"],
   description:
-    "GTG는 Bigdata Analytics, Confluent, HashiCorp, DevOps 솔루션과 DB/테스트/프로세스 컨설팅을 중심으로 기업 IT 시스템의 구축과 운영을 지원합니다.",
+    "데이터 분석, 스트리밍, 인프라 자동화, DevOps 품질, DB/테스트/프로세스 컨설팅을 하나의 실행 구조로 연결합니다.",
   primaryCta: {
     label: "문의하기",
     href: "#contact"
@@ -300,6 +301,27 @@ export const heroCustomers: HeroCustomer[] = customerProofItems.map((customer) =
   label: customer.displayName,
   visual: customer.logoSrc
 }));
+
+const heroRingCustomerIds = [
+  "kt",
+  "lg-electronics",
+  "konkuk-university-hospital",
+  "korea-university-medicine",
+  "supreme-prosecutors-office",
+  "bithumb",
+  "samsung-sds",
+  "samsung-electronics",
+  "saemaul-geumgo",
+  "shinhan-bank",
+  "ptkorea",
+  "komsco"
+] as const;
+
+const heroCustomerById = new Map(heroCustomers.map((customer) => [customer.id, customer]));
+
+export const heroRingCustomers: HeroCustomer[] = heroRingCustomerIds
+  .map((id) => heroCustomerById.get(id))
+  .filter((customer): customer is HeroCustomer => Boolean(customer));
 
 export const solutionSlides: SolutionSlide[] = [
   {

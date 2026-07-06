@@ -1,18 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen consulting and technical support placeholder">
-  <rect width="1800" height="1100" fill="#050505"/>
-  <rect width="1800" height="1100" fill="#151514"/>
-  <g opacity=".2" stroke="#f4efe4" stroke-width="1">
-    <path d="M0 190H1800M0 370H1800M0 550H1800M0 730H1800M0 910H1800"/>
-    <path d="M210 0V1100M420 0V1100M630 0V1100M840 0V1100M1050 0V1100M1260 0V1100M1470 0V1100M1680 0V1100"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-labelledby="title desc">
+  <title id="title">GTG consulting support diagnostic route asset</title>
+  <desc id="desc">A controlled diagnostic route made of folded graphite decision plates, calibration marks, and subtle red operating signals.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1800" y1="0" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#090b0c"/>
+      <stop offset="0.58" stop-color="#050607"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="520" x2="1540" y1="250" y2="830" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#24282a"/>
+      <stop offset="0.56" stop-color="#111315"/>
+      <stop offset="1" stop-color="#070809"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" x2="1">
+      <stop offset="0" stop-color="#e30613"/>
+      <stop offset="1" stop-color="#8f0710"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="34" stdDeviation="34" flood-color="#000000" flood-opacity="0.46"/>
+    </filter>
+  </defs>
+
+  <rect width="1800" height="1100" fill="url(#bg)"/>
+  <g fill="none" stroke="#f3f1ea" stroke-linecap="square" opacity="0.07">
+    <path d="M-80 316H1880M-80 528H1880M-80 740H1880"/>
+    <path d="M440 -80L1060 1100M720 -80L1340 1100M1000 -80L1620 1100"/>
   </g>
-  <path d="M210 712C360 616 460 758 612 620C750 494 872 564 1018 422C1160 282 1352 356 1532 222" fill="none" stroke="#f4efe4" stroke-opacity=".75" stroke-width="11" stroke-linecap="round"/>
-  <path d="M240 846C386 790 496 834 652 760C824 680 938 734 1098 650C1248 572 1392 580 1570 508" fill="none" stroke="#f02018" stroke-width="7" stroke-linecap="round"/>
-  <g fill="#22221f" stroke="#f4efe4" stroke-opacity=".34" stroke-width="5">
-    <circle cx="612" cy="620" r="78"/><circle cx="1018" cy="422" r="78"/><circle cx="1532" cy="222" r="78"/>
+
+  <g filter="url(#shadow)" stroke="#f3f1ea" stroke-opacity="0.16" stroke-width="2">
+    <path d="M556 632L730 492H992L818 632Z" fill="url(#plate)"/>
+    <path d="M826 430L1020 276H1306L1112 430Z" fill="url(#plate)"/>
+    <path d="M1034 694L1224 548H1498L1308 694Z" fill="url(#plate)"/>
+    <path d="M710 780L946 690H1182L948 842Z" fill="#0b0d0e" opacity="0.92"/>
   </g>
-  <g fill="#f02018">
-    <circle cx="612" cy="620" r="18"/><circle cx="1018" cy="422" r="18"/><circle cx="1532" cy="222" r="18"/>
+
+  <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M604 632H818L1020 276" stroke="#f3f1ea" stroke-opacity="0.28" stroke-width="5"/>
+    <path d="M1112 430L1224 548L1450 548" stroke="#878a86" stroke-opacity="0.26" stroke-width="4"/>
+    <path d="M818 632L946 690L1308 694" stroke="#f3f1ea" stroke-opacity="0.22" stroke-width="4"/>
+    <path d="M730 492L902 530L1034 694" stroke="#e30613" stroke-opacity="0.38" stroke-width="4"/>
   </g>
-  <rect x="1120" y="676" width="420" height="210" fill="#050505" fill-opacity=".42" stroke="#f4efe4" stroke-opacity=".16"/>
-  <path d="M1188 770c62-72 118 80 182 0s110 72 142 10" fill="none" stroke="#89867f" stroke-opacity=".68" stroke-width="8" stroke-linecap="round"/>
+
+  <g fill="url(#red)">
+    <rect x="716" y="478" width="28" height="28" rx="4" transform="rotate(45 730 492)" opacity="0.72"/>
+    <rect x="1020" y="680" width="28" height="28" rx="4" transform="rotate(45 1034 694)" opacity="0.58"/>
+    <path d="M1296 274H1428L1386 316H1254Z" opacity="0.58"/>
+  </g>
+
+  <g fill="none" stroke="#f3f1ea" stroke-opacity="0.12" stroke-width="3">
+    <path d="M516 800H618M568 748V850"/>
+    <path d="M1408 442H1512M1460 390V494"/>
+    <path d="M1204 842H1320M1262 784V900"/>
+  </g>
+
+  <g fill="#f3f1ea" opacity="0.1">
+    <path d="M456 382H610L562 430H408Z"/>
+    <path d="M1378 802H1538L1490 850H1330Z"/>
+  </g>
 </svg>

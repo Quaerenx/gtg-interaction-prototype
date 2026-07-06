@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 760" role="img" aria-labelledby="title desc">
+  <title id="title">GTG mobile capability map</title>
+  <desc id="desc">A simplified stacked view of five GTG capabilities with semantic labels kept outside the visual in HTML.</desc>
+  <style>
+    .bg{fill:#040404}.grid{stroke:#89867f;stroke-opacity:.16}.frame{fill:#10100f;stroke:#f4efe4;stroke-opacity:.16;stroke-width:2}.node{fill:#181817;stroke:#f4efe4;stroke-opacity:.72;stroke-width:3}.active{fill:#181817;stroke:#f02018;stroke-width:5}.edge{fill:none;stroke:#f4efe4;stroke-opacity:.58;stroke-width:3}.red{fill:none;stroke:#f02018;stroke-width:5}.label{fill:#f4efe4;font:700 17px Arial,sans-serif}.small{fill:#89867f;font:700 12px Arial,sans-serif}.tag{fill:#f4efe4;font:700 11px Arial,sans-serif;letter-spacing:.04em}
+  </style>
+  <rect class="bg" width="390" height="760"/>
+  <path class="grid" d="M34 70H356M34 150H356M34 230H356M34 310H356M34 390H356M34 470H356M34 550H356M34 630H356M72 42V708M150 42V708M228 42V708M306 42V708"/>
+  <rect class="frame" x="24" y="28" width="342" height="704"/>
+  <text x="42" y="64" class="tag">GTG CAPABILITY MAP</text>
+  <path class="edge" d="M76 132V634"/>
+  <path class="red" d="M76 438V518"/>
+  <path d="M52 704H128L104 728H28Z" fill="#f02018"/>
+
+  <g transform="translate(42 104)">
+    <circle class="node" cx="34" cy="34" r="28"/>
+    <path class="edge" d="M20 42L34 26L48 36L60 22"/>
+    <text class="label" x="78" y="28">Data &amp; Analytics</text>
+    <text class="small" x="78" y="50">analytical layers</text>
+  </g>
+
+  <g transform="translate(42 226)">
+    <circle class="node" cx="34" cy="34" r="28"/>
+    <path class="edge" d="M18 34H56"/>
+    <circle cx="28" cy="34" r="4" fill="#f4efe4"/>
+    <circle cx="44" cy="34" r="4" fill="#f4efe4"/>
+    <text class="label" x="78" y="28">Data Streaming</text>
+    <text class="small" x="78" y="50">event handoff</text>
+  </g>
+
+  <g transform="translate(42 348)">
+    <circle class="node" cx="34" cy="34" r="28"/>
+    <path class="edge" d="M18 20H50V48H18Z"/>
+    <path class="edge" d="M34 20V6M34 48V62M18 34H4M50 34H64"/>
+    <text class="label" x="78" y="24">Infrastructure</text>
+    <text class="label" x="78" y="46">Automation</text>
+  </g>
+
+  <g transform="translate(42 470)">
+    <circle class="node" cx="34" cy="34" r="28"/>
+    <path d="M18 32L30 44L56 18" fill="none" stroke="#f02018" stroke-width="6"/>
+    <text class="label" x="78" y="28">DevOps &amp; Quality</text>
+    <text class="small" x="78" y="50">validation gate</text>
+  </g>
+
+  <g transform="translate(42 592)">
+    <circle class="active" cx="34" cy="34" r="28"/>
+    <path class="edge" d="M20 34C32 14 48 14 60 34S32 54 20 34"/>
+    <circle cx="34" cy="34" r="6" fill="#f02018"/>
+    <text class="label" x="78" y="24">Consulting &amp;</text>
+    <text class="label" x="78" y="46">Technical Support</text>
+  </g>
+</svg>

@@ -3,7 +3,7 @@
   <desc id="desc">Layered data grid with a query path, analytical node, and aggregation layer.</desc>
   <defs>
     <style>
-      .bg{fill:#040404}.grid{stroke:#89867f;stroke-opacity:.22}.plane{fill:#181817;stroke:#f4efe4;stroke-opacity:.42;stroke-width:3}.line{fill:none;stroke:#f4efe4;stroke-opacity:.72;stroke-width:4}.soft{fill:none;stroke:#89867f;stroke-opacity:.46;stroke-width:3}.red{fill:none;stroke:#f02018;stroke-width:6}.node{fill:#181817;stroke:#f4efe4;stroke-opacity:.76;stroke-width:4}.active{fill:#181817;stroke:#f02018;stroke-width:6}.label{fill:#f4efe4;font:700 24px Arial,sans-serif}.small{fill:#89867f;font:700 18px Arial,sans-serif}
+      .bg{fill:#050607}.grid{stroke:#878a86;stroke-opacity:.22}.plane{fill:#111315;stroke:#f3f1ea;stroke-opacity:.42;stroke-width:3}.line{fill:none;stroke:#f3f1ea;stroke-opacity:.72;stroke-width:4}.soft{fill:none;stroke:#878a86;stroke-opacity:.46;stroke-width:3}.red{fill:none;stroke:#e30613;stroke-width:6}.node{fill:#111315;stroke:#f3f1ea;stroke-opacity:.76;stroke-width:4}.active{fill:#111315;stroke:#e30613;stroke-width:6}.label{fill:#f3f1ea;font:700 24px Arial,sans-serif}.small{fill:#878a86;font:700 18px Arial,sans-serif}
     </style>
     <pattern id="grid" width="72" height="72" patternUnits="userSpaceOnUse"><path d="M72 0H0V72" class="grid"/></pattern>
   </defs>
@@ -19,8 +19,8 @@
   <path d="M330 620C482 542 604 554 728 462S884 402 1048 466" class="red"/>
   <circle cx="672" cy="408" r="30" class="node"/>
   <circle cx="1048" cy="466" r="36" class="active"/>
-  <path d="M1044 192H1134L1108 222H1018Z" fill="#f02018"/>
-  <path d="M1134 192L1170 208L1144 238L1108 222Z" fill="#9e0d0a"/>
+  <path d="M1044 192H1134L1108 222H1018Z" fill="#e30613"/>
+  <path d="M1134 192L1170 208L1144 238L1108 222Z" fill="#8f0710"/>
   <text x="300" y="716" class="small">source grid</text>
   <text x="630" y="370" class="small">query path</text>
   <text x="990" y="526" class="small">aggregation</text>

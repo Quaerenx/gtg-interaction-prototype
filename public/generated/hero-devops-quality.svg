@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" role="img" aria-label="Procedural test matrix placeholder">
   <rect width="1400" height="640" fill="#0d0d0c"/>
   <g transform="translate(110 136)">
-    <rect width="1180" height="360" fill="#1f1f1d" stroke="#f4efe4" stroke-opacity=".18"/>
+    <rect width="1180" height="360" fill="#1f1f1d" stroke="#f3f1ea" stroke-opacity=".18"/>
     <g fill="#2f2f2b">
       <rect x="46" y="54" width="132" height="74"/><rect x="218" y="54" width="132" height="74"/><rect x="390" y="54" width="132" height="74"/>
       <rect x="562" y="54" width="132" height="74"/><rect x="734" y="54" width="132" height="74"/><rect x="906" y="54" width="132" height="74"/>
       <rect x="46" y="168" width="132" height="74"/><rect x="218" y="168" width="132" height="74"/><rect x="390" y="168" width="132" height="74"/>
       <rect x="562" y="168" width="132" height="74"/><rect x="734" y="168" width="132" height="74"/><rect x="906" y="168" width="132" height="74"/>
     </g>
-    <g fill="#f4efe4" opacity=".74">
-      <path d="M88 92l22 22 46-54" fill="none" stroke="#f4efe4" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M260 206l22 22 46-54" fill="none" stroke="#f4efe4" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M776 92l22 22 46-54" fill="none" stroke="#f4efe4" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#f3f1ea" opacity=".74">
+      <path d="M88 92l22 22 46-54" fill="none" stroke="#f3f1ea" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M260 206l22 22 46-54" fill="none" stroke="#f3f1ea" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M776 92l22 22 46-54" fill="none" stroke="#f3f1ea" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
-    <path d="M112 296H1040" stroke="#f02018" stroke-width="6" stroke-linecap="round"/>
-    <circle cx="284" cy="296" r="13" fill="#f02018"/><circle cx="626" cy="296" r="13" fill="#f02018"/><circle cx="968" cy="296" r="13" fill="#f02018"/>
+    <path d="M112 296H1040" stroke="#e30613" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="284" cy="296" r="13" fill="#e30613"/><circle cx="626" cy="296" r="13" fill="#e30613"/><circle cx="968" cy="296" r="13" fill="#e30613"/>
   </g>
-  <text x="92" y="104" fill="#f4efe4" font-family="Arial, sans-serif" font-size="34" font-weight="700">DEVOPS &amp; QUALITY</text>
-  <text x="92" y="546" fill="#89867f" font-family="Arial, sans-serif" font-size="22">deployment paths / test matrix / release stages</text>
+  <text x="92" y="104" fill="#f3f1ea" font-family="Arial, sans-serif" font-size="34" font-weight="700">DEVOPS &amp; QUALITY</text>
+  <text x="92" y="546" fill="#878a86" font-family="Arial, sans-serif" font-size="22">deployment paths / test matrix / release stages</text>
 </svg>

@@ -1,0 +1,112 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" stroke="#F3F1EA" stroke-opacity="0.055" stroke-width="1"/>
+      <path d="M32 0V64M0 32H64" stroke="#F3F1EA" stroke-opacity="0.026" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="panelShade" x1="180" y1="88" x2="1420" y2="812" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17191F"/>
+      <stop offset="0.58" stop-color="#0E1015"/>
+      <stop offset="1" stop-color="#07080B"/>
+    </linearGradient>
+    <linearGradient id="redLine" x1="256" y1="238" x2="1352" y2="652" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E90207" stop-opacity="0.15"/>
+      <stop offset="0.5" stop-color="#E90207"/>
+      <stop offset="1" stop-color="#E90207" stop-opacity="0.18"/>
+    </linearGradient>
+    <filter id="softRed" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <clipPath id="mainPanelClip">
+      <path d="M126 96H1474L1518 140V760L1472 804H126V96Z"/>
+    </clipPath>
+    <clipPath id="cardClip">
+      <path d="M0 0H318L348 30V318L318 348H0V0Z"/>
+    </clipPath>
+    <clipPath id="lightLogoTileClip">
+      <rect x="42" y="72" width="264" height="138"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1600" height="900" fill="#07080B"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+
+  <g clip-path="url(#mainPanelClip)">
+    <rect x="126" y="96" width="1392" height="708" fill="url(#panelShade)"/>
+    <path d="M206 226H482L548 292H712" stroke="#F3F1EA" stroke-opacity="0.12" stroke-width="1.5"/>
+    <path d="M948 608H1104L1168 672H1388" stroke="#F3F1EA" stroke-opacity="0.12" stroke-width="1.5"/>
+    <path d="M336 666H504L556 614H716" stroke="#F3F1EA" stroke-opacity="0.08" stroke-width="1.5"/>
+    <path d="M802 188H1026L1082 244H1378" stroke="#F3F1EA" stroke-opacity="0.08" stroke-width="1.5"/>
+  </g>
+
+  <path d="M126 96H1474L1518 140V760L1472 804H126V96Z" stroke="#F3F1EA" stroke-opacity="0.23" stroke-width="1.5"/>
+  <path d="M126 96H334" stroke="#E90207" stroke-width="3"/>
+  <path d="M1396 804H1472L1518 760V690" stroke="#E90207" stroke-opacity="0.85" stroke-width="3"/>
+
+  <g transform="translate(214 196)">
+    <text x="0" y="0" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="0">SOLUTION STACK SAMPLE</text>
+    <text x="0" y="74" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="58" font-weight="750" letter-spacing="0">二쇱슂 ?쒗뭹 ?곸슜 ?곸뿭</text>
+    <text x="0" y="126" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="23" font-weight="500" letter-spacing="0">?쒗뭹 濡쒓퀬???뚰듃?덉떗 二쇱옣???꾨땲?? GTG媛 ?ㅻ（??湲곗닠 踰붿쐞瑜??ㅻ챸?섎뒗 蹂댁“ 利앷굅濡?諛곗튂?⑸땲??</text>
+    <text x="0" y="174" fill="#7F837E" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="17" font-weight="500" letter-spacing="0">Production note: confirm logo usage rights, current files, and trademark display rules before release.</text>
+  </g>
+
+  <g opacity="0.8">
+    <path d="M306 512H506L566 452H696" stroke="url(#redLine)" stroke-width="2"/>
+    <path d="M903 452H1050L1110 512H1314" stroke="url(#redLine)" stroke-width="2"/>
+    <rect x="686" y="442" width="18" height="18" fill="#E90207"/>
+    <rect x="895" y="442" width="18" height="18" fill="#E90207"/>
+    <rect x="686" y="442" width="18" height="18" stroke="#F3F1EA" stroke-opacity="0.28" stroke-width="1"/>
+    <rect x="895" y="442" width="18" height="18" stroke="#F3F1EA" stroke-opacity="0.28" stroke-width="1"/>
+  </g>
+
+  <g transform="translate(214 386)">
+    <g clip-path="url(#cardClip)">
+      <rect width="348" height="348" fill="#111318"/>
+      <rect x="1" y="1" width="346" height="346" stroke="#F3F1EA" stroke-opacity="0.18" stroke-width="1.5"/>
+      <path d="M0 0H92" stroke="#E90207" stroke-width="3"/>
+      <path d="M250 348H318L348 318V250" stroke="#E90207" stroke-opacity="0.72" stroke-width="2"/>
+      <rect x="42" y="72" width="264" height="138" fill="#F3F1EA"/>
+      <g clip-path="url(#lightLogoTileClip)">
+        <image href="../../item-logo/3840px-Vertica_pos_blk_rgb.svg.webp" x="-144" y="28" width="636" height="220" preserveAspectRatio="xMidYMid meet"/>
+      </g>
+      <text x="42" y="268" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">Vertica DB</text>
+      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Data warehouse / analytics focus</text>
+    </g>
+  </g>
+
+  <g transform="translate(626 386)">
+    <g clip-path="url(#cardClip)">
+      <rect width="348" height="348" fill="#111318"/>
+      <rect x="1" y="1" width="346" height="346" stroke="#F3F1EA" stroke-opacity="0.18" stroke-width="1.5"/>
+      <path d="M0 0H92" stroke="#E90207" stroke-width="3"/>
+      <path d="M250 348H318L348 318V250" stroke="#E90207" stroke-opacity="0.72" stroke-width="2"/>
+      <rect x="42" y="72" width="264" height="138" fill="#F3F1EA"/>
+      <image href="../../item-logo/3840px-Confluent,_Inc._logo.svg.webp" x="58" y="104" width="232" height="74" preserveAspectRatio="xMidYMid meet"/>
+      <text x="42" y="268" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">Confluent</text>
+      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Streaming platform focus</text>
+    </g>
+  </g>
+
+  <g transform="translate(1038 386)">
+    <g clip-path="url(#cardClip)">
+      <rect width="348" height="348" fill="#111318"/>
+      <rect x="1" y="1" width="346" height="346" stroke="#F3F1EA" stroke-opacity="0.18" stroke-width="1.5"/>
+      <path d="M0 0H92" stroke="#E90207" stroke-width="3"/>
+      <path d="M250 348H318L348 318V250" stroke="#E90207" stroke-opacity="0.72" stroke-width="2"/>
+      <rect x="42" y="52" width="264" height="178" fill="#07080B" stroke="#F3F1EA" stroke-opacity="0.12" stroke-width="1"/>
+      <image href="../../item-logo/pngaaa.com-5227511.png" x="76" y="76" width="196" height="130" preserveAspectRatio="xMidYMid meet"/>
+      <text x="42" y="268" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">LoadRunner</text>
+      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Performance testing focus</text>
+    </g>
+  </g>
+
+  <g transform="translate(1375 168)">
+    <path d="M0 20L50 0L34 44L58 68L18 60L0 20Z" fill="#E90207"/>
+    <path d="M20 39H38L48 29" stroke="#F3F1EA" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+  </g>
+  <g transform="translate(1375 168)" filter="url(#softRed)" opacity="0.34">
+    <path d="M0 20L50 0L34 44L58 68L18 60L0 20Z" fill="#E90207"/>
+  </g>
+
+  <text x="214" y="766" fill="#7F837E" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" letter-spacing="0">Sample only. Do not use as partner, certification, endorsement, or customer proof claim.</text>
+</svg>

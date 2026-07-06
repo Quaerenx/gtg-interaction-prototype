@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 810" role="img" aria-labelledby="title desc">
+  <title id="title">GTG capability map</title>
+  <desc id="desc">Five GTG service capabilities connected as a relationship field without implying a fixed linear process.</desc>
+  <style>
+    .bg{fill:#040404}.grid{stroke:#89867f;stroke-opacity:.18}.frame{fill:#10100f;stroke:#f4efe4;stroke-opacity:.16;stroke-width:2}.zone{fill:#181817;stroke:#f4efe4;stroke-opacity:.38;stroke-width:3}.node{fill:#181817;stroke:#f4efe4;stroke-opacity:.72;stroke-width:4}.edge{fill:none;stroke:#f4efe4;stroke-opacity:.62;stroke-width:4}.muted{fill:none;stroke:#89867f;stroke-opacity:.42;stroke-width:3;stroke-dasharray:14 14}.active{fill:#181817;stroke:#f02018;stroke-width:6}.red{fill:none;stroke:#f02018;stroke-width:6}.label{fill:#f4efe4;font:700 26px Arial,sans-serif}.small{fill:#89867f;font:700 18px Arial,sans-serif}.tag{fill:#f4efe4;font:700 14px Arial,sans-serif;letter-spacing:.04em}
+  </style>
+  <rect class="bg" width="1440" height="810"/>
+  <path class="grid" d="M120 110H1320M120 220H1320M120 330H1320M120 440H1320M120 550H1320M120 660H1320M180 80V730M340 80V730M500 80V730M660 80V730M820 80V730M980 80V730M1140 80V730M1300 80V730"/>
+  <rect class="frame" x="74" y="58" width="1292" height="694"/>
+  <text x="112" y="126" class="tag">GTG CAPABILITY MAP</text>
+  <text x="112" y="154" class="small">Data, platform, quality, and support capabilities connected as one service relationship field</text>
+
+  <path class="edge" d="M720 250V560"/>
+  <path class="edge" d="M444 300C560 300 606 250 720 250S882 300 996 300"/>
+  <path class="edge" d="M444 512C560 512 606 560 720 560S882 512 996 512"/>
+  <path class="muted" d="M444 300C526 392 526 420 444 512"/>
+  <path class="muted" d="M996 300C914 392 914 420 996 512"/>
+  <path class="red" d="M720 360V448"/>
+  <path class="red" d="M676 404H764"/>
+  <circle class="active" cx="720" cy="404" r="28"/>
+  <path d="M690 378H752L738 404L752 430H690L704 404Z" fill="#f02018"/>
+  <path class="edge" d="M696 404H744M720 380V428"/>
+  <circle cx="720" cy="404" r="7" fill="#f4efe4"/>
+  <path d="M1194 108H1300L1268 144H1162Z" fill="#f02018"/>
+
+  <g transform="translate(252 240)">
+    <rect class="zone" width="384" height="120"/>
+    <circle class="node" cx="62" cy="60" r="34"/>
+    <path class="edge" d="M38 72L58 48L78 64L98 42"/>
+    <text class="label" x="128" y="54">Data &amp; Analytics</text>
+    <text class="small" x="128" y="84">analytical layers</text>
+  </g>
+
+  <g transform="translate(804 240)">
+    <rect class="zone" width="384" height="120"/>
+    <circle class="node" cx="62" cy="60" r="34"/>
+    <path class="edge" d="M34 60H90"/>
+    <circle cx="48" cy="60" r="5" fill="#f4efe4"/>
+    <circle cx="70" cy="60" r="5" fill="#f4efe4"/>
+    <circle cx="92" cy="60" r="5" fill="#89867f"/>
+    <text class="label" x="128" y="54">Data Streaming</text>
+    <text class="small" x="128" y="84">event handoff</text>
+  </g>
+
+  <g transform="translate(252 452)">
+    <rect class="zone" width="384" height="120"/>
+    <circle class="node" cx="62" cy="60" r="34"/>
+    <path class="edge" d="M38 42H86V78H38Z"/>
+    <path class="edge" d="M62 42V24M62 78V96M38 60H20M86 60H104"/>
+    <text class="label" x="128" y="54">Infrastructure Automation</text>
+    <text class="small" x="128" y="84">provisioning mesh</text>
+  </g>
+
+  <g transform="translate(804 452)">
+    <rect class="zone" width="384" height="120"/>
+    <circle class="node" cx="62" cy="60" r="34"/>
+    <path class="edge" d="M38 60H92"/>
+    <path d="M50 58L64 72L90 42" fill="none" stroke="#f02018" stroke-width="7"/>
+    <text class="label" x="128" y="54">DevOps &amp; Quality</text>
+    <text class="small" x="128" y="84">validation gate</text>
+  </g>
+
+  <g transform="translate(528 594)">
+    <rect class="zone" width="384" height="108"/>
+    <circle class="active" cx="62" cy="54" r="34"/>
+    <path class="edge" d="M42 54C58 28 78 28 94 54S58 80 42 54"/>
+    <circle cx="62" cy="54" r="7" fill="#f02018"/>
+    <text class="label" x="128" y="48">Consulting &amp; Technical Support</text>
+    <text class="small" x="128" y="78">diagnosis and action</text>
+  </g>
+</svg>

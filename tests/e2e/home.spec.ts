@@ -4,12 +4,13 @@ import path from "node:path";
 
 const artifactDir = path.join(process.cwd(), "tests", "artifacts");
 const contentArtifactDir = path.join(artifactDir, "content-integration");
-const customerCardArtifactDir = path.join(artifactDir, "customer-card-system");
+const heroVisualArtifactDir = path.join(artifactDir, "hero-data-core");
 const topologyArtifactDir = path.join(artifactDir, "topology-svg-kit");
 const capabilityArtifactDir = path.join(artifactDir, "capability-map");
-const officialHeadline = "데이터 분석, 스트리밍, 인프라 자동화, DevOps 품질을 함께 설계합니다.";
+const officialHeadline = "데이터와 인프라를 하나의 운영 구조로";
 const officialDescription =
-  "GTG는 Bigdata Analytics, Confluent, HashiCorp, DevOps 솔루션과 DB/테스트/프로세스 컨설팅을 중심으로 기업 IT 시스템의 구축과 운영을 지원합니다.";
+  "데이터 분석, 스트리밍, 인프라 자동화, DevOps 품질, DB/테스트/프로세스 컨설팅을 하나의 실행 구조로 연결합니다.";
+const dataCoreKeyword = "GTG Data Core";
 const customerProofKeyword = "Representative Customers";
 const customerNames = [
   "KT",
@@ -88,7 +89,7 @@ const forbiddenCapabilityWorkflowLabels = [
 function ensureArtifacts() {
   fs.mkdirSync(artifactDir, { recursive: true });
   fs.mkdirSync(contentArtifactDir, { recursive: true });
-  fs.mkdirSync(customerCardArtifactDir, { recursive: true });
+  fs.mkdirSync(heroVisualArtifactDir, { recursive: true });
   fs.mkdirSync(topologyArtifactDir, { recursive: true });
   fs.mkdirSync(capabilityArtifactDir, { recursive: true });
 
@@ -104,13 +105,9 @@ function ensureArtifacts() {
     }
   }
 
-  for (const fileName of fs.readdirSync(customerCardArtifactDir)) {
-    if (fileName === "customer-card-contact-sheet.png") {
-      continue;
-    }
-
+  for (const fileName of fs.readdirSync(heroVisualArtifactDir)) {
     if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
-      fs.unlinkSync(path.join(customerCardArtifactDir, fileName));
+      fs.unlinkSync(path.join(heroVisualArtifactDir, fileName));
     }
   }
 
@@ -157,9 +154,9 @@ async function captureContent(page: Page, name: string) {
   });
 }
 
-async function captureCustomerCard(page: Page, name: string) {
+async function captureHeroVisual(page: Page, name: string) {
   await page.screenshot({
-    path: path.join(customerCardArtifactDir, `${name}.png`),
+    path: path.join(heroVisualArtifactDir, `${name}.png`),
     fullPage: false
   });
 }
@@ -309,9 +306,9 @@ async function expectSlideAtViewportStart(page: Page, testId: string) {
   expect(box.y + box.height).toBeGreaterThan(0);
 }
 
-async function expectStaticKeywordReady(page: Page) {
+async function expectStaticDataCoreKeywordReady(page: Page) {
   const keyword = page.locator(".keyword-text");
-  await expect(keyword).toHaveText(customerProofKeyword);
+  await expect(keyword).toHaveText(dataCoreKeyword);
   const styles = await keyword.evaluate((element) => {
     const computed = window.getComputedStyle(element);
     return {
@@ -337,6 +334,12 @@ async function expectCustomerProofKeyword(page: Page) {
   const keyword = page.locator(".keyword-text");
   await expect(keyword).toHaveText(customerProofKeyword);
   await expect(keyword).not.toHaveText("Vertica Analytics");
+}
+
+async function expectDataCoreKeyword(page: Page) {
+  const keyword = page.locator(".keyword-text");
+  await expect(keyword).toHaveText(dataCoreKeyword);
+  await expect(keyword).not.toHaveText(customerProofKeyword);
 }
 
 async function expectNoOverflow(page: Page) {
@@ -438,23 +441,17 @@ async function expectNoUnsupportedCustomerClaims(page: Page) {
   }
 }
 
-async function expectCustomerCardReadable(page: Page, card: Locator) {
-  await expectLocatorFullyInViewport(page, card);
-  await expect(card.locator(".fallback-card-frame")).toBeVisible();
-  await expect(card.locator(".fallback-card-logo-field")).toBeVisible();
-  await expect(card.locator(".fallback-card-name")).toBeVisible();
-  await expect(card.locator(".fallback-card-index")).toBeVisible();
+async function expectFallbackDataCoreReadable(page: Page) {
+  const visual = page.getByTestId("hero-data-core-fallback");
+  await expectLocatorFullyInViewport(page, visual);
+  await expect(visual).toHaveAttribute("src", "/generated/hero/gtg-data-core.svg");
+  await expect(page.locator(".fallback-proof-strip")).toBeVisible();
+  await expect(page.locator(".fallback-proof-tile")).toHaveCount(6);
 
-  const cardBox = await card.boundingBox();
-  const logoBox = await card.locator(".fallback-card-logo-field").boundingBox();
-  const nameBox = await card.locator(".fallback-card-name").boundingBox();
-  expect(cardBox).not.toBeNull();
-  expect(logoBox).not.toBeNull();
-  expect(nameBox).not.toBeNull();
-  expect(logoBox!.x).toBeGreaterThanOrEqual(cardBox!.x);
-  expect(logoBox!.x + logoBox!.width).toBeLessThanOrEqual(cardBox!.x + cardBox!.width + 1);
-  expect(nameBox!.x).toBeGreaterThanOrEqual(cardBox!.x);
-  expect(nameBox!.x + nameBox!.width).toBeLessThanOrEqual(cardBox!.x + cardBox!.width + 1);
+  const box = await visual.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.width).toBeGreaterThan(260);
+  expect(box!.height).toBeGreaterThan(120);
 }
 
 async function expectNoExternalImageRequests(page: Page, action: () => Promise<void>) {
@@ -580,7 +577,7 @@ test.beforeAll(({ browserName }, testInfo) => {
   }
 });
 
-test("desktop Hero carousel, pullback, handoff, and solution sequence", async ({ page }) => {
+test("desktop Hero identity core, proof orbit, handoff, and solution sequence", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await attachConsoleGuards(page);
   await page.context().tracing.start({ screenshots: true, snapshots: true, sources: true });
@@ -592,25 +589,36 @@ test("desktop Hero carousel, pullback, handoff, and solution sequence", async ({
   await waitForHeroState(page, "initial", 0, 0.03);
   await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
   await expect(page.getByText(officialDescription)).toBeVisible();
-  await expectCustomerProofKeyword(page);
+  await expectDataCoreKeyword(page);
   await expect(page.getByTestId("webgl-hero").locator("canvas")).toBeVisible();
+  await expect(page.locator(".hero-title-line")).toHaveCount(2);
+  await waitForFrames(page, 5);
   await capture(page, "01-desktop-hero-initial");
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await waitForFrames(page, 5);
+  await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
+  await capture(page, "01b-desktop-hero-1920");
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await waitForFrames(page, 5);
 
   const dataUrlLength = await page.getByTestId("webgl-hero").locator("canvas").evaluate((canvas) =>
     (canvas as HTMLCanvasElement).toDataURL("image/png").length
   );
   expect(dataUrlLength).toBeGreaterThan(5000);
 
-  await scrollHeroTo(page, 0.28);
-  await waitForHeroState(page, "orbit", 0.26, 0.31);
-  await capture(page, "02-desktop-hero-mid-carousel");
+  await scrollHeroTo(page, 0.56);
+  await waitForHeroState(page, "orbit", 0.54, 0.58);
+  await expectCustomerProofKeyword(page);
+  await capture(page, "02-desktop-customer-orbit-hero");
 
-  await scrollHeroTo(page, 0.7);
-  await waitForHeroState(page, "pullback", 0.68, 0.72);
-  await capture(page, "03-desktop-full-ring");
+  await scrollHeroTo(page, 0.76);
+  await waitForHeroState(page, "orbit", 0.74, 0.78);
+  await capture(page, "03-desktop-customer-orbit-wide");
 
-  await scrollHeroTo(page, 0.88);
-  await waitForHeroState(page, "handoff", 0.86, 0.9);
+  await scrollHeroTo(page, 0.92);
+  await waitForHeroState(page, "handoff", 0.9, 0.94);
   await capture(page, "04-desktop-handoff-overlap");
 
   await scrollSolutionsTo(page, 0);
@@ -634,8 +642,8 @@ test("desktop Hero carousel, pullback, handoff, and solution sequence", async ({
   ).toBeVisible();
   await capture(page, "10-desktop-solution-5");
 
-  await scrollHeroTo(page, 0.45);
-  await waitForHeroState(page, "pullback", 0.44, 0.48);
+  await scrollHeroTo(page, 0.56);
+  await waitForHeroState(page, "orbit", 0.54, 0.58);
 
   await page.setViewportSize({ width: 1280, height: 720 });
   await waitForFrames(page, 4);
@@ -719,7 +727,7 @@ test("mobile Hero and first Solution use simplified flow", async ({ page }) => {
   await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
   await expectSingleHeroServicesList(page);
   await expectSingleRepresentativeCustomersList(page);
-  await expectStaticKeywordReady(page);
+  await expectStaticDataCoreKeywordReady(page);
   await capture(page, "06-mobile-hero");
 
   for (const [index, slide] of ["01", "02", "03", "04", "05"].entries()) {
@@ -790,7 +798,7 @@ test("forceFallback query renders graceful HTML fallback", async ({ page }) => {
   );
   await expect(page.getByTestId("force-fallback-hero").locator("a")).toHaveCount(0);
   await expect(page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" })).toHaveCount(1);
-  await expectStaticKeywordReady(page);
+  await expectStaticDataCoreKeywordReady(page);
   await capture(page, "09-force-fallback-hero");
 
   await page.getByTestId("solutions-section").scrollIntoViewIfNeeded();
@@ -802,7 +810,7 @@ test("forceFallback query renders graceful HTML fallback", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test("customer card system keeps local proof cards readable and claim-safe", async ({ page }) => {
+test("Hero data-core and customer proof system keep local visuals readable and claim-safe", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await attachConsoleGuards(page);
 
@@ -811,46 +819,50 @@ test("customer card system keeps local proof cards readable and claim-safe", asy
     await expect(page.getByTestId("hero")).toBeVisible();
     await expectSingleHeroServicesList(page);
     await expectSingleRepresentativeCustomersList(page);
-    await expectCustomerProofKeyword(page);
+    await expectDataCoreKeyword(page);
     await expect(page.getByTestId("webgl-hero").locator("canvas")).toBeVisible();
     await waitForFrames(page, 5);
-    await captureCustomerCard(page, "hero-desktop-customer-card");
+    await captureHeroVisual(page, "hero-desktop-data-core");
 
     const dataUrlLength = await page.getByTestId("webgl-hero").locator("canvas").evaluate((canvas) =>
       (canvas as HTMLCanvasElement).toDataURL("image/png").length
     );
     expect(dataUrlLength).toBeGreaterThan(5000);
+    await scrollHeroTo(page, 0.56);
+    await waitForHeroState(page, "orbit", 0.54, 0.58);
+    await expectCustomerProofKeyword(page);
+    await captureHeroVisual(page, "hero-desktop-proof-orbit");
     await expectNoUnsupportedCustomerClaims(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
     await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
     await expectSingleRepresentativeCustomersList(page);
-    await expectCustomerProofKeyword(page);
-    await expectCustomerCardReadable(page, page.getByTestId("customer-card-kt"));
+    await expectDataCoreKeyword(page);
+    await expectFallbackDataCoreReadable(page);
     await expectNoOverflow(page);
-    await captureCustomerCard(page, "hero-mobile-fallback-customer-card");
+    await captureHeroVisual(page, "hero-mobile-data-core");
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
     await expect(page.locator("canvas")).toHaveCount(0);
     await expectSingleRepresentativeCustomersList(page);
-    await expectCustomerProofKeyword(page);
-    await expectCustomerCardReadable(page, page.getByTestId("customer-card-kt"));
+    await expectDataCoreKeyword(page);
+    await expectFallbackDataCoreReadable(page);
     await expectNoOverflow(page);
-    await captureCustomerCard(page, "reduced-motion-customer-card");
+    await captureHeroVisual(page, "reduced-motion-data-core");
 
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/?forceFallback=1");
     await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
     await expect(page.locator("canvas")).toHaveCount(0);
     await expectSingleRepresentativeCustomersList(page);
-    await expectCustomerProofKeyword(page);
-    await expectCustomerCardReadable(page, page.getByTestId("customer-card-kt"));
+    await expectDataCoreKeyword(page);
+    await expectFallbackDataCoreReadable(page);
     await expectNoUnsupportedCustomerClaims(page);
     await expectNoOverflow(page);
-    await captureCustomerCard(page, "force-fallback-customer-card");
+    await captureHeroVisual(page, "force-fallback-data-core");
   });
 
   expect(errors).toEqual([]);
@@ -1212,7 +1224,7 @@ test("content screenshots for mobile, reduced motion, and fallback", async ({ pa
 
   await page.goto("/");
   await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
-  await expectStaticKeywordReady(page);
+  await expectStaticDataCoreKeywordReady(page);
   await captureContent(page, "07-mobile-hero");
 
   await scrollSlideToStart(page, "solution-slide-1");
@@ -1236,7 +1248,7 @@ test("content screenshots for mobile, reduced motion, and fallback", async ({ pa
   await page.goto("/?forceFallback=1");
   await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
   await expect(page.locator("canvas")).toHaveCount(0);
-  await expectStaticKeywordReady(page);
+  await expectStaticDataCoreKeywordReady(page);
   await captureContent(page, "13-force-fallback");
 
   await expectNoOverflow(page);
@@ -1263,9 +1275,9 @@ test("mobile Hero hierarchy remains readable across release-candidate viewports"
     expect(titleBox.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height - 2);
     await expectKeywordUnclipped(page);
 
-    const fallbackPrimaryCard = page.locator(".fallback-card.is-primary");
-    if ((await fallbackPrimaryCard.count()) > 0) {
-      await expectLocatorFullyInViewport(page, fallbackPrimaryCard);
+    const fallbackDataCore = page.getByTestId("hero-data-core-fallback");
+    if ((await fallbackDataCore.count()) > 0) {
+      await expectLocatorFullyInViewport(page, fallbackDataCore);
     } else {
       await expectLocatorInViewport(page, page.locator(".hero-media"));
     }

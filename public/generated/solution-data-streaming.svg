@@ -1,21 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Procedural full-screen streaming signal placeholder">
-  <rect width="1800" height="1100" fill="#050505"/>
-  <rect width="1800" height="1100" fill="#141413"/>
-  <g opacity=".2" stroke="#f4efe4" stroke-width="1">
-    <path d="M0 220H1800M0 410H1800M0 600H1800M0 790H1800M0 980H1800"/>
-    <path d="M220 0V1100M440 0V1100M660 0V1100M880 0V1100M1100 0V1100M1320 0V1100M1540 0V1100"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-labelledby="title desc">
+  <title id="title">GTG data streaming handoff asset</title>
+  <desc id="desc">A segmented graphite signal corridor with beveled handoff modules and restrained GTG red activation edges.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1800" y1="0" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a0c0d"/>
+      <stop offset="0.62" stop-color="#050607"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="module" x1="480" x2="1510" y1="300" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#25292b"/>
+      <stop offset="0.56" stop-color="#121517"/>
+      <stop offset="1" stop-color="#070809"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" x2="1">
+      <stop offset="0" stop-color="#e30613"/>
+      <stop offset="1" stop-color="#8f0710"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-30%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="34" stdDeviation="34" flood-color="#000000" flood-opacity="0.46"/>
+    </filter>
+  </defs>
+
+  <rect width="1800" height="1100" fill="url(#bg)"/>
+  <g fill="none" stroke="#f3f1ea" stroke-linecap="square" opacity="0.07">
+    <path d="M-80 278H640L920 550H1880"/>
+    <path d="M-80 430H522L828 724H1880"/>
+    <path d="M-80 884H620L920 612H1880"/>
+    <path d="M1320 -80L1810 410"/>
   </g>
-  <g fill="none" stroke-linecap="round">
-    <path d="M110 300C300 190 430 442 650 316C850 202 958 360 1164 260C1346 172 1510 190 1690 250" stroke="#f4efe4" stroke-opacity=".82" stroke-width="11"/>
-    <path d="M118 510C310 420 458 650 686 528C884 422 1006 572 1198 486C1362 414 1514 424 1694 500" stroke="#89867f" stroke-opacity=".7" stroke-width="7"/>
-    <path d="M124 735C334 672 448 816 690 740C902 674 1048 776 1252 704C1434 640 1564 654 1690 704" stroke="#f02018" stroke-width="7"/>
+
+  <g filter="url(#shadow)">
+    <path d="M466 412L660 332H850L760 454H570Z" fill="url(#module)" stroke="#f3f1ea" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M748 534L958 446H1164L1066 584H860Z" fill="url(#module)" stroke="#f3f1ea" stroke-opacity="0.18" stroke-width="2"/>
+    <path d="M1072 390L1284 306H1492L1394 444H1186Z" fill="url(#module)" stroke="#f3f1ea" stroke-opacity="0.18" stroke-width="2"/>
+    <path d="M1058 706L1258 626H1450L1360 748H1168Z" fill="url(#module)" stroke="#f3f1ea" stroke-opacity="0.14" stroke-width="2"/>
   </g>
-  <g fill="#f02018">
-    <circle cx="650" cy="316" r="18"/><circle cx="1164" cy="260" r="18"/><circle cx="1514" cy="424" r="18"/>
+
+  <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M642 390L780 390L900 514L1034 514" stroke="#f3f1ea" stroke-opacity="0.34" stroke-width="5"/>
+    <path d="M1042 514L1164 514L1264 374L1402 374" stroke="#878a86" stroke-opacity="0.28" stroke-width="4"/>
+    <path d="M1012 610L1130 610L1228 686L1376 686" stroke="#f3f1ea" stroke-opacity="0.22" stroke-width="4"/>
+    <path d="M760 454L892 534L1062 584" stroke="#e30613" stroke-opacity="0.38" stroke-width="4"/>
   </g>
-  <g fill="#f4efe4" opacity=".7">
-    <circle cx="300" cy="190" r="13"/><circle cx="884" cy="422" r="13"/><circle cx="1252" cy="704" r="13"/>
+
+  <g fill="url(#red)">
+    <path d="M798 360H856L834 382H776Z" opacity="0.78"/>
+    <path d="M1118 558H1178L1156 580H1096Z" opacity="0.64"/>
+    <path d="M1418 342H1482L1458 366H1394Z" opacity="0.56"/>
   </g>
-  <rect x="1198" y="684" width="378" height="220" fill="#050505" fill-opacity=".38" stroke="#f4efe4" stroke-opacity=".16"/>
-  <path d="M1262 792h46m42 0h80m42 0h42m-252 46h96m42 0h130" stroke="#f4efe4" stroke-opacity=".46" stroke-width="8" stroke-linecap="round"/>
+
+  <g fill="#f3f1ea" opacity="0.12">
+    <path d="M504 646H692L642 696H454Z"/>
+    <path d="M1360 826H1510L1466 870H1316Z"/>
+  </g>
 </svg>

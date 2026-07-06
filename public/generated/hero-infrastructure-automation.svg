@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" role="img" aria-label="Procedural infrastructure topology placeholder">
-  <rect width="1400" height="640" fill="#181817"/>
-  <g stroke="#89867f" stroke-opacity=".3" stroke-width="2">
+  <rect width="1400" height="640" fill="#111315"/>
+  <g stroke="#878a86" stroke-opacity=".3" stroke-width="2">
     <path d="M220 170L450 250L676 150L940 240L1170 152"/>
     <path d="M220 388L450 250L676 410L940 240L1170 390"/>
     <path d="M450 250V500M676 150V410M940 240V500"/>
   </g>
-  <g fill="#22221f" stroke="#f4efe4" stroke-opacity=".38" stroke-width="3">
+  <g fill="#1d2022" stroke="#f3f1ea" stroke-opacity=".38" stroke-width="3">
     <rect x="160" y="126" width="120" height="88"/><rect x="390" y="206" width="120" height="88"/>
     <rect x="616" y="106" width="120" height="88"/><rect x="880" y="196" width="120" height="88"/>
     <rect x="1110" y="108" width="120" height="88"/><rect x="160" y="344" width="120" height="88"/>
     <rect x="616" y="366" width="120" height="88"/><rect x="1110" y="346" width="120" height="88"/>
   </g>
-  <g fill="#f02018">
+  <g fill="#e30613">
     <circle cx="450" cy="250" r="11"/><circle cx="940" cy="240" r="11"/><circle cx="676" cy="410" r="11"/>
   </g>
-  <path d="M172 500H1232" stroke="#f4efe4" stroke-opacity=".18"/>
-  <text x="92" y="104" fill="#f4efe4" font-family="Arial, sans-serif" font-size="34" font-weight="700">INFRASTRUCTURE AUTOMATION</text>
-  <text x="92" y="546" fill="#89867f" font-family="Arial, sans-serif" font-size="22">nodes / provisioning topology / structured mesh</text>
+  <path d="M172 500H1232" stroke="#f3f1ea" stroke-opacity=".18"/>
+  <text x="92" y="104" fill="#f3f1ea" font-family="Arial, sans-serif" font-size="34" font-weight="700">INFRASTRUCTURE AUTOMATION</text>
+  <text x="92" y="546" fill="#878a86" font-family="Arial, sans-serif" font-size="22">nodes / provisioning topology / structured mesh</text>
 </svg>
