@@ -36,10 +36,29 @@ export type SolutionSlide = {
   title: string;
   description: string;
   related: string[];
+  productSpotlight?: SolutionProductSpotlight;
   cta: Cta;
   visual: string;
   visualAlt: string;
   index: string;
+};
+
+export type SolutionProductSpotlight = {
+  id: string;
+  eyebrow: string;
+  label: string;
+  descriptor: string;
+  logoSrc?: string;
+  logoAlt?: string;
+  variant: "data-analytics" | "data-streaming" | "infrastructure-automation" | "devops-quality" | "consulting-support";
+};
+
+export type SolutionStackItem = {
+  id: string;
+  label: string;
+  descriptor: string;
+  logoSrc?: string;
+  logoAlt?: string;
 };
 
 export type NavigationItem = {
@@ -323,6 +342,35 @@ export const heroRingCustomers: HeroCustomer[] = heroRingCustomerIds
   .map((id) => heroCustomerById.get(id))
   .filter((customer): customer is HeroCustomer => Boolean(customer));
 
+export const solutionStackItems: SolutionStackItem[] = [
+  {
+    id: "vertica",
+    label: "Vertica",
+    descriptor: "Analytics scope reference",
+    logoSrc: "/item-logo/3840px-Vertica_pos_blk_rgb.svg.webp",
+    logoAlt: "Vertica"
+  },
+  {
+    id: "confluent",
+    label: "Confluent",
+    descriptor: "Streaming scope reference",
+    logoSrc: "/item-logo/3840px-Confluent,_Inc._logo.svg.webp",
+    logoAlt: "Confluent"
+  },
+  {
+    id: "hashicorp",
+    label: "HashiCorp",
+    descriptor: "Automation scope reference"
+  },
+  {
+    id: "loadrunner",
+    label: "LoadRunner",
+    descriptor: "Testing scope reference",
+    logoSrc: "/item-logo/pngaaa.com-5227511.png",
+    logoAlt: "LoadRunner"
+  }
+];
+
 export const solutionSlides: SolutionSlide[] = [
   {
     id: "solution-data-analytics",
@@ -337,6 +385,15 @@ export const solutionSlides: SolutionSlide[] = [
       "Vertica Eon Mode",
       "Vertica 기술 블로그"
     ],
+    productSpotlight: {
+      id: "vertica",
+      eyebrow: "Technology scope",
+      label: "Vertica",
+      descriptor: "Analytics scope reference",
+      logoSrc: "/item-logo/3840px-Vertica_pos_blk_rgb.svg.webp",
+      logoAlt: "Vertica",
+      variant: "data-analytics"
+    },
     cta: {
       label: "Vertica 기술 블로그 보기",
       href: "https://x2wizard.github.io/"
@@ -352,6 +409,15 @@ export const solutionSlides: SolutionSlide[] = [
     description:
       "Confluent를 중심으로 이벤트 기반 데이터 흐름과 스트리밍 플랫폼 도입, 운영, 보안 구성을 다룹니다.",
     related: ["Confluent Platform", "운영과 보안", "제어 센터", "자동 데이터 밸런서"],
+    productSpotlight: {
+      id: "confluent",
+      eyebrow: "Technology scope",
+      label: "Confluent",
+      descriptor: "Streaming scope reference",
+      logoSrc: "/item-logo/3840px-Confluent,_Inc._logo.svg.webp",
+      logoAlt: "Confluent",
+      variant: "data-streaming"
+    },
     cta: {
       label: "Confluent 솔루션 보기",
       href: "https://www.gtgsc.com/gtg/sub/confluent/platform.php"
@@ -369,13 +435,20 @@ export const solutionSlides: SolutionSlide[] = [
     related: [
       "HashiCorp",
       "Infrastructure Automation",
-      "Global Support",
-      "Technical Account Management",
-      "Professional Services"
+      "기술지원 범위",
+      "운영 문의 대응",
+      "구성 자동화 컨설팅"
     ],
     cta: {
       label: "HashiCorp 솔루션 보기",
       href: "https://www.gtgsc.com/gtg/sub/hash/hash.php"
+    },
+    productSpotlight: {
+      id: "hashicorp",
+      eyebrow: "Technology scope",
+      label: "HashiCorp",
+      descriptor: "Automation scope reference",
+      variant: "infrastructure-automation"
     },
     visual: "/generated/solution-infrastructure-automation.svg",
     visualAlt: "절차적으로 생성한 인프라 자동화 비주얼",
@@ -391,6 +464,15 @@ export const solutionSlides: SolutionSlide[] = [
     cta: {
       label: "DevOps 솔루션 보기",
       href: "https://www.gtgsc.com/gtg/sub/devops/load.php"
+    },
+    productSpotlight: {
+      id: "loadrunner",
+      eyebrow: "Technology scope",
+      label: "LoadRunner",
+      descriptor: "Testing scope reference",
+      logoSrc: "/item-logo/pngaaa.com-5227511.png",
+      logoAlt: "LoadRunner",
+      variant: "devops-quality"
     },
     visual: "/generated/solution-devops-quality.svg",
     visualAlt: "절차적으로 생성한 DevOps 품질 비주얼",
@@ -414,6 +496,13 @@ export const solutionSlides: SolutionSlide[] = [
       label: "기술 문의하기",
       href: "mailto:webmaster@gtgsc.com"
     },
+    productSpotlight: {
+      id: "gtg-support",
+      eyebrow: "GTG capability scope",
+      label: "GTG Support Scope",
+      descriptor: "Consulting and support scope",
+      variant: "consulting-support"
+    },
     visual: "/generated/solution-consulting-support.svg",
     visualAlt: "절차적으로 생성한 컨설팅과 기술지원 비주얼",
     index: "05 / 05"
@@ -423,10 +512,10 @@ export const solutionSlides: SolutionSlide[] = [
 export const companyContent = {
   id: "company",
   eyebrow: "Company Overview",
-  headline: "데이터 플랫폼과 소프트웨어 품질을 위한 기술 파트너",
+  headline: "데이터 플랫폼과 소프트웨어 품질을 다루는 기술 컨설팅",
   headlineLines: {
-    desktop: ["데이터 플랫폼과", "소프트웨어 품질을 위한", "기술 파트너"],
-    mobile: ["데이터 플랫폼과", "소프트웨어 품질을 위한", "기술 파트너"]
+    desktop: ["데이터 플랫폼과", "소프트웨어 품질을 다루는", "기술 컨설팅"],
+    mobile: ["데이터 플랫폼과", "소프트웨어 품질을 다루는", "기술 컨설팅"]
   },
   description:
     "GTG Solutions & Consult는 공개 사이트에서 Bigdata Analytics, Confluent, HashiCorp, DevOps를 주요 솔루션 영역으로 소개하며, DB/테스트/프로세스/형상관리 컨설팅과 제품 기술지원을 함께 다룹니다.",

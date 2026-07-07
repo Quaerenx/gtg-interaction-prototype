@@ -35,6 +35,11 @@ const customerNames = [
 const unsupportedCustomerClaims = [
   "Certified partner",
   "Official partner",
+  "공식 파트너",
+  "파트너 등급",
+  "기술 파트너",
+  "Certified",
+  "SLA",
   "Proven ROI",
   "ROI",
   "DORA elite",
@@ -233,6 +238,27 @@ async function waitForActiveSolution(page: Page, index: string) {
     return Number(styles.opacity) > 0.98 && (styles.filter === "none" || styles.filter === "blur(0px)");
   }, index);
   await waitForFrames(page, 3);
+}
+
+async function readHeroHandoffMetrics(page: Page) {
+  return page.evaluate(() => {
+    const stylesFor = (selector: string) => {
+      const element = document.querySelector<HTMLElement>(selector);
+      return element ? window.getComputedStyle(element) : null;
+    };
+    const stageStyles = stylesFor(".hero-stage");
+
+    return {
+      activeCards: document.querySelectorAll(".hero-solution-stack-card.is-active").length,
+      mediaOpacity: Number(stylesFor(".hero-media")?.opacity ?? "0"),
+      previewOpacity: Number(stylesFor(".hero-solution-preview")?.opacity ?? "0"),
+      proofOpacity: Number(stylesFor(".hero-proof-copy")?.opacity ?? "0"),
+      routeScale: Number(stageStyles?.getPropertyValue("--hero-solution-route-scale") ?? "0"),
+      signalOpacity: Number(stylesFor(".hero-solution-signal")?.opacity ?? "0"),
+      stackOpacity: Number(stylesFor(".hero-solution-stack")?.opacity ?? "0"),
+      topologyOpacity: Number(stylesFor(".hero-solution-topology")?.opacity ?? "0")
+    };
+  });
 }
 
 function expectViewportSize(page: Page) {
@@ -617,9 +643,34 @@ test("desktop Hero identity core, proof orbit, handoff, and solution sequence", 
   await waitForHeroState(page, "orbit", 0.74, 0.78);
   await capture(page, "03-desktop-customer-orbit-wide");
 
+  await scrollHeroTo(page, 0.84);
+  await waitForHeroState(page, "handoff", 0.82, 0.86);
+  const blackResetMetrics = await readHeroHandoffMetrics(page);
+  expect(blackResetMetrics.proofOpacity).toBeLessThan(0.05);
+  expect(blackResetMetrics.mediaOpacity).toBeLessThan(0.05);
+  expect(blackResetMetrics.previewOpacity).toBeLessThan(0.05);
+  expect(blackResetMetrics.stackOpacity).toBeLessThan(0.05);
+  await capture(page, "04a-desktop-handoff-black-reset");
+
   await scrollHeroTo(page, 0.92);
   await waitForHeroState(page, "handoff", 0.9, 0.94);
-  await capture(page, "04-desktop-handoff-overlap");
+  const topologyMetrics = await readHeroHandoffMetrics(page);
+  expect(topologyMetrics.proofOpacity).toBeLessThan(0.05);
+  expect(topologyMetrics.mediaOpacity).toBeLessThan(0.05);
+  expect(topologyMetrics.topologyOpacity).toBeGreaterThan(0.65);
+  expect(topologyMetrics.routeScale).toBeGreaterThan(0.45);
+  expect(topologyMetrics.signalOpacity).toBeGreaterThan(0.15);
+  expect(topologyMetrics.stackOpacity).toBeLessThan(0.05);
+  expect(topologyMetrics.activeCards).toBe(0);
+  await capture(page, "04b-desktop-handoff-topology-signal");
+
+  await scrollHeroTo(page, 0.96);
+  await waitForHeroState(page, "handoff", 0.94, 0.98);
+  const firstCardMetrics = await readHeroHandoffMetrics(page);
+  expect(firstCardMetrics.stackOpacity).toBeGreaterThan(0.35);
+  expect(firstCardMetrics.activeCards).toBeGreaterThanOrEqual(1);
+  expect(firstCardMetrics.activeCards).toBeLessThan(4);
+  await capture(page, "04c-desktop-handoff-first-card");
 
   await scrollSolutionsTo(page, 0);
   await expect(page.getByTestId("solutions-section")).toBeVisible();
@@ -627,19 +678,59 @@ test("desktop Hero identity core, proof orbit, handoff, and solution sequence", 
   await expect(
     page.getByTestId("solution-slide-1").getByRole("heading", { name: "Data & Analytics" })
   ).toBeVisible();
+  await expect(
+    page.getByTestId("solution-data-analytics-product-spotlight").locator(".solution-spotlight-logo-wordmark")
+  ).toBeVisible();
+  await page.waitForTimeout(950);
+  await waitForFrames(page, 4);
   await capture(page, "05-desktop-solution-1");
+
+  await page.getByTestId("solution-rail-2").click();
+  await waitForActiveSolution(page, "02");
+  await expect(
+    page.getByTestId("solution-slide-2").getByRole("heading", { name: "Data Streaming" })
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("solution-data-streaming-product-spotlight").locator(".solution-spotlight-logo-frame")
+  ).toBeVisible();
+  await page.waitForTimeout(950);
+  await waitForFrames(page, 4);
+  await capture(page, "05b-desktop-solution-2");
 
   await page.getByTestId("solution-rail-3").click();
   await waitForActiveSolution(page, "03");
   await expect(
     page.getByTestId("solution-slide-3").getByRole("heading", { name: "Infrastructure Automation" })
   ).toBeVisible();
+  await expect(
+    page.getByTestId("solution-infrastructure-automation-product-spotlight").locator(".solution-spotlight-textmark")
+  ).toBeVisible();
+  await page.waitForTimeout(950);
+  await waitForFrames(page, 4);
+  await capture(page, "05c-desktop-solution-3");
+
+  await page.getByTestId("solution-rail-4").click();
+  await waitForActiveSolution(page, "04");
+  await expect(
+    page.getByTestId("solution-slide-4").getByRole("heading", { name: "DevOps & Quality" })
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("solution-devops-quality-product-spotlight").locator(".solution-spotlight-logo-frame")
+  ).toBeVisible();
+  await page.waitForTimeout(950);
+  await waitForFrames(page, 4);
+  await capture(page, "05d-desktop-solution-4");
 
   await page.getByTestId("solution-rail-5").click();
   await waitForActiveSolution(page, "05");
   await expect(
     page.getByTestId("solution-slide-5").getByRole("heading", { name: "Consulting & Technical Support" })
   ).toBeVisible();
+  await expect(
+    page.getByTestId("solution-consulting-support-product-spotlight").locator(".solution-spotlight-scope-title")
+  ).toBeVisible();
+  await page.waitForTimeout(950);
+  await waitForFrames(page, 4);
   await capture(page, "10-desktop-solution-5");
 
   await scrollHeroTo(page, 0.56);
@@ -669,10 +760,16 @@ test("desktop inactive Solution slides are hidden from keyboard access", async (
   await waitForActiveSolution(page, "01");
 
   await expect(page.getByTestId("solution-slide-1")).toHaveAttribute("aria-hidden", "false");
+  await expect(page.getByTestId("solution-slide-1")).toHaveAttribute("data-slide-state", "active");
+  await expect(page.getByTestId("solution-slide-1")).toHaveCSS("visibility", "visible");
+  await expect(page.getByTestId("solution-slide-1")).toHaveCSS("content-visibility", "visible");
   for (const index of [2, 3, 4, 5]) {
     const slide = page.getByTestId(`solution-slide-${index}`);
+    await expect(slide).toHaveAttribute("data-slide-state", "inactive");
     await expect(slide).toHaveAttribute("aria-hidden", "true");
     await expect(slide).toHaveAttribute("inert", "");
+    await expect(slide).toHaveCSS("visibility", "hidden");
+    await expect(slide).toHaveCSS("content-visibility", "hidden");
   }
 
   const solutionOneStops = await collectTabStopsFromTestId(page, "solutions-section", 12);
@@ -683,7 +780,16 @@ test("desktop inactive Solution slides are hidden from keyboard access", async (
   await page.getByTestId("solution-rail-3").click();
   await waitForActiveSolution(page, "03");
   await expect(page.getByTestId("solution-slide-3")).toHaveAttribute("aria-hidden", "false");
+  await expect(page.getByTestId("solution-slide-3")).toHaveAttribute("data-slide-state", "active");
+  await expect(page.getByTestId("solution-slide-3")).toHaveCSS("visibility", "visible");
+  await expect(page.getByTestId("solution-slide-3")).toHaveCSS("content-visibility", "visible");
   await expect(page.getByTestId("solution-slide-3")).not.toHaveAttribute("inert", "");
+  for (const index of [1, 2, 4, 5]) {
+    const slide = page.getByTestId(`solution-slide-${index}`);
+    await expect(slide).toHaveAttribute("data-slide-state", "inactive");
+    await expect(slide).toHaveCSS("visibility", "hidden");
+    await expect(slide).toHaveCSS("content-visibility", "hidden");
+  }
 
   const solutionThreeStops = await collectTabStopsFromTestId(page, "solutions-section", 12);
   expect(solutionThreeStops.filter((stop) => stop.isSolutionCta).map((stop) => stop.slide)).toEqual([
@@ -702,8 +808,11 @@ test("mobile static Solution flow keeps every CTA keyboard accessible", async ({
 
   for (const index of [1, 2, 3, 4, 5]) {
     const slide = page.getByTestId(`solution-slide-${index}`);
+    await expect(slide).toHaveAttribute("data-slide-state", "static");
     await expect(slide).not.toHaveAttribute("aria-hidden", "true");
     await expect(slide).not.toHaveAttribute("inert", "");
+    await expect(slide).toHaveCSS("visibility", "visible");
+    await expect(slide).toHaveCSS("content-visibility", "visible");
   }
 
   const stops = await collectTabStopsFromTestId(page, "solutions-section", 10);
@@ -1111,7 +1220,7 @@ test("official content structure, navigation, metadata, and screenshots", async 
   await captureContent(page, "02-desktop-solution-1");
 
   await scrollTestIdToStart(page, "company-section");
-  await expectLocatorInViewport(page, page.getByRole("heading", { name: "데이터 플랫폼과 소프트웨어 품질을 위한 기술 파트너" }));
+  await expectLocatorInViewport(page, page.getByRole("heading", { name: "데이터 플랫폼과 소프트웨어 품질을 다루는 기술 컨설팅" }));
   await expect(page.getByTestId("company-headline-line")).toHaveCount(3);
   await expect(page.getByText("Bigdata Analytics / Vertica")).toBeVisible();
   await expectCapabilityMapContent(page);
@@ -1231,6 +1340,35 @@ test("content screenshots for mobile, reduced motion, and fallback", async ({ pa
   await expectLocatorInViewport(page, page.getByTestId("solution-slide-1").getByRole("heading", { name: "Data & Analytics" }));
   await captureContent(page, "08-mobile-solution");
 
+  await scrollSlideToStart(page, "solution-slide-2");
+  await expectLocatorInViewport(page, page.getByTestId("solution-slide-2").getByRole("heading", { name: "Data Streaming" }));
+  await expect(page.getByTestId("solution-data-streaming-product-spotlight")).toBeVisible();
+  await captureContent(page, "08b-mobile-solution-2");
+
+  await scrollSlideToStart(page, "solution-slide-3");
+  await expectLocatorInViewport(
+    page,
+    page.getByTestId("solution-slide-3").getByRole("heading", { name: "Infrastructure Automation" })
+  );
+  await expect(page.getByTestId("solution-infrastructure-automation-product-spotlight")).toBeVisible();
+  await captureContent(page, "08c-mobile-solution-3");
+
+  await scrollSlideToStart(page, "solution-slide-4");
+  await expectLocatorInViewport(
+    page,
+    page.getByTestId("solution-slide-4").getByRole("heading", { name: "DevOps & Quality" })
+  );
+  await expect(page.getByTestId("solution-devops-quality-product-spotlight")).toBeVisible();
+  await captureContent(page, "08d-mobile-solution-4");
+
+  await scrollSlideToStart(page, "solution-slide-5");
+  await expectLocatorInViewport(
+    page,
+    page.getByTestId("solution-slide-5").getByRole("heading", { name: "Consulting & Technical Support" })
+  );
+  await expect(page.getByTestId("solution-consulting-support-product-spotlight")).toBeVisible();
+  await captureContent(page, "08e-mobile-solution-5");
+
   await scrollTestIdToStart(page, "company-section");
   await expectLocatorInViewport(page, page.getByTestId("company-section"));
   await captureContent(page, "09-mobile-company");
@@ -1240,10 +1378,30 @@ test("content screenshots for mobile, reduced motion, and fallback", async ({ pa
   await captureContent(page, "10-mobile-contact");
 
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
   await captureContent(page, "12-reduced-motion");
+  await scrollSlideToStart(page, "solution-slide-1");
+  await expect(page.getByTestId("solution-data-analytics-product-spotlight")).toBeVisible();
+  await expect(
+    page.getByTestId("solution-data-analytics-product-spotlight").locator(".solution-spotlight-logo-wordmark")
+  ).toBeVisible();
+  await captureContent(page, "12b-reduced-motion-solution");
+  await scrollSlideToStart(page, "solution-slide-2");
+  await expect(page.getByTestId("solution-data-streaming-product-spotlight")).toBeVisible();
+  await captureContent(page, "12c-reduced-motion-solution-2");
+  await scrollSlideToStart(page, "solution-slide-3");
+  await expect(page.getByTestId("solution-infrastructure-automation-product-spotlight")).toBeVisible();
+  await captureContent(page, "12d-reduced-motion-solution-3");
+  await scrollSlideToStart(page, "solution-slide-4");
+  await expect(page.getByTestId("solution-devops-quality-product-spotlight")).toBeVisible();
+  await captureContent(page, "12e-reduced-motion-solution-4");
+  await scrollSlideToStart(page, "solution-slide-5");
+  await expect(page.getByTestId("solution-consulting-support-product-spotlight")).toBeVisible();
+  await captureContent(page, "12f-reduced-motion-solution-5");
 
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/?forceFallback=1");
   await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
@@ -1282,7 +1440,14 @@ test("mobile Hero hierarchy remains readable across release-candidate viewports"
       await expectLocatorInViewport(page, page.locator(".hero-media"));
     }
 
+    await expectLocatorFullyInViewport(page, page.locator(".hero-cta"));
     await expectLocatorInViewport(page, page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" }));
+    if (viewport.width < 768) {
+      await expect(page.locator("canvas")).toHaveCount(0);
+      await expect(page.locator(".fallback-service-rail")).toBeHidden();
+      await expect(page.locator(".scroll-indicator")).toBeHidden();
+      await capture(page, `mobile-hero-density-${viewport.width}x${viewport.height}`);
+    }
     await expectNoOverflow(page);
   }
 });

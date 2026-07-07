@@ -44,9 +44,9 @@
   <path d="M1396 804H1472L1518 760V690" stroke="#E90207" stroke-opacity="0.85" stroke-width="3"/>
 
   <g transform="translate(214 196)">
-    <text x="0" y="0" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="0">SOLUTION STACK SAMPLE</text>
-    <text x="0" y="74" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="58" font-weight="750" letter-spacing="0">二쇱슂 ?쒗뭹 ?곸슜 ?곸뿭</text>
-    <text x="0" y="126" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="23" font-weight="500" letter-spacing="0">?쒗뭹 濡쒓퀬???뚰듃?덉떗 二쇱옣???꾨땲?? GTG媛 ?ㅻ（??湲곗닠 踰붿쐞瑜??ㅻ챸?섎뒗 蹂댁“ 利앷굅濡?諛곗튂?⑸땲??</text>
+    <text x="0" y="0" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="0">SOLUTION SCOPE SAMPLE</text>
+    <text x="0" y="74" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="58" font-weight="750" letter-spacing="0">Technology scope sample</text>
+    <text x="0" y="126" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="23" font-weight="500" letter-spacing="0">Logos are shown as technology scope references; they do not imply affiliation, status, approval, or outcomes.</text>
     <text x="0" y="174" fill="#7F837E" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="17" font-weight="500" letter-spacing="0">Production note: confirm logo usage rights, current files, and trademark display rules before release.</text>
   </g>
 
@@ -70,7 +70,7 @@
         <image href="../../item-logo/3840px-Vertica_pos_blk_rgb.svg.webp" x="-144" y="28" width="636" height="220" preserveAspectRatio="xMidYMid meet"/>
       </g>
       <text x="42" y="268" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">Vertica DB</text>
-      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Data warehouse / analytics focus</text>
+      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Analytics scope reference</text>
     </g>
   </g>
 
@@ -83,7 +83,7 @@
       <rect x="42" y="72" width="264" height="138" fill="#F3F1EA"/>
       <image href="../../item-logo/3840px-Confluent,_Inc._logo.svg.webp" x="58" y="104" width="232" height="74" preserveAspectRatio="xMidYMid meet"/>
       <text x="42" y="268" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">Confluent</text>
-      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Streaming platform focus</text>
+      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Streaming scope reference</text>
     </g>
   </g>
 
@@ -96,7 +96,7 @@
       <rect x="42" y="52" width="264" height="178" fill="#07080B" stroke="#F3F1EA" stroke-opacity="0.12" stroke-width="1"/>
       <image href="../../item-logo/pngaaa.com-5227511.png" x="76" y="76" width="196" height="130" preserveAspectRatio="xMidYMid meet"/>
       <text x="42" y="268" fill="#F3F1EA" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="0">LoadRunner</text>
-      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Performance testing focus</text>
+      <text x="42" y="302" fill="#B6B7B1" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="0">Testing scope reference</text>
     </g>
   </g>
 
@@ -108,5 +108,5 @@
     <path d="M0 20L50 0L34 44L58 68L18 60L0 20Z" fill="#E90207"/>
   </g>
 
-  <text x="214" y="766" fill="#7F837E" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" letter-spacing="0">Sample only. Do not use as partner, certification, endorsement, or customer proof claim.</text>
+  <text x="214" y="766" fill="#7F837E" font-family="Pretendard, Segoe UI, Arial, sans-serif" font-size="14" font-weight="500" letter-spacing="0">Sample only. Treat logos as technology scope references only; no affiliation, status, approval, outcome, or guarantee.</text>
 </svg>
