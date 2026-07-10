@@ -1,21 +1,25 @@
 "use client";
 
-import { Component, ReactNode, useEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Component, type MutableRefObject, type ReactNode, useEffect, useMemo, useRef } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   CatmullRomCurve3,
   DoubleSide,
   ExtrudeGeometry,
   Group,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   Vector3
 } from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
+import { EXPERIENCE_MOTION, rangeProgress } from "@/components/motion/experience-motion";
 
 type Triple = [number, number, number];
 
 type HeroCanvasProps = {
+  active: boolean;
   onFailure: () => void;
+  progressRef: MutableRefObject<number>;
 };
 
 type BoundaryProps = {
@@ -23,19 +27,10 @@ type BoundaryProps = {
   onFailure: () => void;
 };
 
-type FlowRibbon = {
+type ExitRoute = {
   id: string;
-  color: string;
-  opacity: number;
-  radius: number;
-  points: Triple[];
-};
-
-type ActivationNode = {
-  id: string;
-  position: Triple;
-  rotation: Triple;
-  scale: Triple;
+  bend: Triple;
+  end: Triple;
 };
 
 const SYMBOL_SOURCE_CENTER: Triple = [2014.97, 1424.725, 0];
@@ -96,88 +91,31 @@ function makeSymbolGeometries() {
   );
 }
 
-const ribbons: FlowRibbon[] = [
+const exitRoutes: ExitRoute[] = [
   {
-    id: "upper-warm-flow",
-    color: "#a9aaa4",
-    opacity: 0.28,
-    radius: 0.012,
-    points: [
-      [-4.8, 0.7, -0.7],
-      [-2.8, 1.02, -0.2],
-      [-0.9, 0.86, 0.42],
-      [0.7, 1.12, 0.05],
-      [2.7, 0.88, -0.36],
-      [4.4, 1.18, -0.8]
-    ]
+    id: "solution-data-analytics",
+    bend: [-1.46, 0.56, 0.42],
+    end: [-3.05, 0.98, -0.32]
   },
   {
-    id: "middle-graphite-flow",
-    color: "#6f7472",
-    opacity: 0.28,
-    radius: 0.01,
-    points: [
-      [-4.9, -0.12, -0.35],
-      [-2.2, 0.08, 0.4],
-      [-0.8, -0.16, 0.88],
-      [0.7, 0.03, 0.38],
-      [2.4, -0.08, -0.08],
-      [4.8, 0.1, -0.46]
-    ]
+    id: "solution-data-streaming",
+    bend: [-1.24, -0.12, 0.48],
+    end: [-2.38, -0.48, 0.08]
   },
   {
-    id: "lower-red-signal",
-    color: "#e30613",
-    opacity: 0.18,
-    radius: 0.009,
-    points: [
-      [-4.2, -1.0, 0.1],
-      [-2.5, -0.72, 0.5],
-      [-1.1, -0.86, 0.8],
-      [0.2, -0.68, 0.32],
-      [1.8, -0.9, -0.16],
-      [3.9, -0.62, -0.48]
-    ]
+    id: "solution-infrastructure-automation",
+    bend: [0, 0.76, 0.54],
+    end: [0, 1.48, -0.42]
   },
   {
-    id: "foreground-fold-line",
-    color: "#858984",
-    opacity: 0.2,
-    radius: 0.007,
-    points: [
-      [-3.2, 1.55, 0.68],
-      [-1.54, 1.24, 0.36],
-      [-0.2, 1.46, 0.22],
-      [1.18, 1.26, 0.36],
-      [3.1, 1.54, 0.62]
-    ]
-  }
-];
-
-const activationNodes: ActivationNode[] = [
-  {
-    id: "upper-left-node",
-    position: [-2.05, 0.94, 0.1],
-    rotation: [0.2, 0.32, 0.78],
-    scale: [0.16, 0.16, 0.08]
+    id: "solution-devops-quality",
+    bend: [1.24, -0.12, 0.48],
+    end: [2.38, -0.48, 0.08]
   },
   {
-    id: "right-node",
-    position: [2.34, -0.08, -0.16],
-    rotation: [0.18, -0.42, 0.78],
-    scale: [0.14, 0.14, 0.08]
-  },
-  {
-    id: "core-node",
-    position: [0.92, 0.62, 0.28],
-    rotation: [0.12, -0.4, 0.78],
-    scale: [0.12, 0.12, 0.08]
-  },
-  {
-    id: "lower-left-node",
-    position: [-1.48, -0.82, 0.48],
-    rotation: [0.18, 0.28, 0.78],
-    scale: [0.11, 0.11, 0.07]
+    id: "solution-consulting-support",
+    bend: [1.46, 0.56, 0.42],
+    end: [3.05, 0.98, -0.32]
   }
 ];
 
@@ -221,53 +159,118 @@ function SymbolCore() {
   );
 }
 
-function Ribbon({ ribbon }: { ribbon: FlowRibbon }) {
+function TopologyRoute({ progressRef, route }: { progressRef: MutableRefObject<number>; route: ExitRoute }) {
+  const materialRef = useRef<MeshBasicMaterial>(null);
+  const endpointRef = useRef<Group>(null);
   const curve = useMemo(
-    () => new CatmullRomCurve3(ribbon.points.map((point) => new Vector3(...point))),
-    [ribbon.points]
+    () =>
+      new CatmullRomCurve3([
+        new Vector3(0, 0, 0.18),
+        new Vector3(...route.bend),
+        new Vector3(...route.end)
+      ]),
+    [route.bend, route.end]
   );
 
+  useFrame(() => {
+    const { identityEnd, activeEnd, pullbackEnd } = EXPERIENCE_MOTION.hero.boundaries;
+    const edgeProgress = rangeProgress(progressRef.current, identityEnd, activeEnd);
+    const nodeProgress = rangeProgress(progressRef.current, activeEnd, pullbackEnd);
+    if (materialRef.current) {
+      materialRef.current.opacity = 0.035 + edgeProgress * 0.27;
+    }
+    endpointRef.current?.scale.setScalar(0.001 + nodeProgress * 0.11);
+  });
+
   return (
-    <mesh>
-      <tubeGeometry args={[curve, 96, ribbon.radius, 8, false]} />
-      <meshBasicMaterial color={ribbon.color} transparent opacity={ribbon.opacity} toneMapped={false} />
-    </mesh>
+    <>
+      <mesh>
+        <tubeGeometry args={[curve, 72, 0.009, 6, false]} />
+        <meshBasicMaterial ref={materialRef} color="#a9aaa4" transparent opacity={0.035} toneMapped={false} />
+      </mesh>
+      <group ref={endpointRef} position={route.end} rotation={[0.16, 0.24, 0.78]} scale={0.001}>
+        <mesh>
+          <boxGeometry args={[1, 1, 0.54]} />
+          <meshStandardMaterial color="#a9aaa4" metalness={0.1} roughness={0.76} />
+        </mesh>
+      </group>
+    </>
   );
 }
 
-function ActivationNode({ node }: { node: ActivationNode }) {
+function BoundarySignal({ progressRef }: { progressRef: MutableRefObject<number> }) {
+  const materialRef = useRef<MeshBasicMaterial>(null);
+  const signalRef = useRef<Group>(null);
+  const curve = useMemo(
+    () =>
+      new CatmullRomCurve3([
+        new Vector3(0, -0.02, 0.18),
+        new Vector3(0.18, -0.72, 0.42),
+        new Vector3(0, -1.38, 0.08)
+      ]),
+    []
+  );
+
+  useFrame(() => {
+    const settleProgress = rangeProgress(
+      progressRef.current,
+      EXPERIENCE_MOTION.hero.boundaries.pullbackEnd,
+      1
+    );
+    if (materialRef.current) {
+      materialRef.current.opacity = settleProgress * 0.28;
+    }
+    signalRef.current?.scale.setScalar(0.001 + settleProgress * 0.14);
+  });
+
   return (
-    <mesh position={node.position} rotation={node.rotation} scale={node.scale}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial
-        color="#e30613"
-        emissive="#70050b"
-        emissiveIntensity={0.42}
-        metalness={0.18}
-        roughness={0.58}
-      />
-    </mesh>
+    <>
+      <mesh>
+        <tubeGeometry args={[curve, 48, 0.008, 6, false]} />
+        <meshBasicMaterial ref={materialRef} color="#a9aaa4" transparent opacity={0} toneMapped={false} />
+      </mesh>
+      <group ref={signalRef} position={[0, -1.38, 0.08]} rotation={[0.1, 0.2, 0.78]} scale={0.001}>
+        <mesh>
+          <boxGeometry args={[1, 1, 0.5]} />
+          <meshStandardMaterial
+            color="#e30613"
+            emissive="#4b0509"
+            emissiveIntensity={0.24}
+            metalness={0.1}
+            roughness={0.66}
+          />
+        </mesh>
+      </group>
+    </>
   );
 }
 
-function DataCoreScene() {
+function DataCoreScene({ progressRef }: { progressRef: MutableRefObject<number> }) {
   const coreRef = useRef<Group>(null);
   const fieldRef = useRef<Group>(null);
+  const { camera } = useThree();
 
   useFrame((state) => {
-    const breathe = Math.sin(state.clock.elapsedTime * 0.72) * 0.018;
+    const progress = progressRef.current;
+    const { identityEnd, activeEnd, pullbackEnd } = EXPERIENCE_MOTION.hero.boundaries;
+    const activeProgress = rangeProgress(progress, identityEnd, activeEnd);
+    const pullbackProgress = rangeProgress(progress, activeEnd, pullbackEnd);
+    const settleProgress = rangeProgress(progress, pullbackEnd, 1);
+    const breathe = Math.sin(state.clock.elapsedTime * 0.62) * 0.014 * (1 - settleProgress);
 
     if (coreRef.current) {
-      coreRef.current.rotation.x = -0.08 + Math.sin(state.clock.elapsedTime * 0.36) * 0.025;
-      coreRef.current.rotation.y = -0.18 + Math.sin(state.clock.elapsedTime * 0.34) * 0.18;
+      coreRef.current.rotation.x = -0.08 + Math.sin(state.clock.elapsedTime * 0.28) * 0.018;
+      coreRef.current.rotation.y = -0.12 + Math.sin(state.clock.elapsedTime * 0.3) * 0.08;
       coreRef.current.rotation.z = 0.02;
-      coreRef.current.scale.setScalar(1.05 + breathe);
+      coreRef.current.scale.setScalar(1.05 - pullbackProgress * 0.2 + breathe);
     }
 
     if (fieldRef.current) {
-      fieldRef.current.rotation.y = state.clock.elapsedTime * -0.018;
-      fieldRef.current.scale.setScalar(0.88);
+      fieldRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.18) * 0.025 * activeProgress;
+      fieldRef.current.scale.setScalar(0.84 + pullbackProgress * 0.15);
     }
+
+    camera.position.z = 7.1 + pullbackProgress * 1.25;
   });
 
   return (
@@ -275,15 +278,13 @@ function DataCoreScene() {
       <ambientLight intensity={1.24} />
       <directionalLight position={[2.4, 3.2, 4.8]} intensity={1.62} color="#f3f1ea" />
       <directionalLight position={[-3.4, -1.8, 2.8]} intensity={0.54} color="#858984" />
-      <pointLight position={[0, 0.2, 2.8]} intensity={0.72} color="#e30613" distance={5.8} />
+      <pointLight position={[0, 0.2, 2.8]} intensity={0.46} color="#e30613" distance={5.4} />
 
       <group ref={fieldRef}>
-        {ribbons.map((ribbon) => (
-          <Ribbon key={ribbon.id} ribbon={ribbon} />
+        {exitRoutes.map((route) => (
+          <TopologyRoute key={route.id} progressRef={progressRef} route={route} />
         ))}
-        {activationNodes.map((node) => (
-          <ActivationNode key={node.id} node={node} />
-        ))}
+        <BoundarySignal progressRef={progressRef} />
       </group>
 
       <group ref={coreRef} position={[0, -0.04, 0]}>
@@ -293,13 +294,14 @@ function DataCoreScene() {
   );
 }
 
-export function HeroCanvas({ onFailure }: HeroCanvasProps) {
+export function HeroCanvas({ active, onFailure, progressRef }: HeroCanvasProps) {
   return (
     <div className="hero-canvas-wrap" data-testid="webgl-hero" aria-hidden="true">
       <CanvasBoundary onFailure={onFailure}>
         <Canvas
           className="hero-canvas"
           dpr={[1, 1.5]}
+          frameloop={active ? "always" : "never"}
           camera={{ position: [0, 0.04, 7.1], fov: 36 }}
           gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: "high-performance" }}
           onCreated={({ gl }) => {
@@ -307,7 +309,7 @@ export function HeroCanvas({ onFailure }: HeroCanvasProps) {
           }}
           onError={onFailure}
         >
-          <DataCoreScene />
+          <DataCoreScene progressRef={progressRef} />
         </Canvas>
       </CanvasBoundary>
     </div>

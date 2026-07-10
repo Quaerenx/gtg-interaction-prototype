@@ -13,14 +13,13 @@ export function CustomerProofBand() {
       id="proof"
       className="customer-proof-band content-section"
       data-testid="customer-proof-band"
-      data-header-theme="dark"
+      data-header-theme="light"
       data-release-status={siteContent.proofMode}
       aria-labelledby="proof-heading"
       aria-describedby="proof-description proof-disclaimer"
     >
       <div className="customer-proof-inner content-section-inner">
         <div className="customer-proof-heading">
-          <p className="section-eyebrow">Customer proof</p>
           <h2 id="proof-heading" className="section-title">
             {customerProofContent.headlineKeyword}
           </h2>
@@ -44,13 +43,13 @@ export function CustomerProofBand() {
               key={customer.id}
             >
               <figure>
-                <div className="customer-proof-logo">
-                  <Image src={withBasePath(customer.logoSrc)} alt="" width={260} height={96} sizes="260px" />
-                </div>
                 <figcaption>
                   <span>{customer.displayName}</span>
                   <small>관계 범위 검토 중</small>
                 </figcaption>
+                <div className="customer-proof-logo">
+                  <Image src={withBasePath(customer.logoSrc)} alt="" width={260} height={96} sizes="112px" />
+                </div>
               </figure>
             </li>
           ))}

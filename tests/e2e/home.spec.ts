@@ -1,6 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
+import {
+  EXPERIENCE_MOTION,
+  type HeroState,
+  type ProductRevealState
+} from "../../src/components/motion/experience-motion";
 
 function normalizeBasePath(value: string) {
   const normalized = value.trim().replace(/^\/+|\/+$/g, "");
@@ -41,6 +46,23 @@ const informationArchitectureDir = path.join(artifactDir, "information-architect
 const afterArtifactDir = path.join(informationArchitectureDir, "after");
 const topologyArtifactDir = path.join(artifactDir, "topology-svg-kit");
 const capabilityArtifactDir = path.join(artifactDir, "capability-map");
+const experienceAfterArtifactDir = path.join(artifactDir, "experience-redesign", "after");
+
+const heroStateOrder: Record<HeroState, number> = {
+  identity: 0,
+  "core-active": 1,
+  "core-pullback": 2,
+  "core-settle": 3
+};
+const mouseWheelDelta = 120;
+const trackpadLikeDeltas = [8, 16, 24, 32, 24, 16, 8] as const;
+const requiredViewports = [
+  { name: "desktop-1280x720", width: 1280, height: 720 },
+  { name: "desktop-1920x1080", width: 1920, height: 1080 },
+  { name: "mobile-360x640", width: 360, height: 640 },
+  { name: "mobile-390x844", width: 390, height: 844 },
+  { name: "mobile-430x932", width: 430, height: 932 }
+] as const;
 
 const officialHeadline = "데이터와 인프라를 하나의 운영 구조로";
 const officialDescription =
@@ -124,10 +146,21 @@ function ensureArtifacts() {
   fs.mkdirSync(afterArtifactDir, { recursive: true });
   fs.mkdirSync(topologyArtifactDir, { recursive: true });
   fs.mkdirSync(capabilityArtifactDir, { recursive: true });
+  fs.mkdirSync(experienceAfterArtifactDir, { recursive: true });
 
-  for (const directory of [afterArtifactDir, topologyArtifactDir, capabilityArtifactDir]) {
+  for (const directory of [
+    afterArtifactDir,
+    topologyArtifactDir,
+    capabilityArtifactDir,
+    experienceAfterArtifactDir
+  ]) {
     for (const fileName of fs.readdirSync(directory)) {
-      if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
+      if (
+        fileName.endsWith(".png") ||
+        fileName.endsWith(".json") ||
+        fileName.endsWith(".zip") ||
+        fileName.endsWith(".webm")
+      ) {
         fs.unlinkSync(path.join(directory, fileName));
       }
     }
@@ -177,18 +210,31 @@ function attachDeploymentPathGuards(page: Page) {
   return { asset404s, failedRequests, outOfBasePathAssets };
 }
 
-async function captureIa(page: Page, name: string) {
+async function waitForScreenshotReadiness(page: Page) {
   await page.evaluate(() => document.fonts.ready);
-  await page.waitForFunction(() =>
-    [...document.images]
-      .filter((image) => {
-        const rect = image.getBoundingClientRect();
-        return rect.bottom >= 0 && rect.top <= window.innerHeight;
-      })
-      .every((image) => image.complete && image.naturalWidth > 0)
+  await page.locator("img").evaluateAll((images) => {
+    (images as HTMLImageElement[]).forEach((image) => {
+      if (!image.complete || image.naturalWidth === 0) {
+        image.loading = "eager";
+      }
+    });
+  });
+  await page.waitForFunction(
+    () => [...document.images].every((image) => image.complete && image.naturalWidth > 0),
+    undefined,
+    { timeout: 15_000 }
   );
   await waitForFrames(page, 2);
+}
+
+async function captureIa(page: Page, name: string) {
+  await waitForScreenshotReadiness(page);
   await page.screenshot({ path: path.join(afterArtifactDir, `${name}.png`), fullPage: false });
+}
+
+async function captureExperience(page: Page, name: string) {
+  await waitForScreenshotReadiness(page);
+  await page.screenshot({ path: path.join(experienceAfterArtifactDir, `${name}.png`), fullPage: false });
 }
 
 async function waitForFrames(page: Page, count = 2) {
@@ -215,6 +261,160 @@ async function scrollToSelector(page: Page, selector: string) {
     document.querySelector<HTMLElement>(targetSelector)?.scrollIntoView({ behavior: "instant", block: "start" });
   }, selector);
   await waitForFrames(page, 2);
+}
+
+async function waitForMotionReady(page: Page) {
+  await expect(page.getByTestId("hero")).toHaveAttribute("data-motion-ready", "true");
+  await page.evaluate(() => document.fonts.ready);
+  await waitForFrames(page, 2);
+}
+
+type HeroMotionSample = {
+  activeElement: string;
+  hasVisibleContent: boolean;
+  progress: number;
+  scrollY: number;
+  state: HeroState;
+};
+
+async function sampleHeroMotion(page: Page): Promise<HeroMotionSample> {
+  return page.getByTestId("hero").evaluate((hero) => {
+    const activeElement = document.activeElement;
+    const visibleContent = [...document.querySelectorAll<HTMLElement>("h1, h2, h3, p, a, li, canvas, img, svg")].some(
+      (element) => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return (
+          rect.bottom > 24 &&
+          rect.top < window.innerHeight - 24 &&
+          rect.width > 1 &&
+          rect.height > 1 &&
+          style.display !== "none" &&
+          style.visibility !== "hidden" &&
+          Number.parseFloat(style.opacity || "1") > 0.05
+        );
+      }
+    );
+
+    return {
+      activeElement:
+        activeElement instanceof HTMLElement
+          ? activeElement.id || activeElement.getAttribute("data-testid") || activeElement.tagName.toLowerCase()
+          : "",
+      hasVisibleContent: visibleContent,
+      progress: Number.parseFloat(hero.getAttribute("data-hero-progress") ?? "0"),
+      scrollY: window.scrollY,
+      state: (hero.getAttribute("data-hero-state") ?? "identity") as HeroState
+    };
+  });
+}
+
+async function wheelSequence(page: Page, deltas: readonly number[]) {
+  const viewport = page.viewportSize();
+  if (!viewport) {
+    throw new Error("A viewport is required for wheel QA");
+  }
+  await page.mouse.move(viewport.width / 2, viewport.height / 2);
+
+  const samples: HeroMotionSample[] = [];
+  for (const delta of deltas) {
+    await page.mouse.wheel(0, delta);
+    await waitForFrames(page, 2);
+    samples.push(await sampleHeroMotion(page));
+  }
+  return samples;
+}
+
+function expectMonotonicProgress(samples: HeroMotionSample[], direction: "down" | "up") {
+  for (let index = 1; index < samples.length; index += 1) {
+    const previous = samples[index - 1];
+    const current = samples[index];
+    if (direction === "down") {
+      expect(current.progress).toBeGreaterThanOrEqual(previous.progress - 0.002);
+      expect(heroStateOrder[current.state]).toBeGreaterThanOrEqual(heroStateOrder[previous.state]);
+    } else {
+      expect(current.progress).toBeLessThanOrEqual(previous.progress + 0.002);
+      expect(heroStateOrder[current.state]).toBeLessThanOrEqual(heroStateOrder[previous.state]);
+    }
+    expect(Math.abs(heroStateOrder[current.state] - heroStateOrder[previous.state])).toBeLessThanOrEqual(1);
+    expect(current.hasVisibleContent).toBe(true);
+  }
+}
+
+async function expectEveryImageLoaded(page: Page) {
+  await page.locator("img").evaluateAll((images) => {
+    (images as HTMLImageElement[]).forEach((image) => {
+      image.loading = "eager";
+    });
+  });
+  await page.waitForFunction(
+    () => [...document.images].every((image) => image.complete && image.naturalWidth > 0),
+    undefined,
+    { timeout: 15_000 }
+  );
+
+  const imageDimensions = await page.locator("img").evaluateAll((images) =>
+    images.map((image) => ({
+      height: (image as HTMLImageElement).naturalHeight,
+      src: (image as HTMLImageElement).currentSrc || (image as HTMLImageElement).src,
+      width: (image as HTMLImageElement).naturalWidth
+    }))
+  );
+  expect(imageDimensions.length).toBeGreaterThan(0);
+  for (const image of imageDimensions) {
+    expect(image.width, image.src).toBeGreaterThan(0);
+    expect(image.height, image.src).toBeGreaterThan(0);
+  }
+}
+
+async function expectStaticExperience(page: Page) {
+  await waitForMotionReady(page);
+  await expect(page.getByTestId("hero")).toHaveAttribute("data-hero-progress", "1.000");
+  await expect(page.getByTestId("hero")).toHaveAttribute("data-hero-state", "core-settle");
+  await expect(page.getByTestId("solutions-handoff")).toHaveAttribute("data-handoff-progress", "1.000");
+  await expect(page.getByTestId("solutions-handoff")).toHaveAttribute("data-handoff-state", "connected");
+  await expect(page.getByTestId("solutions-section")).toHaveAttribute("data-motion-mode", "static");
+  await expect(page.locator("[data-product-id][data-reveal-state='seen']")).toHaveCount(
+    Object.keys(productOwners).length
+  );
+  await expect(page.locator("canvas")).toHaveCount(0);
+  expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBe(0);
+
+  const pinnedContent = await page.locator("#top .hero-stage, #solutions .solution-article").evaluateAll((elements) =>
+    elements.filter((element) => ["fixed", "sticky"].includes(getComputedStyle(element).position)).length
+  );
+  expect(pinnedContent).toBe(0);
+}
+
+async function scrollHeroToProgress(page: Page, progress: number, expectedState: HeroState) {
+  await page.getByTestId("hero").evaluate((hero, targetProgress) => {
+    const element = hero as HTMLElement;
+    const travel = Math.max(1, element.offsetHeight - window.innerHeight);
+    window.scrollTo({ top: element.offsetTop + travel * targetProgress, behavior: "instant" });
+  }, progress);
+  await expect(page.getByTestId("hero")).toHaveAttribute("data-hero-state", expectedState);
+  await waitForFrames(page, 2);
+}
+
+async function captureSectionFrame(
+  page: Page,
+  prefix: string,
+  frame: { name: string; productId?: string; selector: string }
+) {
+  await scrollToSelector(page, frame.selector);
+  if (frame.selector === "[data-testid='solutions-handoff']") {
+    await expect(page.getByTestId("solutions-handoff")).toHaveAttribute("data-handoff-state", "connected");
+  }
+  if (frame.productId) {
+    await scrollToSelector(page, `[data-testid='product-reveal-${frame.productId}']`);
+    await expect(page.getByTestId(`product-reveal-${frame.productId}`)).toHaveAttribute(
+      "data-reveal-state",
+      "seen"
+    );
+    await captureExperience(page, `${prefix}-${frame.name}-product-reveal`);
+    await scrollToSelector(page, frame.selector);
+  }
+  await captureExperience(page, `${prefix}-${frame.name}`);
 }
 
 async function expectNoOverflow(page: Page) {
@@ -539,6 +739,304 @@ test("customer proof is contextual and product marks belong only to stable Solut
   expect(errors).toEqual([]);
 });
 
+test("motion configuration is centralized and legacy 650svh HUD structures stay removed", async () => {
+  const cssSource = fs.readFileSync(path.join(process.cwd(), "src", "app", "globals.css"), "utf8");
+  const motionSource = fs.readFileSync(
+    path.join(process.cwd(), "src", "components", "motion", "experience-motion.ts"),
+    "utf8"
+  );
+  const componentSource = [
+    "src/components/sections/hero-experience.tsx",
+    "src/components/sections/solution-sequence.tsx",
+    "src/components/sections/solutions-handoff.tsx"
+  ]
+    .map((filePath) => fs.readFileSync(path.join(process.cwd(), filePath), "utf8"))
+    .join("\n");
+
+  expect(cssSource).not.toMatch(/650svh/i);
+  expect(`${cssSource}\n${componentSource}`).not.toMatch(
+    /(?:hero-proof-copy|hero-solution-stack|solution-stack-static|solution-rail|solution-layers|--solution-count)/i
+  );
+  expect(`${cssSource}\n${componentSource}`).not.toMatch(
+    /(?:MVP PROTOTYPE|Solution scope|Technology scope|scope reference)/i
+  );
+  expect(motionSource).toContain("export const EXPERIENCE_MOTION");
+  expect(componentSource.match(/EXPERIENCE_MOTION/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+
+  const { identityEnd, activeEnd, pullbackEnd } = EXPERIENCE_MOTION.hero.boundaries;
+  expect(0).toBeLessThan(identityEnd);
+  expect(identityEnd).toBeLessThan(activeEnd);
+  expect(activeEnd).toBeLessThan(pullbackEnd);
+  expect(pullbackEnd).toBeLessThan(1);
+  expect(EXPERIENCE_MOTION.hero.travel.minPx).toBeLessThanOrEqual(EXPERIENCE_MOTION.hero.travel.maxPx);
+});
+
+test("mouse wheel and trackpad-like input preserve Hero state order and reverse cleanly", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await trackCanvasMounts(page);
+  const errors = await attachConsoleGuards(page);
+  const pathGuards = attachDeploymentPathGuards(page);
+  await page.goto(appRoute());
+
+  const hero = page.getByTestId("hero");
+  await expect(hero).toHaveAttribute("data-experience-mode", "motion");
+  await waitForMotionReady(page);
+  await expect(hero).toHaveAttribute("data-hero-state", "identity");
+  await expect(page.locator("#top canvas")).toHaveCount(1);
+
+  const heroCta = page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" });
+  await heroCta.focus();
+  await expect(heroCta).toBeFocused();
+
+  const mouseSamples = await wheelSequence(page, [mouseWheelDelta]);
+  expect(mouseSamples).toHaveLength(1);
+  expect(mouseSamples[0].state).not.toBe("core-settle");
+  expect(heroStateOrder[mouseSamples[0].state]).toBeLessThanOrEqual(1);
+  expect(mouseSamples[0].hasVisibleContent).toBe(true);
+  await expect(heroCta).toBeFocused();
+
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await expect.poll(() => sampleHeroMotion(page).then((sample) => sample.progress)).toBeLessThanOrEqual(0.002);
+
+  const downwardSamples: HeroMotionSample[] = [await sampleHeroMotion(page)];
+  let downwardPackets = 0;
+  while (downwardSamples.at(-1)!.progress < 0.9 && downwardPackets < 24) {
+    downwardSamples.push(...(await wheelSequence(page, trackpadLikeDeltas)));
+    downwardPackets += 1;
+  }
+  expect(downwardPackets).toBeLessThan(24);
+  expect(downwardSamples.at(-1)!.state).toBe("core-settle");
+  expectMonotonicProgress(downwardSamples, "down");
+  await expect(heroCta).toBeFocused();
+
+  const reverseDeltas = [...trackpadLikeDeltas].reverse().map((delta) => -delta);
+  const upwardSamples: HeroMotionSample[] = [await sampleHeroMotion(page)];
+  let upwardPackets = 0;
+  while (upwardSamples.at(-1)!.progress > 0.01 && upwardPackets < 24) {
+    upwardSamples.push(...(await wheelSequence(page, reverseDeltas)));
+    upwardPackets += 1;
+  }
+  expect(upwardPackets).toBeLessThan(24);
+  expect(upwardSamples.at(-1)!.state).toBe("identity");
+  expectMonotonicProgress(upwardSamples, "up");
+  await expect(heroCta).toBeFocused();
+
+  const layoutMetrics = await page.evaluate(() => {
+    const heroElement = document.querySelector<HTMLElement>("#top");
+    const contact = document.querySelector<HTMLElement>("#contact");
+    if (!heroElement || !contact) {
+      throw new Error("Hero and Contact are required for motion metrics");
+    }
+    return {
+      contactOffsetPx: contact.offsetTop,
+      contactOffsetVh: contact.offsetTop / window.innerHeight,
+      documentHeightPx: document.documentElement.scrollHeight,
+      heroTravelPx: Math.max(0, heroElement.offsetHeight - window.innerHeight),
+      heroTravelVh: Math.max(0, heroElement.offsetHeight - window.innerHeight) / window.innerHeight,
+      viewport: { height: window.innerHeight, width: window.innerWidth }
+    };
+  });
+  fs.writeFileSync(
+    path.join(experienceAfterArtifactDir, "motion-metrics.json"),
+    `${JSON.stringify(
+      {
+        ...layoutMetrics,
+        mouseWheel: {
+          deltaPx: mouseWheelDelta,
+          progressAfterOnePacket: mouseSamples[0].progress,
+          stateAfterOnePacket: mouseSamples[0].state
+        },
+        trackpadLike: {
+          deltasPx: trackpadLikeDeltas,
+          downwardPackets,
+          reversePackets: upwardPackets,
+          syntheticDownDurationMs: downwardPackets * trackpadLikeDeltas.length * 16,
+          syntheticReverseDurationMs: upwardPackets * trackpadLikeDeltas.length * 16
+        }
+      },
+      null,
+      2
+    )}\n`,
+    "utf8"
+  );
+
+  expect(pathGuards.outOfBasePathAssets).toEqual([]);
+  expect(pathGuards.failedRequests).toEqual([]);
+  expect(pathGuards.asset404s).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("each product reveal runs once and stays seen through boundary jitter", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const errors = await attachConsoleGuards(page);
+  const pathGuards = attachDeploymentPathGuards(page);
+  await page.goto(appRoute());
+  await waitForMotionReady(page);
+  await expect(page.getByTestId("solutions-section")).toHaveAttribute("data-motion-mode", "motion");
+  await expect(page.locator("[data-product-id][data-reveal-state='idle']")).toHaveCount(
+    Object.keys(productOwners).length
+  );
+
+  await page.evaluate(() => {
+    window.__GTG_REVEAL_TRANSITIONS__ = {};
+    const reveals = document.querySelectorAll<HTMLElement>("[data-product-id][data-reveal-state]");
+    for (const reveal of reveals) {
+      const productId = reveal.dataset.productId;
+      if (!productId) {
+        continue;
+      }
+      window.__GTG_REVEAL_TRANSITIONS__[productId] = [
+        (reveal.dataset.revealState ?? "idle") as ProductRevealState
+      ];
+    }
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        const reveal = record.target as HTMLElement;
+        const productId = reveal.dataset.productId;
+        if (!productId || !window.__GTG_REVEAL_TRANSITIONS__) {
+          continue;
+        }
+        window.__GTG_REVEAL_TRANSITIONS__[productId] ??= [];
+        window.__GTG_REVEAL_TRANSITIONS__[productId].push(
+          (reveal.dataset.revealState ?? "idle") as ProductRevealState
+        );
+      }
+    });
+    reveals.forEach((reveal) => observer.observe(reveal, { attributeFilter: ["data-reveal-state"] }));
+  });
+
+  for (const [productId, solutionId] of Object.entries(productOwners)) {
+    const reveal = page.getByTestId(`product-reveal-${productId}`);
+    await scrollToSelector(page, `[data-testid='product-reveal-${productId}']`);
+    await expect(reveal).toHaveAttribute("data-reveal-state", "seen");
+    expect(await reveal.evaluate((element) => element.closest("article")?.id)).toBe(solutionId);
+
+    for (const delta of [-60, 60, -40, 40]) {
+      await page.mouse.wheel(0, delta);
+      await waitForFrames(page, 2);
+      await expect(reveal).toHaveAttribute("data-reveal-state", "seen");
+    }
+  }
+
+  const transitions = await page.evaluate(() => window.__GTG_REVEAL_TRANSITIONS__ ?? {});
+  for (const productId of Object.keys(productOwners)) {
+    expect(transitions[productId]?.filter((state) => state === "active")).toHaveLength(1);
+    expect(transitions[productId]?.at(-1)).toBe("seen");
+  }
+
+  expect(pathGuards.outOfBasePathAssets).toEqual([]);
+  expect(pathGuards.failedRequests).toEqual([]);
+  expect(pathGuards.asset404s).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("desktop redesign screenshots cover every major section at required resolutions", async ({ page }) => {
+  test.slow();
+  const errors = await attachConsoleGuards(page);
+  const pathGuards = attachDeploymentPathGuards(page);
+  const desktopViewports = requiredViewports.filter((viewport) => viewport.name.startsWith("desktop"));
+
+  for (const viewport of desktopViewports) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto(appRoute());
+    await waitForMotionReady(page);
+    await expect(page.getByTestId("hero")).toHaveAttribute("data-experience-mode", "motion");
+    await expect(page.locator("#top canvas")).toHaveCount(1);
+    await expect(page.locator("main#main-content > section:not(#top) canvas")).toHaveCount(0);
+
+    await captureExperience(page, `${viewport.name}-hero-identity`);
+    if (viewport.width === 1280) {
+      await scrollHeroToProgress(page, 0.4, "core-active");
+      await captureExperience(page, `${viewport.name}-hero-core-active`);
+      await scrollHeroToProgress(page, 0.7, "core-pullback");
+      await captureExperience(page, `${viewport.name}-hero-core-pullback`);
+    }
+    await scrollHeroToProgress(page, 0.9, "core-settle");
+    await captureExperience(page, `${viewport.name}-hero-core-settle`);
+
+    const frames =
+      viewport.width === 1280
+        ? [
+            { name: "proof", selector: "#proof" },
+            { name: "handoff", selector: "[data-testid='solutions-handoff']" },
+            { name: "solution-01", productId: "vertica", selector: "#solution-data-analytics" },
+            { name: "solution-02", productId: "confluent", selector: "#solution-data-streaming" },
+            {
+              name: "solution-03",
+              productId: "hashicorp",
+              selector: "#solution-infrastructure-automation"
+            },
+            { name: "solution-04", productId: "loadrunner", selector: "#solution-devops-quality" },
+            { name: "solution-05", selector: "#solution-consulting-support" },
+            { name: "company", selector: "#company" },
+            { name: "engagement", selector: "#engagement" },
+            { name: "contact", selector: "#contact" }
+          ]
+        : [
+            { name: "proof", selector: "#proof" },
+            { name: "handoff", selector: "[data-testid='solutions-handoff']" },
+            { name: "solution-01", productId: "vertica", selector: "#solution-data-analytics" },
+            { name: "solution-05", selector: "#solution-consulting-support" },
+            { name: "contact", selector: "#contact" }
+          ];
+
+    for (const frame of frames) {
+      await captureSectionFrame(page, viewport.name, frame);
+    }
+    await expectEveryImageLoaded(page);
+    await expectNoOverflow(page);
+  }
+
+  expect(pathGuards.outOfBasePathAssets).toEqual([]);
+  expect(pathGuards.failedRequests).toEqual([]);
+  expect(pathGuards.asset404s).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("mobile redesign screenshots keep the full flow static at every required viewport", async ({ page }) => {
+  test.slow();
+  await trackCanvasMounts(page);
+  const errors = await attachConsoleGuards(page);
+  const pathGuards = attachDeploymentPathGuards(page);
+  const mobileViewports = requiredViewports.filter((viewport) => viewport.name.startsWith("mobile"));
+
+  for (const viewport of mobileViewports) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto(appRoute());
+    await expect(page.getByTestId("hero")).toHaveAttribute("data-experience-mode", "mobile");
+    await expectStaticExperience(page);
+    await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
+    const heroCtaBounds = await page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" }).evaluate(
+      (cta) => {
+        const rect = cta.getBoundingClientRect();
+        return { bottom: rect.bottom, height: rect.height, top: rect.top, viewportHeight: window.innerHeight };
+      }
+    );
+    expect(heroCtaBounds.height).toBeGreaterThan(0);
+    expect(heroCtaBounds.top).toBeGreaterThanOrEqual(0);
+    expect(heroCtaBounds.bottom).toBeLessThanOrEqual(heroCtaBounds.viewportHeight + 2);
+    await captureExperience(page, `${viewport.name}-hero`);
+
+    for (const frame of [
+      { name: "proof", selector: "#proof" },
+      { name: "handoff", selector: "[data-testid='solutions-handoff']" },
+      { name: "solution-01", productId: "vertica", selector: "#solution-data-analytics" },
+      { name: "solution-05", selector: "#solution-consulting-support" },
+      { name: "contact", selector: "#contact" }
+    ]) {
+      await captureSectionFrame(page, viewport.name, frame);
+    }
+
+    await expectEveryImageLoaded(page);
+    await expectNoOverflow(page);
+  }
+
+  expect(pathGuards.outOfBasePathAssets).toEqual([]);
+  expect(pathGuards.failedRequests).toEqual([]);
+  expect(pathGuards.asset404s).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
 test("mobile keeps proof context and all Solutions in normal document flow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await trackCanvasMounts(page);
@@ -592,22 +1090,31 @@ test("mobile keeps proof context and all Solutions in normal document flow", asy
 });
 
 test("reduced motion never mounts Canvas and keeps all semantic content", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await trackCanvasMounts(page);
   const errors = await attachConsoleGuards(page);
+  const pathGuards = attachDeploymentPathGuards(page);
   await page.goto(appRoute());
 
   await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
-  await expect(page.locator("canvas")).toHaveCount(0);
-  expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBe(0);
+  await expectStaticExperience(page);
   await expectCoreSemanticContent(page);
   await captureIa(page, "10-reduced-hero");
+  await captureExperience(page, "reduced-1280x720-hero");
   await scrollToSelector(page, "#proof");
   await captureIa(page, "11-reduced-proof");
+  await captureExperience(page, "reduced-1280x720-proof");
   await scrollToSelector(page, "#solutions");
   await captureIa(page, "12-reduced-solutions");
+  await captureExperience(page, "reduced-1280x720-solutions");
+  await scrollToSelector(page, "#contact");
+  await captureExperience(page, "reduced-1280x720-contact");
+  await expectEveryImageLoaded(page);
   await expectNoOverflow(page);
+  expect(pathGuards.outOfBasePathAssets).toEqual([]);
+  expect(pathGuards.failedRequests).toEqual([]);
+  expect(pathGuards.asset404s).toEqual([]);
   expect(errors).toEqual([]);
 });
 
@@ -617,18 +1124,31 @@ test("forceFallback keeps services, customers, Solutions, Company, Engagement, a
   await page.setViewportSize({ width: 390, height: 844 });
   await trackCanvasMounts(page);
   const errors = await attachConsoleGuards(page);
+  const pathGuards = attachDeploymentPathGuards(page);
   await page.goto(appRoute("/?forceFallback=1"));
 
   const currentUrl = new URL(page.url());
   expect(currentUrl.pathname).toBe(appHomePath);
   expect(currentUrl.searchParams.get("forceFallback")).toBe("1");
   await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
-  await expect(page.locator("canvas")).toHaveCount(0);
-  expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBe(0);
+  await expectStaticExperience(page);
   await expect(page.locator(".fallback-proof-strip, .fallback-service-rail")).toHaveCount(0);
   await expectCoreSemanticContent(page);
   await captureIa(page, "13-force-fallback");
+  await captureExperience(page, "force-fallback-390x844-hero");
+  for (const frame of [
+    { name: "proof", selector: "#proof" },
+    { name: "solution-01", productId: "vertica", selector: "#solution-data-analytics" },
+    { name: "solution-05", selector: "#solution-consulting-support" },
+    { name: "contact", selector: "#contact" }
+  ]) {
+    await captureSectionFrame(page, "force-fallback-390x844", frame);
+  }
+  await expectEveryImageLoaded(page);
   await expectNoOverflow(page);
+  expect(pathGuards.outOfBasePathAssets).toEqual([]);
+  expect(pathGuards.failedRequests).toEqual([]);
+  expect(pathGuards.asset404s).toEqual([]);
   expect(errors).toEqual([]);
 });
 
@@ -767,12 +1287,10 @@ test("draft metadata, robots, sitemap, and 404 remain basePath-aware", async ({ 
 
 test("layout has no horizontal overflow across required viewports", async ({ page }) => {
   const viewports = [
-    { width: 360, height: 640 },
-    { width: 390, height: 844 },
-    { width: 430, height: 932 },
+    ...requiredViewports.map(({ width, height }) => ({ width, height })),
     { width: 768, height: 1024 },
-    { width: 1280, height: 720 },
-    { width: 1440, height: 900 }
+    { width: 1440, height: 900 },
+    { width: 844, height: 390 }
   ];
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
@@ -796,5 +1314,6 @@ test("cross-browser smoke keeps the semantic baseline reachable @browser-smoke",
 declare global {
   interface Window {
     __GTG_CANVAS_MOUNTS__?: number;
+    __GTG_REVEAL_TRANSITIONS__?: Record<string, ProductRevealState[]>;
   }
 }
