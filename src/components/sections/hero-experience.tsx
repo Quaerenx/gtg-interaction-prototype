@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SectionAnchor } from "@/components/navigation/section-anchor";
 import {
   EXPERIENCE_MOTION,
@@ -10,12 +10,12 @@ import {
   rangeProgress
 } from "@/components/motion/experience-motion";
 import { useMediaQuery, usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
-import { HeroCanvas } from "@/components/three/hero-canvas";
 import { heroContent, solutionSlides } from "@/content/site";
 import { supportsWebGL } from "@/lib/webgl";
 import { HeroFallback } from "./hero-fallback";
 
 type ExperienceMode = "pending" | "motion" | "mobile" | "reduced" | "fallback";
+type HeroCanvasComponent = typeof import("@/components/three/hero-canvas")["HeroCanvas"];
 
 export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
   const heroRef = useRef<HTMLElement>(null);
@@ -25,26 +25,65 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
   const isMobile = useMediaQuery(`(max-width: ${EXPERIENCE_MOTION.mobileMaxWidth}px)`);
   const [webglAvailable, setWebglAvailable] = useState<boolean | null>(forceFallback ? false : null);
   const [canvasActive, setCanvasActive] = useState(true);
+  const [LoadedHeroCanvas, setLoadedHeroCanvas] = useState<HeroCanvasComponent | null>(null);
+  const shouldProbeWebGL =
+    !forceFallback && prefersReducedMotion === false && isMobile === false;
 
   useEffect(() => {
     if (forceFallback) {
       setWebglAvailable(false);
-      return;
+      return undefined;
+    }
+    if (!shouldProbeWebGL) {
+      setWebglAvailable(null);
+      return undefined;
     }
 
     setWebglAvailable(supportsWebGL());
-  }, [forceFallback]);
+    return undefined;
+  }, [forceFallback, shouldProbeWebGL]);
+
+  const shouldLoadHeroCanvas =
+    shouldProbeWebGL && webglAvailable === true;
+
+  useEffect(() => {
+    if (!shouldLoadHeroCanvas) {
+      setLoadedHeroCanvas(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+    void import("@/components/three/hero-canvas")
+      .then(({ HeroCanvas }) => {
+        if (!cancelled) {
+          setLoadedHeroCanvas(() => HeroCanvas);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setWebglAvailable(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldLoadHeroCanvas]);
 
   const canUseWebGL =
-    !forceFallback && prefersReducedMotion === false && isMobile === false && webglAvailable === true;
+    shouldLoadHeroCanvas && LoadedHeroCanvas !== null;
+
+  const handleCanvasFailure = useCallback(() => setWebglAvailable(false), []);
 
   let experienceMode: ExperienceMode = "pending";
-  if (forceFallback || webglAvailable === false) {
+  if (forceFallback) {
     experienceMode = "fallback";
   } else if (prefersReducedMotion === true) {
     experienceMode = "reduced";
   } else if (isMobile === true) {
     experienceMode = "mobile";
+  } else if (webglAvailable === false) {
+    experienceMode = "fallback";
   } else if (canUseWebGL) {
     experienceMode = "motion";
   }
@@ -52,10 +91,12 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
   const fallbackMode =
     experienceMode === "mobile" ? "mobile" : experienceMode === "reduced" ? "reduced" : "fallback";
   const isMotionExperience = experienceMode === "motion";
-  const reservesMotionTravel = experienceMode === "pending" || isMotionExperience;
+  const reservesMotionTravel = isMotionExperience;
   const initialHeroState = isMotionExperience ? "identity" : "core-settle";
   const { minPx, viewportFactor, maxPx } = EXPERIENCE_MOTION.hero.travel;
-  const initialTravel = `clamp(${minPx}px, ${viewportFactor * 100}svh, ${maxPx}px)`;
+  const initialTravel = isMotionExperience
+    ? `clamp(${minPx}px, ${viewportFactor * 100}svh, ${maxPx}px)`
+    : "0px";
   const renderedProgress = isMotionExperience ? "0" : "1";
 
   useEffect(() => {
@@ -205,11 +246,11 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
         </div>
 
         <div className="hero-media" aria-hidden="true">
-          {canUseWebGL ? (
-            <HeroCanvas
+          {canUseWebGL && LoadedHeroCanvas ? (
+            <LoadedHeroCanvas
               active={canvasActive}
               progressRef={heroProgressRef}
-              onFailure={() => setWebglAvailable(false)}
+              onFailure={handleCanvasFailure}
             />
           ) : (
             <HeroFallback mode={fallbackMode} />

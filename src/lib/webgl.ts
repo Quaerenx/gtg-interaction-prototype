@@ -6,7 +6,11 @@ export function supportsWebGL() {
   try {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
-    return Boolean(context);
+    const supported = Boolean(context);
+    context?.getExtension("WEBGL_lose_context")?.loseContext();
+    canvas.width = 1;
+    canvas.height = 1;
+    return supported;
   } catch {
     return false;
   }

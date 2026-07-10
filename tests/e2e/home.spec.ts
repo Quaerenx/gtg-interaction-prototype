@@ -15,7 +15,8 @@ function normalizeBasePath(value: string) {
 const appBasePath = normalizeBasePath(process.env.NEXT_BASE_PATH ?? "/hero");
 const appHomePath = appBasePath || "/";
 const defaultApplicationBaseURL = `http://127.0.0.1:18150${appBasePath}/`;
-const applicationOrigin = new URL(process.env.PLAYWRIGHT_BASE_URL ?? defaultApplicationBaseURL).origin;
+const applicationBaseURL = process.env.PLAYWRIGHT_BASE_URL ?? defaultApplicationBaseURL;
+const applicationOrigin = new URL(applicationBaseURL).origin;
 
 function appPath(pathname: string) {
   if (!pathname.startsWith("/") || pathname.startsWith("//")) {
@@ -63,6 +64,15 @@ const requiredViewports = [
   { name: "mobile-390x844", width: 390, height: 844 },
   { name: "mobile-430x932", width: 430, height: 932 }
 ] as const;
+
+type WebGLRuntimeTelemetry = {
+  canvasDomMounts: number;
+  drawCalls: number;
+  firstAnimationFrameCanvasCount: number | null;
+  webglContextRequests: number;
+};
+
+let threeClientChunkPathsCache: Set<string> | undefined;
 
 const officialHeadline = "데이터와 인프라를 하나의 운영 구조로";
 const officialDescription =
@@ -165,6 +175,57 @@ function ensureArtifacts() {
       }
     }
   }
+}
+
+function listFilesRecursively(directory: string): string[] {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    return entry.isDirectory() ? listFilesRecursively(entryPath) : [entryPath];
+  });
+}
+
+function discoverThreeClientChunkPaths() {
+  if (threeClientChunkPathsCache) {
+    return threeClientChunkPathsCache;
+  }
+
+  const staticRoot = path.join(process.cwd(), ".next", "static");
+  const chunksRoot = path.join(staticRoot, "chunks");
+  if (!fs.existsSync(chunksRoot)) {
+    throw new Error("A production .next build is required before Playwright chunk verification");
+  }
+
+  const threeMarkers = /WebGLRenderer|ExtrudeGeometry|\bR3F\b/;
+  const chunkPaths = listFilesRecursively(chunksRoot)
+    .filter((filePath) => filePath.endsWith(".js"))
+    .filter((filePath) => threeMarkers.test(fs.readFileSync(filePath, "utf8")))
+    .map((filePath) => `/_next/static/${path.relative(staticRoot, filePath).replaceAll("\\", "/")}`);
+
+  if (chunkPaths.length === 0) {
+    throw new Error("Could not identify a production Three/R3F client chunk");
+  }
+
+  threeClientChunkPathsCache = new Set(chunkPaths);
+  return threeClientChunkPathsCache;
+}
+
+function collectClientChunkRequests(page: Page) {
+  const requests: string[] = [];
+  page.on("request", (request) => {
+    const url = request.url();
+    if (url.includes("/_next/static/chunks/") && /\.js(?:\?|$)/.test(url)) {
+      requests.push(url);
+    }
+  });
+  return requests;
+}
+
+function requestedThreeClientChunks(requests: readonly string[]) {
+  const threeChunkPaths = discoverThreeClientChunkPaths();
+  return requests.filter((requestUrl) => {
+    const pathname = decodeURIComponent(new URL(requestUrl).pathname);
+    return [...threeChunkPaths].some((chunkPath) => pathname.endsWith(chunkPath));
+  });
 }
 
 async function attachConsoleGuards(page: Page) {
@@ -440,6 +501,80 @@ async function trackCanvasMounts(page: Page) {
       }
     });
     observer.observe(document, { childList: true, subtree: true });
+  });
+}
+
+async function trackWebGLRuntime(page: Page) {
+  await page.addInitScript(() => {
+    const telemetry: WebGLRuntimeTelemetry = {
+      canvasDomMounts: 0,
+      drawCalls: 0,
+      firstAnimationFrameCanvasCount: null,
+      webglContextRequests: 0
+    };
+    window.__GTG_WEBGL_TELEMETRY__ = telemetry;
+
+    const canvasObserver = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (!(node instanceof Element)) {
+            continue;
+          }
+          telemetry.canvasDomMounts += Number(node.matches("canvas"));
+          telemetry.canvasDomMounts += node.querySelectorAll("canvas").length;
+        }
+      }
+    });
+    canvasObserver.observe(document, { childList: true, subtree: true });
+
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+      configurable: true,
+      value(this: HTMLCanvasElement, contextId: string, ...args: unknown[]) {
+        if (contextId === "webgl" || contextId === "webgl2" || contextId === "experimental-webgl") {
+          telemetry.webglContextRequests += 1;
+        }
+        return Reflect.apply(originalGetContext, this, [contextId, ...args]);
+      },
+      writable: true
+    });
+
+    const drawMethods = ["drawArrays", "drawElements", "drawArraysInstanced", "drawElementsInstanced"];
+    const contextConstructors = [window.WebGLRenderingContext, window.WebGL2RenderingContext].filter(Boolean);
+    for (const ContextConstructor of contextConstructors) {
+      const prototype = ContextConstructor.prototype as unknown as Record<
+        string,
+        (...args: unknown[]) => unknown
+      >;
+      for (const methodName of drawMethods) {
+        const originalMethod = prototype[methodName];
+        if (typeof originalMethod !== "function") {
+          continue;
+        }
+        Object.defineProperty(prototype, methodName, {
+          configurable: true,
+          value(this: WebGLRenderingContext | WebGL2RenderingContext, ...args: unknown[]) {
+            telemetry.drawCalls += 1;
+            return Reflect.apply(originalMethod, this, args);
+          },
+          writable: true
+        });
+      }
+    }
+
+    window.requestAnimationFrame(() => {
+      telemetry.firstAnimationFrameCanvasCount = document.querySelectorAll("canvas").length;
+    });
+  });
+}
+
+async function readWebGLRuntime(page: Page) {
+  return page.evaluate(() => {
+    const telemetry = window.__GTG_WEBGL_TELEMETRY__;
+    if (!telemetry) {
+      throw new Error("WebGL runtime telemetry was not installed before navigation");
+    }
+    return { ...telemetry };
   });
 }
 
@@ -752,6 +887,14 @@ test("motion configuration is centralized and legacy 650svh HUD structures stay 
   ]
     .map((filePath) => fs.readFileSync(path.join(process.cwd(), filePath), "utf8"))
     .join("\n");
+  const heroCanvasSource = fs.readFileSync(
+    path.join(process.cwd(), "src", "components", "three", "hero-canvas.tsx"),
+    "utf8"
+  );
+  const heroExperienceSource = fs.readFileSync(
+    path.join(process.cwd(), "src", "components", "sections", "hero-experience.tsx"),
+    "utf8"
+  );
 
   expect(cssSource).not.toMatch(/650svh/i);
   expect(`${cssSource}\n${componentSource}`).not.toMatch(
@@ -762,6 +905,13 @@ test("motion configuration is centralized and legacy 650svh HUD structures stay 
   );
   expect(motionSource).toContain("export const EXPERIENCE_MOTION");
   expect(componentSource.match(/EXPERIENCE_MOTION/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+  expect(`${componentSource}\n${heroCanvasSource}`).not.toMatch(/ScrollTrigger/);
+  expect(heroCanvasSource).toMatch(/geometries\.forEach\(\(geometry\) => geometry\.dispose\(\)\)/);
+  expect(heroCanvasSource).toMatch(/materials\.forEach\(\(material\) => material\.dispose\(\)\)/);
+  expect(heroExperienceSource).toMatch(/observer\.disconnect\(\)/);
+  expect(heroExperienceSource).toMatch(/cancelAnimationFrame\(frame\)/);
+  expect(heroExperienceSource).toMatch(/removeEventListener\("scroll", requestUpdate\)/);
+  expect(heroExperienceSource).toMatch(/removeEventListener\("resize", handleResize\)/);
 
   const { identityEnd, activeEnd, pullbackEnd } = EXPERIENCE_MOTION.hero.boundaries;
   expect(0).toBeLessThan(identityEnd);
@@ -769,6 +919,123 @@ test("motion configuration is centralized and legacy 650svh HUD structures stay 
   expect(activeEnd).toBeLessThan(pullbackEnd);
   expect(pullbackEnd).toBeLessThan(1);
   expect(EXPERIENCE_MOTION.hero.travel.minPx).toBeLessThanOrEqual(EXPERIENCE_MOTION.hero.travel.maxPx);
+});
+
+test("mobile never initializes WebGL or requests the production Three/R3F chunks", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const chunkRequests = collectClientChunkRequests(page);
+  await trackWebGLRuntime(page);
+  await page.goto(appRoute());
+
+  await expect(page.getByTestId("hero")).toHaveAttribute("data-experience-mode", "mobile");
+  await expect(page.locator("canvas")).toHaveCount(0);
+  await page.waitForLoadState("networkidle");
+
+  const telemetry = await readWebGLRuntime(page);
+  expect(telemetry.firstAnimationFrameCanvasCount).toBe(0);
+  expect(telemetry.canvasDomMounts).toBe(0);
+  expect(telemetry.webglContextRequests).toBe(0);
+  expect(telemetry.drawCalls).toBe(0);
+  expect(requestedThreeClientChunks(chunkRequests)).toEqual([]);
+});
+
+test("desktop loads the split Three/R3F chunk and pauses WebGL draws outside Hero", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const chunkRequests = collectClientChunkRequests(page);
+  await trackWebGLRuntime(page);
+  await page.goto(appRoute());
+
+  const hero = page.getByTestId("hero");
+  await expect(hero).toHaveAttribute("data-experience-mode", "motion");
+  await expect(hero).toHaveAttribute("data-canvas-active", "true");
+  await expect(page.locator("#top canvas")).toHaveCount(1);
+  await expect.poll(() => readWebGLRuntime(page).then((telemetry) => telemetry.drawCalls)).toBeGreaterThan(0);
+
+  expect(requestedThreeClientChunks(chunkRequests).length).toBeGreaterThan(0);
+
+  const contextAttributes = await page.locator("#top canvas").evaluate((canvas) => {
+    const htmlCanvas = canvas as HTMLCanvasElement;
+    const context = htmlCanvas.getContext("webgl2") ?? htmlCanvas.getContext("webgl");
+    return context?.getContextAttributes() ?? null;
+  });
+  expect(contextAttributes).not.toBeNull();
+  expect(contextAttributes?.preserveDrawingBuffer).toBe(false);
+
+  const visibleDrawBaseline = (await readWebGLRuntime(page)).drawCalls;
+  await expect
+    .poll(() => readWebGLRuntime(page).then((telemetry) => telemetry.drawCalls))
+    .toBeGreaterThan(visibleDrawBaseline);
+
+  await scrollToSelector(page, "#proof");
+  await expect(hero).toHaveAttribute("data-canvas-active", "false");
+  await page.waitForTimeout(250);
+  const pausedDrawBaseline = (await readWebGLRuntime(page)).drawCalls;
+  await page.waitForTimeout(600);
+  expect((await readWebGLRuntime(page)).drawCalls - pausedDrawBaseline).toBeLessThanOrEqual(1);
+
+  await scrollToSelector(page, "#top");
+  await expect(hero).toHaveAttribute("data-canvas-active", "true");
+  const resumeDrawBaseline = (await readWebGLRuntime(page)).drawCalls;
+  await expect
+    .poll(() => readWebGLRuntime(page).then((telemetry) => telemetry.drawCalls))
+    .toBeGreaterThan(resumeDrawBaseline);
+});
+
+test("Hero Canvas caps its backing-store DPR at 1.25", async ({ browser }) => {
+  const context = await browser.newContext({
+    baseURL: applicationBaseURL,
+    deviceScaleFactor: 3,
+    reducedMotion: "no-preference",
+    viewport: { width: 1280, height: 720 }
+  });
+  const page = await context.newPage();
+
+  try {
+    await page.goto(appRoute());
+    await expect(page.getByTestId("hero")).toHaveAttribute("data-experience-mode", "motion");
+    const dprMetrics = await page.locator("#top canvas").evaluate((canvas) => {
+      const htmlCanvas = canvas as HTMLCanvasElement;
+      const bounds = htmlCanvas.getBoundingClientRect();
+      return {
+        backingDprX: htmlCanvas.width / bounds.width,
+        backingDprY: htmlCanvas.height / bounds.height,
+        devicePixelRatio: window.devicePixelRatio
+      };
+    });
+
+    expect(dprMetrics.devicePixelRatio).toBe(3);
+    expect(dprMetrics.backingDprX).toBeGreaterThan(0);
+    expect(dprMetrics.backingDprY).toBeGreaterThan(0);
+    expect(dprMetrics.backingDprX).toBeLessThanOrEqual(1.26);
+    expect(dprMetrics.backingDprY).toBeLessThanOrEqual(1.26);
+  } finally {
+    await context.close();
+  }
+});
+
+test("desktop forceFallback performs no Canvas, WebGL, or Three/R3F work", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const chunkRequests = collectClientChunkRequests(page);
+  await trackCanvasMounts(page);
+  await trackWebGLRuntime(page);
+  await page.goto(appRoute("/?forceFallback=1"));
+
+  const hero = page.getByTestId("hero");
+  await expect(hero).toHaveAttribute("data-experience-mode", "fallback");
+  await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
+  await waitForMotionReady(page);
+  await expect(hero).toHaveAttribute("data-hero-progress", "1.000");
+  await expect(hero).toHaveAttribute("data-hero-state", "core-settle");
+  await expect(page.locator("canvas")).toHaveCount(0);
+  expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBe(0);
+  await page.waitForLoadState("networkidle");
+
+  const telemetry = await readWebGLRuntime(page);
+  expect(telemetry.firstAnimationFrameCanvasCount).toBe(0);
+  expect(telemetry.canvasDomMounts).toBe(0);
+  expect(telemetry.webglContextRequests).toBe(0);
+  expect(telemetry.drawCalls).toBe(0);
+  expect(requestedThreeClientChunks(chunkRequests)).toEqual([]);
 });
 
 test("mouse wheel and trackpad-like input preserve Hero state order and reverse cleanly", async ({ page }) => {
@@ -1092,13 +1359,22 @@ test("mobile keeps proof context and all Solutions in normal document flow", asy
 test("reduced motion never mounts Canvas and keeps all semantic content", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.emulateMedia({ reducedMotion: "reduce" });
+  const chunkRequests = collectClientChunkRequests(page);
   await trackCanvasMounts(page);
+  await trackWebGLRuntime(page);
   const errors = await attachConsoleGuards(page);
   const pathGuards = attachDeploymentPathGuards(page);
   await page.goto(appRoute());
 
   await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
   await expectStaticExperience(page);
+  await page.waitForLoadState("networkidle");
+  const telemetry = await readWebGLRuntime(page);
+  expect(telemetry.firstAnimationFrameCanvasCount).toBe(0);
+  expect(telemetry.canvasDomMounts).toBe(0);
+  expect(telemetry.webglContextRequests).toBe(0);
+  expect(telemetry.drawCalls).toBe(0);
+  expect(requestedThreeClientChunks(chunkRequests)).toEqual([]);
   await expectCoreSemanticContent(page);
   await captureIa(page, "10-reduced-hero");
   await captureExperience(page, "reduced-1280x720-hero");
@@ -1315,5 +1591,6 @@ declare global {
   interface Window {
     __GTG_CANVAS_MOUNTS__?: number;
     __GTG_REVEAL_TRANSITIONS__?: Record<string, ProductRevealState[]>;
+    __GTG_WEBGL_TELEMETRY__?: WebGLRuntimeTelemetry;
   }
 }
