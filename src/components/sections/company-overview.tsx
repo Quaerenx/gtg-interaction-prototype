@@ -1,4 +1,5 @@
 import { capabilityMapContent, companyContent } from "@/content/site";
+import { withBasePath } from "@/lib/paths";
 
 export function CompanyOverview() {
   return (
@@ -34,8 +35,8 @@ export function CompanyOverview() {
             <p>{capabilityMapContent.description}</p>
           </div>
           <picture className="capability-map-visual" aria-hidden="true">
-            <source media="(max-width: 767px)" srcSet={capabilityMapContent.mobileVisual} />
-            <img src={capabilityMapContent.desktopVisual} alt="" loading="lazy" />
+            <source media="(max-width: 767px)" srcSet={withBasePath(capabilityMapContent.mobileVisual)} />
+            <img src={withBasePath(capabilityMapContent.desktopVisual)} alt="" loading="lazy" />
           </picture>
           <ul className="capability-map-list" aria-label="GTG capability map nodes">
             {capabilityMapContent.nodes.map((node) => (

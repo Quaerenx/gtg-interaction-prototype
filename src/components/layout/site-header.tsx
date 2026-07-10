@@ -1,6 +1,7 @@
 "use client";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { brandContent, navigationItems } from "@/content/site";
+import { withBasePath } from "@/lib/paths";
 
 const focusableSelector =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
@@ -121,15 +122,15 @@ export function SiteHeader() {
       </a>
       <header className="site-header" data-theme={headerTheme} aria-label="Site header">
         <nav className="header-cluster header-cluster-left" aria-label="Primary">
-          <a className="header-link" href="/#company">
+          <a className="header-link" href={withBasePath("/#company")}>
             ABOUT
           </a>
-          <a className="header-link" href="/#contact">
+          <a className="header-link" href={withBasePath("/#contact")}>
             CONTACT
           </a>
         </nav>
 
-        <a className="header-brand" href="/#top" aria-label={`${brandContent.englishName} home`}>
+        <a className="header-brand" href={withBasePath("/#top")} aria-label={`${brandContent.englishName} home`}>
           {brandContent.englishName}
         </a>
 
@@ -170,11 +171,11 @@ export function SiteHeader() {
             </button>
           </div>
           <nav className="menu-nav" aria-label="Menu sections">
-            <a href="/#top" onClick={closeMenu}>
+            <a href={withBasePath("/#top")} onClick={closeMenu}>
               Home
             </a>
             {navigationItems.map((item) => (
-              <a href={item.href} key={item.href} onClick={closeMenu}>
+              <a href={withBasePath(item.href)} key={item.href} onClick={closeMenu}>
                 {item.label}
               </a>
             ))}

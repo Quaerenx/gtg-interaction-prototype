@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   customerProofContent,
+  firstSolution,
   heroContent,
   heroCustomers,
   heroRingCustomers,
@@ -15,6 +16,7 @@ import {
 } from "@/content/site";
 import { useMediaQuery, usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
 import { HeroCanvas } from "@/components/three/hero-canvas";
+import { withBasePath } from "@/lib/paths";
 import { supportsWebGL } from "@/lib/webgl";
 import { HeroFallback } from "./hero-fallback";
 
@@ -252,7 +254,15 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
     >
       <div ref={stageRef} className="hero-stage" data-testid="hero-stage">
         <div className="hero-atmosphere" aria-hidden="true" />
-        <div className="hero-solution-preview" aria-hidden="true">
+        <div
+          className="hero-solution-preview"
+          aria-hidden="true"
+          style={
+            {
+              "--hero-solution-preview-image": `url("${withBasePath(firstSolution.visual)}")`
+            } as CSSProperties
+          }
+        >
           <div className="hero-solution-topology">
             <span className="hero-solution-route hero-solution-route-a" />
             <span className="hero-solution-route hero-solution-route-b" />
@@ -282,7 +292,7 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
                   >
                     {item.logoSrc ? (
                       <>
-                        <Image src={item.logoSrc} alt="" width={220} height={80} />
+                        <Image src={withBasePath(item.logoSrc)} alt="" width={220} height={80} />
                         {item.id === "vertica" ? <span className="hero-solution-logo-wordmark">VERTICA</span> : null}
                       </>
                     ) : (

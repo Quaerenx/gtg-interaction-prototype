@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { solutionSlides, solutionStackItems } from "@/content/site";
 import { useMediaQuery, usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
+import { withBasePath } from "@/lib/paths";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -158,7 +159,7 @@ export function SolutionPreview() {
               >
                 {item.logoSrc ? (
                   <>
-                    <Image src={item.logoSrc} alt="" width={220} height={80} />
+                    <Image src={withBasePath(item.logoSrc)} alt="" width={220} height={80} />
                     {item.id === "vertica" ? <span className="solution-stack-logo-wordmark">VERTICA</span> : null}
                   </>
                 ) : (
@@ -190,7 +191,7 @@ export function SolutionPreview() {
             >
               <div className="solution-bg" aria-hidden="true">
                 <Image
-                  src={slide.visual}
+                  src={withBasePath(slide.visual)}
                   alt=""
                   fill
                   priority={index === 0}
@@ -286,7 +287,7 @@ export function SolutionPreview() {
                     <div className="solution-spotlight-logo-frame" data-spotlight-id={slide.productSpotlight.id}>
                       {slide.productSpotlight.logoSrc ? (
                         <Image
-                          src={slide.productSpotlight.logoSrc}
+                          src={withBasePath(slide.productSpotlight.logoSrc)}
                           alt=""
                           width={420}
                           height={140}

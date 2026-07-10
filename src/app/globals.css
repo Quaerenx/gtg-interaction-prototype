@@ -539,7 +539,7 @@ svg {
     radial-gradient(circle at 72% 42%, rgba(227, 6, 19, 0.16), transparent 28%),
     linear-gradient(90deg, rgba(0, 0, 0, 0.76), rgba(0, 0, 0, 0.38) 48%, rgba(0, 0, 0, 0.64)),
     linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.54)),
-    url("/generated/solution-data-analytics.svg") center / cover no-repeat;
+    var(--hero-solution-preview-image) center / cover no-repeat;
   opacity: var(--hero-solution-preview-opacity);
   pointer-events: none;
   isolation: isolate;
