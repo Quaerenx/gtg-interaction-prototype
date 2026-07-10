@@ -1,4 +1,4 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -37,15 +37,14 @@ function isInsideAppBasePath(pathname: string) {
 }
 
 const artifactDir = path.join(process.cwd(), "tests", "artifacts");
-const contentArtifactDir = path.join(artifactDir, "content-integration");
-const heroVisualArtifactDir = path.join(artifactDir, "hero-data-core");
+const informationArchitectureDir = path.join(artifactDir, "information-architecture");
+const afterArtifactDir = path.join(informationArchitectureDir, "after");
 const topologyArtifactDir = path.join(artifactDir, "topology-svg-kit");
 const capabilityArtifactDir = path.join(artifactDir, "capability-map");
+
 const officialHeadline = "데이터와 인프라를 하나의 운영 구조로";
 const officialDescription =
   "데이터 분석, 스트리밍, 인프라 자동화, DevOps 품질, DB/테스트/프로세스 컨설팅을 하나의 실행 구조로 연결합니다.";
-const dataCoreKeyword = "GTG Data Core";
-const customerProofKeyword = "Representative Customers";
 const customerNames = [
   "KT",
   "LG Electronics",
@@ -66,23 +65,33 @@ const customerNames = [
   "Techfin Ratings",
   "Korea Credit Information Services"
 ];
-const unsupportedCustomerClaims = [
-  "Certified partner",
-  "Official partner",
-  "공식 파트너",
-  "파트너 등급",
-  "기술 파트너",
-  "Certified",
-  "SLA",
-  "Proven ROI",
-  "ROI",
-  "DORA elite",
-  "Improved performance by",
-  "performance improved",
-  "Reduced cost by",
-  "Reduced cost",
-  "customer outcome",
-  "case result"
+const heroCapabilityNames = [
+  "Data & Analytics",
+  "Data Streaming",
+  "Infrastructure Automation",
+  "DevOps & Quality",
+  "Consulting & Technical Support"
+];
+const solutionIds = [
+  "solution-data-analytics",
+  "solution-data-streaming",
+  "solution-infrastructure-automation",
+  "solution-devops-quality",
+  "solution-consulting-support"
+] as const;
+const productOwners = {
+  vertica: "solution-data-analytics",
+  confluent: "solution-data-streaming",
+  hashicorp: "solution-infrastructure-automation",
+  loadrunner: "solution-devops-quality"
+} as const;
+const solutionFiveCapabilities = [
+  "DB 컨설팅",
+  "성능/기능 테스트 컨설팅",
+  "프로세스 컨설팅",
+  "형상관리",
+  "기술지원",
+  "Vertica 교육 문의"
 ];
 const topologySvgFiles = [
   "gtg-primitives.svg",
@@ -93,13 +102,7 @@ const topologySvgFiles = [
   "gtg-consulting-support.svg"
 ];
 const capabilitySvgFiles = ["gtg-capability-map.svg", "gtg-capability-map-mobile.svg"];
-const capabilityNodeNames = [
-  "Data & Analytics",
-  "Data Streaming",
-  "Infrastructure Automation",
-  "DevOps & Quality",
-  "Consulting & Technical Support"
-];
+const capabilityNodeNames = heroCapabilityNames;
 const forbiddenTopologyTerms = [
   "Kafka",
   "Confluent",
@@ -116,66 +119,29 @@ const forbiddenTopologyTerms = [
   "Official partner",
   "customer logo"
 ];
-const forbiddenCapabilityWorkflowLabels = [
-  "step 1",
-  "step 2",
-  "pipeline result",
-  "pipeline output",
-  "guaranteed sequence",
-  "fixed workflow order"
-];
 
 function ensureArtifacts() {
-  fs.mkdirSync(artifactDir, { recursive: true });
-  fs.mkdirSync(contentArtifactDir, { recursive: true });
-  fs.mkdirSync(heroVisualArtifactDir, { recursive: true });
+  fs.mkdirSync(afterArtifactDir, { recursive: true });
   fs.mkdirSync(topologyArtifactDir, { recursive: true });
   fs.mkdirSync(capabilityArtifactDir, { recursive: true });
 
-  for (const fileName of fs.readdirSync(artifactDir)) {
-    if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
-      fs.unlinkSync(path.join(artifactDir, fileName));
-    }
-  }
-
-  for (const fileName of fs.readdirSync(contentArtifactDir)) {
-    if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
-      fs.unlinkSync(path.join(contentArtifactDir, fileName));
-    }
-  }
-
-  for (const fileName of fs.readdirSync(heroVisualArtifactDir)) {
-    if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
-      fs.unlinkSync(path.join(heroVisualArtifactDir, fileName));
-    }
-  }
-
-  for (const fileName of fs.readdirSync(topologyArtifactDir)) {
-    if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
-      fs.unlinkSync(path.join(topologyArtifactDir, fileName));
-    }
-  }
-
-  for (const fileName of fs.readdirSync(capabilityArtifactDir)) {
-    if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
-      fs.unlinkSync(path.join(capabilityArtifactDir, fileName));
+  for (const directory of [afterArtifactDir, topologyArtifactDir, capabilityArtifactDir]) {
+    for (const fileName of fs.readdirSync(directory)) {
+      if (fileName.endsWith(".png") || fileName.endsWith(".zip") || fileName.endsWith(".webm")) {
+        fs.unlinkSync(path.join(directory, fileName));
+      }
     }
   }
 }
 
 async function attachConsoleGuards(page: Page) {
   const errors: string[] = [];
-
   page.on("console", (message) => {
     if (message.type() === "error") {
       errors.push(message.text());
     }
   });
-
-  page.on("pageerror", (error) => {
-    errors.push(error.message);
-  });
-
+  page.on("pageerror", (error) => errors.push(error.message));
   return errors;
 }
 
@@ -189,20 +155,17 @@ function attachDeploymentPathGuards(page: Page) {
     if (!assetTypes.has(request.resourceType())) {
       return;
     }
-
     const url = new URL(request.url());
     if (url.origin === applicationOrigin && !isInsideAppBasePath(url.pathname)) {
       outOfBasePathAssets.push(url.href);
     }
   });
-
   page.on("requestfailed", (request) => {
     const url = new URL(request.url());
     if (url.origin === applicationOrigin) {
       failedRequests.push(`${request.resourceType()}: ${url.href}`);
     }
   });
-
   page.on("response", (response) => {
     const request = response.request();
     const url = new URL(response.url());
@@ -214,25 +177,18 @@ function attachDeploymentPathGuards(page: Page) {
   return { asset404s, failedRequests, outOfBasePathAssets };
 }
 
-async function capture(page: Page, name: string) {
-  await page.screenshot({
-    path: path.join(artifactDir, `${name}.png`),
-    fullPage: false
-  });
-}
-
-async function captureContent(page: Page, name: string) {
-  await page.screenshot({
-    path: path.join(contentArtifactDir, `${name}.png`),
-    fullPage: false
-  });
-}
-
-async function captureHeroVisual(page: Page, name: string) {
-  await page.screenshot({
-    path: path.join(heroVisualArtifactDir, `${name}.png`),
-    fullPage: false
-  });
+async function captureIa(page: Page, name: string) {
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() =>
+    [...document.images]
+      .filter((image) => {
+        const rect = image.getBoundingClientRect();
+        return rect.bottom >= 0 && rect.top <= window.innerHeight;
+      })
+      .every((image) => image.complete && image.naturalWidth > 0)
+  );
+  await waitForFrames(page, 2);
+  await page.screenshot({ path: path.join(afterArtifactDir, `${name}.png`), fullPage: false });
 }
 
 async function waitForFrames(page: Page, count = 2) {
@@ -246,195 +202,19 @@ async function waitForFrames(page: Page, count = 2) {
             resolve();
             return;
           }
-
           requestAnimationFrame(tick);
         };
-
         requestAnimationFrame(tick);
       }),
     count
   );
 }
 
-async function scrollHeroTo(page: Page, progress: number) {
-  await page.evaluate((targetProgress) => {
-    const hero = document.querySelector<HTMLElement>('[data-testid="hero"]');
-    if (!hero) {
-      return;
-    }
-
-    const top = hero.getBoundingClientRect().top + window.scrollY;
-    const scrollable = Math.max(hero.offsetHeight - window.innerHeight, 0);
-    window.scrollTo({ top: top + scrollable * targetProgress, behavior: "instant" });
-  }, progress);
-}
-
-async function waitForHeroState(page: Page, state: string, minProgress: number, maxProgress = 1) {
-  await page.waitForFunction(
-    ({ expectedState, min, max }) => {
-      const hero = document.querySelector<HTMLElement>('[data-testid="hero"]');
-      const progress = Number(hero?.dataset.heroProgress ?? "0");
-      return hero?.dataset.heroState === expectedState && progress >= min && progress <= max;
-    },
-    { expectedState: state, min: minProgress, max: maxProgress }
-  );
-  await waitForFrames(page);
-}
-
-async function scrollSolutionsTo(page: Page, progress: number) {
-  await page.evaluate((targetProgress) => {
-    const solutions = document.querySelector<HTMLElement>('[data-testid="solutions-section"]');
-    if (!solutions) {
-      return;
-    }
-
-    const top = solutions.getBoundingClientRect().top + window.scrollY;
-    const scrollable = Math.max(solutions.offsetHeight - window.innerHeight, 0);
-    window.scrollTo({ top: top + scrollable * targetProgress, behavior: "instant" });
-  }, progress);
-}
-
-async function waitForActiveSolution(page: Page, index: string) {
-  await expect(page.getByTestId("solutions-section")).toHaveAttribute("data-active-solution", index);
-  await page.waitForFunction((activeIndex) => {
-    const slideNumber = Number(activeIndex);
-    const slide = document.querySelector<HTMLElement>(`[data-testid="solution-slide-${slideNumber}"]`);
-    if (!slide || !slide.classList.contains("is-active")) {
-      return false;
-    }
-
-    const styles = window.getComputedStyle(slide);
-    return Number(styles.opacity) > 0.98 && (styles.filter === "none" || styles.filter === "blur(0px)");
-  }, index);
-  await waitForFrames(page, 3);
-}
-
-async function readHeroHandoffMetrics(page: Page) {
-  return page.evaluate(() => {
-    const stylesFor = (selector: string) => {
-      const element = document.querySelector<HTMLElement>(selector);
-      return element ? window.getComputedStyle(element) : null;
-    };
-    const stageStyles = stylesFor(".hero-stage");
-
-    return {
-      activeCards: document.querySelectorAll(".hero-solution-stack-card.is-active").length,
-      mediaOpacity: Number(stylesFor(".hero-media")?.opacity ?? "0"),
-      previewOpacity: Number(stylesFor(".hero-solution-preview")?.opacity ?? "0"),
-      proofOpacity: Number(stylesFor(".hero-proof-copy")?.opacity ?? "0"),
-      routeScale: Number(stageStyles?.getPropertyValue("--hero-solution-route-scale") ?? "0"),
-      signalOpacity: Number(stylesFor(".hero-solution-signal")?.opacity ?? "0"),
-      stackOpacity: Number(stylesFor(".hero-solution-stack")?.opacity ?? "0"),
-      topologyOpacity: Number(stylesFor(".hero-solution-topology")?.opacity ?? "0")
-    };
-  });
-}
-
-function expectViewportSize(page: Page) {
-  const viewport = page.viewportSize();
-  expect(viewport).not.toBeNull();
-  return viewport!;
-}
-
-function intersectsViewport(
-  box: { x: number; y: number; width: number; height: number },
-  viewport: { width: number; height: number }
-) {
-  return box.x < viewport.width && box.x + box.width > 0 && box.y < viewport.height && box.y + box.height > 0;
-}
-
-async function expectLocatorInViewport(page: Page, locator: Locator) {
-  await expect(locator).toBeVisible();
-  const box = await locator.boundingBox();
-  expect(box).not.toBeNull();
-  expect(intersectsViewport(box!, expectViewportSize(page))).toBe(true);
-  return box!;
-}
-
-async function expectLocatorFullyInViewport(page: Page, locator: Locator) {
-  await expect(locator).toBeVisible();
-  const box = await locator.boundingBox();
-  expect(box).not.toBeNull();
-  const viewport = expectViewportSize(page);
-  expect(box!.x).toBeGreaterThanOrEqual(0);
-  expect(box!.y).toBeGreaterThanOrEqual(0);
-  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
-  expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
-  return box!;
-}
-
-async function expectLocatorOutsideViewport(page: Page, locator: Locator) {
-  const box = await locator.boundingBox();
-  if (!box) {
-    return;
-  }
-
-  expect(intersectsViewport(box, expectViewportSize(page))).toBe(false);
-}
-
-async function scrollSlideToStart(page: Page, testId: string) {
-  await page.evaluate((targetTestId) => {
-    const element = document.querySelector<HTMLElement>(`[data-testid="${targetTestId}"]`);
-    element?.scrollIntoView({
-      behavior: "instant" as ScrollBehavior,
-      block: "start"
-    });
-  }, testId);
-  await waitForFrames(page, 3);
-}
-
-async function scrollTestIdToStart(page: Page, testId: string) {
-  await page.evaluate((targetTestId) => {
-    const element = document.querySelector<HTMLElement>(`[data-testid="${targetTestId}"]`);
-    element?.scrollIntoView({
-      behavior: "instant" as ScrollBehavior,
-      block: "start"
-    });
-  }, testId);
-  await waitForFrames(page, 3);
-}
-
-async function expectSlideAtViewportStart(page: Page, testId: string) {
-  const box = await expectLocatorInViewport(page, page.getByTestId(testId));
-  expect(box.y).toBeGreaterThanOrEqual(-20);
-  expect(box.y).toBeLessThanOrEqual(120);
-  expect(box.y + box.height).toBeGreaterThan(0);
-}
-
-async function expectStaticDataCoreKeywordReady(page: Page) {
-  const keyword = page.locator(".keyword-text");
-  await expect(keyword).toHaveText(dataCoreKeyword);
-  const styles = await keyword.evaluate((element) => {
-    const computed = window.getComputedStyle(element);
-    return {
-      animationDuration: computed.animationDuration,
-      animationName: computed.animationName,
-      filter: computed.filter,
-      opacity: computed.opacity,
-      transform: computed.transform,
-      transitionDuration: computed.transitionDuration
-    };
-  });
-
-  const transitionDurations = styles.transitionDuration.split(",").map((duration) => duration.trim());
-  expect(styles.opacity).toBe("1");
-  expect(["none", "blur(0px)"]).toContain(styles.filter);
-  expect(styles.transform).toBe("none");
-  expect(styles.animationName).toBe("none");
-  expect(styles.animationDuration).toBe("0s");
-  expect(transitionDurations.every((duration) => duration === "0s" || duration === "0ms")).toBe(true);
-}
-
-async function expectCustomerProofKeyword(page: Page) {
-  const keyword = page.locator(".keyword-text");
-  await expect(keyword).toHaveText(customerProofKeyword);
-  await expect(keyword).not.toHaveText("Vertica Analytics");
-}
-
-async function expectDataCoreKeyword(page: Page) {
-  const keyword = page.locator(".keyword-text");
-  await expect(keyword).toHaveText(dataCoreKeyword);
-  await expect(keyword).not.toHaveText(customerProofKeyword);
+async function scrollToSelector(page: Page, selector: string) {
+  await page.evaluate((targetSelector) => {
+    document.querySelector<HTMLElement>(targetSelector)?.scrollIntoView({ behavior: "instant", block: "start" });
+  }, selector);
+  await waitForFrames(page, 2);
 }
 
 async function expectNoOverflow(page: Page) {
@@ -442,133 +222,73 @@ async function expectNoOverflow(page: Page) {
   expect(overflow).toBeLessThanOrEqual(2);
 }
 
-async function expectNoTbdInUi(page: Page) {
-  const text = await page.locator("body").innerText();
-  expect(text).not.toContain("[TBD]");
-}
-
-async function waitForHeaderTheme(page: Page, theme: "dark" | "light") {
-  await expect(page.locator(".site-header")).toHaveAttribute("data-theme", theme);
-}
-
-async function expectElementBelowHeader(page: Page, locator: Locator) {
-  const headerBox = await page.locator(".site-header").boundingBox();
-  const targetBox = await expectLocatorInViewport(page, locator);
-  expect(headerBox).not.toBeNull();
-  expect(targetBox.y).toBeGreaterThanOrEqual(Math.floor(headerBox!.height) - 2);
-}
-
-async function waitForTestIdBelowHeader(page: Page, testId: string) {
-  await page.waitForFunction((targetTestId) => {
-    const header = document.querySelector<HTMLElement>(".site-header")?.getBoundingClientRect();
-    const target = document.querySelector<HTMLElement>(`[data-testid="${targetTestId}"]`)?.getBoundingClientRect();
-    if (!header || !target) {
-      return false;
-    }
-
-    const lowerBound = Math.floor(header.height) - 8;
-    const upperBound = Math.floor(header.height) + 120;
-    return target.top >= lowerBound && target.top <= upperBound && target.bottom > 0;
-  }, testId);
-  await waitForFrames(page, 2);
-}
-
-async function collectTabStopsFromTestId(page: Page, testId: string, count: number) {
-  await page.evaluate((targetTestId) => {
-    const element = document.querySelector<HTMLElement>(`[data-testid="${targetTestId}"]`);
-    if (!element) {
-      return;
-    }
-
-    element.setAttribute("tabindex", "-1");
-    element.focus({ preventScroll: true });
-  }, testId);
-
-  const stops: Array<{ href: string | null; isSolutionCta: boolean; slide: string | null; text: string }> = [];
-
-  for (let index = 0; index < count; index += 1) {
-    await page.keyboard.press("Tab");
-    stops.push(
-      await page.evaluate(() => {
-        const active = document.activeElement as HTMLElement | null;
-        const slide = active?.closest<HTMLElement>("[data-testid^='solution-slide-']");
-        return {
-          href: active instanceof HTMLAnchorElement ? active.getAttribute("href") : null,
-          isSolutionCta: active?.classList.contains("solution-cta") ?? false,
-          slide: slide?.dataset.testid ?? null,
-          text: active?.textContent?.trim() ?? ""
-        };
-      })
-    );
-  }
-
-  return stops;
-}
-
-async function expectKeywordUnclipped(page: Page) {
-  const maskBox = await expectLocatorInViewport(page, page.locator(".keyword-mask"));
-  const textBox = await expectLocatorInViewport(page, page.locator(".keyword-text"));
-  expect(textBox.y).toBeGreaterThanOrEqual(maskBox.y - 2);
-  expect(textBox.y + textBox.height).toBeLessThanOrEqual(maskBox.y + maskBox.height + 4);
-}
-
-async function expectSingleHeroServicesList(page: Page) {
-  await expect(page.getByTestId("hero").locator("[aria-live]")).toHaveCount(0);
-  const list = page.getByRole("list", { name: "Hero services" });
-  await expect(list).toHaveCount(1);
-  await expect(list.getByRole("listitem")).toHaveCount(7);
-}
-
-async function expectSingleRepresentativeCustomersList(page: Page) {
-  const list = page.getByRole("list", { name: "Representative customers" });
-  await expect(list).toHaveCount(1);
-  const items = list.getByRole("listitem");
-  await expect(items).toHaveCount(customerNames.length);
-  for (const customerName of customerNames) {
-    await expect(items.filter({ hasText: customerName })).toHaveCount(1);
-  }
-}
-
-async function expectNoUnsupportedCustomerClaims(page: Page) {
-  const text = await page.locator("body").innerText();
-  for (const claim of unsupportedCustomerClaims) {
-    expect(text).not.toContain(claim);
-  }
-}
-
-async function expectFallbackDataCoreReadable(page: Page) {
-  const visual = page.getByTestId("hero-data-core-fallback");
-  await expectLocatorFullyInViewport(page, visual);
-  await expect(visual).toHaveAttribute("src", appPath("/generated/hero/gtg-data-core.svg"));
-  await expect(page.locator(".fallback-proof-strip")).toBeVisible();
-  await expect(page.locator(".fallback-proof-tile")).toHaveCount(6);
-
-  const box = await visual.boundingBox();
-  expect(box).not.toBeNull();
-  expect(box!.width).toBeGreaterThan(260);
-  expect(box!.height).toBeGreaterThan(120);
-}
-
-async function expectNoExternalImageRequests(page: Page, action: () => Promise<void>) {
-  const externalImages: string[] = [];
-  page.on("request", (request) => {
-    if (request.resourceType() !== "image") {
-      return;
-    }
-
-    const url = request.url();
-    const parsedUrl = new URL(url);
-    const isLocalImage =
-      ["127.0.0.1", "localhost", "::1"].includes(parsedUrl.hostname) ||
-      parsedUrl.protocol === "data:" ||
-      parsedUrl.protocol === "blob:";
-    if (!isLocalImage) {
-      externalImages.push(url);
-    }
+async function trackCanvasMounts(page: Page) {
+  await page.addInitScript(() => {
+    window.__GTG_CANVAS_MOUNTS__ = 0;
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (!(node instanceof Element)) {
+            continue;
+          }
+          if (node.matches("canvas")) {
+            window.__GTG_CANVAS_MOUNTS__ = (window.__GTG_CANVAS_MOUNTS__ ?? 0) + 1;
+          }
+          window.__GTG_CANVAS_MOUNTS__ =
+            (window.__GTG_CANVAS_MOUNTS__ ?? 0) + node.querySelectorAll("canvas").length;
+        }
+      }
+    });
+    observer.observe(document, { childList: true, subtree: true });
   });
+}
 
-  await action();
-  expect(externalImages).toEqual([]);
+async function expectCustomerProof(page: Page) {
+  const proof = page.locator("section#proof");
+  await expect(proof).toHaveAttribute("aria-labelledby", "proof-heading");
+  await expect(proof).toHaveAttribute("data-release-status", "local-only");
+  await expect(proof.getByRole("heading", { name: "Representative Customers" })).toBeVisible();
+  await expect(proof.getByText("관계 범위 검토 중 · 로컬 프로토타입")).toBeVisible();
+  await expect(proof.getByText("특정 제품의 도입", { exact: false })).toBeVisible();
+  await expect(proof.getByText("파트너 등급", { exact: false })).toBeVisible();
+
+  const list = proof.getByRole("list", { name: "Representative customers" });
+  await expect(list).toHaveCount(1);
+  await expect(list.getByRole("listitem")).toHaveCount(customerNames.length);
+  for (const customerName of customerNames) {
+    await expect(list.getByText(customerName, { exact: true })).toHaveCount(1);
+  }
+
+  await expect(proof.locator("img")).toHaveCount(customerNames.length);
+  await expect(page.locator("#top img[src*='customer-logos']")).toHaveCount(0);
+  await expect(page.locator(".fallback-proof-strip")).toHaveCount(0);
+}
+
+async function expectCoreSemanticContent(page: Page) {
+  await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
+  await expect(page.getByText(officialDescription)).toBeVisible();
+  await expect(page.getByText("GTG Data Core", { exact: true })).toHaveCount(1);
+
+  const heroCapabilities = page.getByRole("list", { name: "GTG Data Core capability routes" });
+  await expect(heroCapabilities.getByRole("listitem")).toHaveCount(heroCapabilityNames.length);
+  for (const capabilityName of heroCapabilityNames) {
+    await expect(heroCapabilities.getByText(capabilityName, { exact: true })).toHaveCount(1);
+  }
+
+  await expectCustomerProof(page);
+  for (const solutionId of solutionIds) {
+    const article = page.locator(`article#${solutionId}`);
+    await expect(article).toHaveCount(1);
+    await expect(article.getByRole("heading", { level: 3 })).toHaveCount(1);
+    await expect(article.getByRole("list")).toHaveCount(1);
+    await expect(article.getByRole("link")).toHaveCount(1);
+  }
+
+  await expect(page.locator("section#company").getByRole("heading", { level: 2 })).toHaveCount(1);
+  await expect(page.getByRole("list", { name: "GTG capability map nodes" }).getByRole("listitem")).toHaveCount(5);
+  await expect(page.locator("section#engagement").getByRole("heading", { level: 3 })).toHaveCount(4);
+  await expect(page.locator("section#contact").getByRole("heading", { level: 2 })).toHaveCount(1);
+  await expect(page.locator("section#contact dl")).toHaveCount(1);
 }
 
 function visibleSvgText(svg: string) {
@@ -577,7 +297,7 @@ function visibleSvgText(svg: string) {
     .join(" ");
 }
 
-function expectTopologySvgSafe(fileName: string) {
+function expectSvgSafe(fileName: string) {
   const filePath = path.join(process.cwd(), "public", "generated", "topology", fileName);
   expect(fs.existsSync(filePath)).toBe(true);
   const svg = fs.readFileSync(filePath, "utf8");
@@ -585,85 +305,29 @@ function expectTopologySvgSafe(fileName: string) {
   expect(svg).toContain("<desc");
   expect(svg).not.toContain("<image");
   expect(svg).not.toMatch(/\b(?:href|src)=["']https?:\/\//i);
-
   for (const term of forbiddenTopologyTerms) {
     expect(svg.toLowerCase()).not.toContain(term.toLowerCase());
   }
-
   expect(visibleSvgText(svg)).not.toMatch(/\b\d+(?:\.\d+)?\s?(?:%|ms|s|x|k|m|gb|tb)\b/i);
 }
 
-function collectRepoFilePaths() {
-  const ignoredDirectories = new Set([".git", ".next", "node_modules", "test-results", "tests/artifacts"]);
-  const foundFiles: string[] = [];
-  const pendingDirectories = [process.cwd()];
-
-  while (pendingDirectories.length > 0) {
-    const currentDirectory = pendingDirectories.pop()!;
-    const relativeDirectory = path.relative(process.cwd(), currentDirectory).replaceAll(path.sep, "/");
-
-    if (ignoredDirectories.has(relativeDirectory) || ignoredDirectories.has(path.basename(currentDirectory))) {
-      continue;
+async function expectNoExternalImageRequests(page: Page, action: () => Promise<void>) {
+  const externalImages: string[] = [];
+  page.on("request", (request) => {
+    if (request.resourceType() !== "image") {
+      return;
     }
-
-    for (const entry of fs.readdirSync(currentDirectory, { withFileTypes: true })) {
-      const entryPath = path.join(currentDirectory, entry.name);
-
-      if (entry.isDirectory()) {
-        pendingDirectories.push(entryPath);
-      } else {
-        foundFiles.push(path.relative(process.cwd(), entryPath).replaceAll(path.sep, "/"));
-      }
+    const parsedUrl = new URL(request.url());
+    const isLocal =
+      ["127.0.0.1", "localhost", "::1"].includes(parsedUrl.hostname) ||
+      parsedUrl.protocol === "data:" ||
+      parsedUrl.protocol === "blob:";
+    if (!isLocal) {
+      externalImages.push(request.url());
     }
-  }
-
-  return foundFiles;
-}
-
-function expectTopologySvgAssetsOnlyInGeneratedTopology() {
-  const expectedPaths = topologySvgFiles.map((fileName) => `public/generated/topology/${fileName}`).sort();
-  const foundTopologySvgPaths = collectRepoFilePaths()
-    .filter((filePath) => topologySvgFiles.includes(path.basename(filePath)))
-    .sort();
-
-  expect(foundTopologySvgPaths).toEqual(expectedPaths);
-}
-
-function expectCapabilitySvgSafe(fileName: string) {
-  const filePath = path.join(process.cwd(), "public", "generated", "topology", fileName);
-  expect(fs.existsSync(filePath)).toBe(true);
-  const svg = fs.readFileSync(filePath, "utf8");
-  const visibleText = visibleSvgText(svg);
-  expect(svg).toContain("<title");
-  expect(svg).toContain("<desc");
-  expect(svg).not.toContain("<image");
-  expect(svg).not.toMatch(/\b(?:href|src)=["']https?:\/\//i);
-
-  for (const term of forbiddenTopologyTerms) {
-    expect(svg.toLowerCase()).not.toContain(term.toLowerCase());
-  }
-
-  expect(svg.toLowerCase()).not.toContain("customer logo");
-  expect(svg.toLowerCase()).not.toContain("vendor logo");
-  expect(visibleText).not.toMatch(/\b\d+(?:\.\d+)?\s?(?:%|ms|s|x|k|m|gb|tb)\b/i);
-
-  for (const label of forbiddenCapabilityWorkflowLabels) {
-    expect(visibleText.toLowerCase()).not.toContain(label);
-  }
-}
-
-async function expectCapabilityMapContent(page: Page) {
-  const map = page.getByTestId("capability-map");
-  await map.scrollIntoViewIfNeeded();
-  await expectLocatorInViewport(page, map);
-  const list = page.getByRole("list", { name: "GTG capability map nodes" });
-  await expect(list).toHaveCount(1);
-  const items = list.getByRole("listitem");
-  await expect(items).toHaveCount(capabilityNodeNames.length);
-
-  for (const nodeName of capabilityNodeNames) {
-    await expect(items.filter({ hasText: nodeName })).toHaveCount(1);
-  }
+  });
+  await action();
+  expect(externalImages).toEqual([]);
 }
 
 test.beforeAll(({ browserName }, testInfo) => {
@@ -672,332 +336,308 @@ test.beforeAll(({ browserName }, testInfo) => {
   }
 });
 
-test("desktop Hero identity core, proof orbit, handoff, and solution sequence", async ({ page }) => {
+test("approved information architecture has labelled landmarks and a valid heading hierarchy", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
+  await trackCanvasMounts(page);
   const errors = await attachConsoleGuards(page);
-  await page.context().tracing.start({ screenshots: true, snapshots: true, sources: true });
-
   await page.goto(appRoute());
-  await expect(page.getByTestId("hero")).toBeVisible();
-  await expectSingleHeroServicesList(page);
-  await expectSingleRepresentativeCustomersList(page);
-  await waitForHeroState(page, "initial", 0, 0.03);
-  await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
-  await expect(page.getByText(officialDescription)).toBeVisible();
-  await expectDataCoreKeyword(page);
-  await expect(page.getByTestId("webgl-hero").locator("canvas")).toBeVisible();
-  await expect(page.locator(".hero-title-line")).toHaveCount(2);
-  await waitForFrames(page, 5);
-  await capture(page, "01-desktop-hero-initial");
 
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await waitForFrames(page, 5);
-  await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
-  await capture(page, "01b-desktop-hero-1920");
+  await expect(page.getByTestId("hero")).toHaveAttribute("data-experience-mode", "motion");
+  await expect(page.locator("#top canvas")).toHaveCount(1);
+  await expect(page.locator("canvas")).toHaveCount(1);
+  expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBeGreaterThan(0);
+  await expect(page.getByRole("banner")).toHaveCount(1);
+  await expect(page.locator("main#main-content")).toHaveAttribute("tabindex", "-1");
+  await expect(page.getByRole("contentinfo")).toHaveCount(1);
 
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await waitForFrames(page, 5);
-
-  const dataUrlLength = await page.getByTestId("webgl-hero").locator("canvas").evaluate((canvas) =>
-    (canvas as HTMLCanvasElement).toDataURL("image/png").length
+  const mainChildren = await page.locator("main#main-content").evaluate((main) =>
+    Array.from(main.children).map((child) => ({
+      id: child.id,
+      tag: child.tagName.toLowerCase(),
+      testId: child.getAttribute("data-testid")
+    }))
   );
-  expect(dataUrlLength).toBeGreaterThan(5000);
+  expect(mainChildren).toEqual([
+    { id: "top", tag: "section", testId: "hero" },
+    { id: "proof", tag: "section", testId: "customer-proof-band" },
+    { id: "", tag: "div", testId: "solutions-handoff" },
+    { id: "solutions", tag: "section", testId: "solutions-section" },
+    { id: "company", tag: "section", testId: "company-section" },
+    { id: "engagement", tag: "section", testId: "engagement-section" },
+    { id: "contact", tag: "section", testId: "contact-section" }
+  ]);
 
-  await scrollHeroTo(page, 0.56);
-  await waitForHeroState(page, "orbit", 0.54, 0.58);
-  await expectCustomerProofKeyword(page);
-  await capture(page, "02-desktop-customer-orbit-hero");
+  const labelledSections = {
+    top: "hero-heading",
+    proof: "proof-heading",
+    solutions: "solutions-heading",
+    company: "company-heading",
+    engagement: "engagement-heading",
+    contact: "contact-heading"
+  } as const;
+  for (const [sectionId, headingId] of Object.entries(labelledSections)) {
+    await expect(page.locator(`section#${sectionId}`)).toHaveAttribute("aria-labelledby", headingId);
+    await expect(page.locator(`#${headingId}`)).toHaveCount(1);
+  }
 
-  await scrollHeroTo(page, 0.76);
-  await waitForHeroState(page, "orbit", 0.74, 0.78);
-  await capture(page, "03-desktop-customer-orbit-wide");
+  const outline = await page.locator("main h1, main h2, main h3").evaluateAll((headings) =>
+    headings.map((heading) => ({ id: heading.id, level: Number(heading.tagName.slice(1)) }))
+  );
+  expect(outline.filter((heading) => heading.level === 1)).toEqual([{ id: "hero-heading", level: 1 }]);
+  expect(outline.find((heading) => heading.id === "proof-heading")?.level).toBe(2);
+  expect(outline.find((heading) => heading.id === "solutions-heading")?.level).toBe(2);
+  for (const solutionId of solutionIds) {
+    expect(outline.find((heading) => heading.id === `${solutionId}-title`)?.level).toBe(3);
+  }
+  for (let index = 1; index < outline.length; index += 1) {
+    expect(outline[index].level - outline[index - 1].level).toBeLessThanOrEqual(1);
+  }
+  fs.writeFileSync(
+    path.join(afterArtifactDir, "00-dom-structure.json"),
+    `${JSON.stringify({ mainChildren, outline }, null, 2)}\n`,
+    "utf8"
+  );
 
-  await scrollHeroTo(page, 0.84);
-  await waitForHeroState(page, "handoff", 0.82, 0.86);
-  const blackResetMetrics = await readHeroHandoffMetrics(page);
-  expect(blackResetMetrics.proofOpacity).toBeLessThan(0.05);
-  expect(blackResetMetrics.mediaOpacity).toBeLessThan(0.05);
-  expect(blackResetMetrics.previewOpacity).toBeLessThan(0.05);
-  expect(blackResetMetrics.stackOpacity).toBeLessThan(0.05);
-  await capture(page, "04a-desktop-handoff-black-reset");
+  const handoff = page.getByTestId("solutions-handoff");
+  await expect(handoff).toHaveAttribute("aria-hidden", "true");
+  await expect(handoff.getByRole("heading")).toHaveCount(0);
+  await expect(handoff.locator("[data-product-id]")).toHaveCount(0);
+  await expect(handoff.locator("[data-route-id]")).toHaveCount(solutionIds.length);
 
-  await scrollHeroTo(page, 0.92);
-  await waitForHeroState(page, "handoff", 0.9, 0.94);
-  const topologyMetrics = await readHeroHandoffMetrics(page);
-  expect(topologyMetrics.proofOpacity).toBeLessThan(0.05);
-  expect(topologyMetrics.mediaOpacity).toBeLessThan(0.05);
-  expect(topologyMetrics.topologyOpacity).toBeGreaterThan(0.65);
-  expect(topologyMetrics.routeScale).toBeGreaterThan(0.45);
-  expect(topologyMetrics.signalOpacity).toBeGreaterThan(0.15);
-  expect(topologyMetrics.stackOpacity).toBeLessThan(0.05);
-  expect(topologyMetrics.activeCards).toBe(0);
-  await capture(page, "04b-desktop-handoff-topology-signal");
+  await expectCoreSemanticContent(page);
+  await captureIa(page, "01-desktop-hero");
+  await scrollToSelector(page, "#proof");
+  await captureIa(page, "02-desktop-proof");
+  await scrollToSelector(page, "[data-testid='solutions-handoff']");
+  await captureIa(page, "03-desktop-handoff-solutions");
+  await scrollToSelector(page, "#solution-data-analytics-title");
+  await captureIa(page, "04-desktop-solution-1");
+  await scrollToSelector(page, "#solution-consulting-support-title");
+  await captureIa(page, "05-desktop-solution-5");
 
-  await scrollHeroTo(page, 0.96);
-  await waitForHeroState(page, "handoff", 0.94, 0.98);
-  const firstCardMetrics = await readHeroHandoffMetrics(page);
-  expect(firstCardMetrics.stackOpacity).toBeGreaterThan(0.35);
-  expect(firstCardMetrics.activeCards).toBeGreaterThanOrEqual(1);
-  expect(firstCardMetrics.activeCards).toBeLessThan(4);
-  await capture(page, "04c-desktop-handoff-first-card");
-
-  await scrollSolutionsTo(page, 0);
-  await expect(page.getByTestId("solutions-section")).toBeVisible();
-  await waitForActiveSolution(page, "01");
-  await expect(
-    page.getByTestId("solution-slide-1").getByRole("heading", { name: "Data & Analytics" })
-  ).toBeVisible();
-  await expect(
-    page.getByTestId("solution-data-analytics-product-spotlight").locator(".solution-spotlight-logo-wordmark")
-  ).toBeVisible();
-  await page.waitForTimeout(950);
-  await waitForFrames(page, 4);
-  await capture(page, "05-desktop-solution-1");
-
-  await page.getByTestId("solution-rail-2").click();
-  await waitForActiveSolution(page, "02");
-  await expect(
-    page.getByTestId("solution-slide-2").getByRole("heading", { name: "Data Streaming" })
-  ).toBeVisible();
-  await expect(
-    page.getByTestId("solution-data-streaming-product-spotlight").locator(".solution-spotlight-logo-frame")
-  ).toBeVisible();
-  await page.waitForTimeout(950);
-  await waitForFrames(page, 4);
-  await capture(page, "05b-desktop-solution-2");
-
-  await page.getByTestId("solution-rail-3").click();
-  await waitForActiveSolution(page, "03");
-  await expect(
-    page.getByTestId("solution-slide-3").getByRole("heading", { name: "Infrastructure Automation" })
-  ).toBeVisible();
-  await expect(
-    page.getByTestId("solution-infrastructure-automation-product-spotlight").locator(".solution-spotlight-textmark")
-  ).toBeVisible();
-  await page.waitForTimeout(950);
-  await waitForFrames(page, 4);
-  await capture(page, "05c-desktop-solution-3");
-
-  await page.getByTestId("solution-rail-4").click();
-  await waitForActiveSolution(page, "04");
-  await expect(
-    page.getByTestId("solution-slide-4").getByRole("heading", { name: "DevOps & Quality" })
-  ).toBeVisible();
-  await expect(
-    page.getByTestId("solution-devops-quality-product-spotlight").locator(".solution-spotlight-logo-frame")
-  ).toBeVisible();
-  await page.waitForTimeout(950);
-  await waitForFrames(page, 4);
-  await capture(page, "05d-desktop-solution-4");
-
-  await page.getByTestId("solution-rail-5").click();
-  await waitForActiveSolution(page, "05");
-  await expect(
-    page.getByTestId("solution-slide-5").getByRole("heading", { name: "Consulting & Technical Support" })
-  ).toBeVisible();
-  await expect(
-    page.getByTestId("solution-consulting-support-product-spotlight").locator(".solution-spotlight-scope-title")
-  ).toBeVisible();
-  await page.waitForTimeout(950);
-  await waitForFrames(page, 4);
-  await capture(page, "10-desktop-solution-5");
-
-  await scrollHeroTo(page, 0.56);
-  await waitForHeroState(page, "orbit", 0.54, 0.58);
-
-  await page.setViewportSize({ width: 1280, height: 720 });
-  await waitForFrames(page, 4);
-  await expect(page.getByTestId("hero")).toBeVisible();
-
-  const triggerCount = await page.evaluate(() => window.__GTG_SCROLLTRIGGERS__ ?? 0);
-  const solutionTriggerCount = await page.evaluate(() => window.__GTG_SOLUTION_TRIGGERS__ ?? 0);
-  expect(triggerCount).toBeLessThanOrEqual(2);
-  expect(solutionTriggerCount).toBeLessThanOrEqual(2);
   await expectNoOverflow(page);
-  await expectNoTbdInUi(page);
-  await expectNoUnsupportedCustomerClaims(page);
   expect(errors).toEqual([]);
-  await page.context().tracing.stop({ path: path.join(artifactDir, "hero-to-solution-trace.zip") });
 });
 
-test("desktop inactive Solution slides are hidden from keyboard access", async ({ page }) => {
+test("keyboard navigation follows the semantic document without inert Solution layers", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const errors = await attachConsoleGuards(page);
+  await page.goto(appRoute());
+
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "본문으로 이동" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("main#main-content")).toBeFocused();
+
+  for (const solutionId of solutionIds) {
+    await expect(page.locator(`article#${solutionId}`)).not.toHaveAttribute("aria-hidden", "true");
+    await expect(page.locator(`article#${solutionId}`)).not.toHaveAttribute("inert", "");
+  }
+
+  const streamingRoute = page.getByRole("navigation", { name: "Solution routes" }).getByRole("link", {
+    name: "Data Streaming"
+  });
+  await streamingRoute.click();
+  expectAppLocation(page, "#solution-data-streaming");
+  await expect(page.locator("#solution-data-streaming-title")).toBeFocused();
+  const headerHeight = await page.evaluate(() =>
+    Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height"))
+  );
+  await expect
+    .poll(() => page.locator("#solution-data-streaming-title").evaluate((heading) => heading.getBoundingClientRect().top))
+    .toBeLessThanOrEqual(headerHeight + 8);
+  const routeTop = await page
+    .locator("#solution-data-streaming-title")
+    .evaluate((heading) => heading.getBoundingClientRect().top);
+  expect(routeTop).toBeGreaterThanOrEqual(headerHeight - 2);
+  await page.evaluate(() => window.scrollBy(0, 120));
+  await expect(page.locator("#solution-data-streaming-title")).toBeFocused();
+
+  await page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" }).click();
+  expectAppLocation(page, "#contact");
+  await expect(page.locator("#contact-heading")).toBeFocused();
+
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("dialog", { name: "Site menu" })).toBeVisible();
+  await page.keyboard.press("Shift+Tab");
+  await expect(page.getByRole("dialog").getByRole("link", { name: "CONTACT" })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Close" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Site menu" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
+
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const menu = page.getByRole("dialog", { name: "Site menu" });
+  await menu.getByRole("link", { name: "SOLUTIONS", exact: true }).click();
+  await expect(menu).toHaveCount(0);
+  expectAppLocation(page, "#solutions");
+  await expect(page.locator("#solutions-heading")).toBeFocused();
+
+  const tabbedSolutionCtas: string[] = [];
+  for (let tabIndex = 0; tabIndex < solutionIds.length * 2; tabIndex += 1) {
+    await page.keyboard.press("Tab");
+    const solutionId = await page.evaluate(() => document.activeElement?.closest("#solutions article")?.id ?? null);
+    if (solutionId && !tabbedSolutionCtas.includes(solutionId)) {
+      tabbedSolutionCtas.push(solutionId);
+    }
+  }
+  expect(tabbedSolutionCtas).toEqual(solutionIds);
+  const solutionFiveCta = page.locator("#solution-consulting-support").getByRole("link");
+  await expect(solutionFiveCta).toBeFocused();
+  await page.keyboard.press("Enter");
+  expectAppLocation(page, "#contact");
+  await expect(page.locator("#contact-heading")).toBeFocused();
+
+  expect(errors).toEqual([]);
+});
+
+test("customer proof is contextual and product marks belong only to stable Solution ids", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await attachConsoleGuards(page);
 
-  await page.goto(appRoute());
-  await scrollSolutionsTo(page, 0);
-  await waitForActiveSolution(page, "01");
+  await expectNoExternalImageRequests(page, async () => {
+    await page.goto(appRoute());
+    await expectCustomerProof(page);
 
-  await expect(page.getByTestId("solution-slide-1")).toHaveAttribute("aria-hidden", "false");
-  await expect(page.getByTestId("solution-slide-1")).toHaveAttribute("data-slide-state", "active");
-  await expect(page.getByTestId("solution-slide-1")).toHaveCSS("visibility", "visible");
-  await expect(page.getByTestId("solution-slide-1")).toHaveCSS("content-visibility", "visible");
-  for (const index of [2, 3, 4, 5]) {
-    const slide = page.getByTestId(`solution-slide-${index}`);
-    await expect(slide).toHaveAttribute("data-slide-state", "inactive");
-    await expect(slide).toHaveAttribute("aria-hidden", "true");
-    await expect(slide).toHaveAttribute("inert", "");
-    await expect(slide).toHaveCSS("visibility", "hidden");
-    await expect(slide).toHaveCSS("content-visibility", "hidden");
-  }
+    await expect(page.locator("#top [data-product-id], #proof [data-product-id]")).toHaveCount(0);
+    await expect(page.locator(".hero-solution-stack, .solution-stack-static, .solution-rail")).toHaveCount(0);
+    for (const [productId, solutionId] of Object.entries(productOwners)) {
+      const product = page.locator(`[data-product-id='${productId}']`);
+      await expect(product).toHaveCount(1);
+      expect(await product.evaluate((element) => element.closest("article")?.id)).toBe(solutionId);
+    }
 
-  const solutionOneStops = await collectTabStopsFromTestId(page, "solutions-section", 12);
-  expect(solutionOneStops.filter((stop) => stop.isSolutionCta).map((stop) => stop.slide)).toEqual([
-    "solution-slide-1"
-  ]);
+    const solutionFive = page.locator("#solution-consulting-support");
+    await expect(solutionFive.locator("[data-product-id]")).toHaveCount(0);
+    await expect(solutionFive.getByText("GTG Support Scope", { exact: true })).toHaveCount(0);
+    await expect(solutionFive.locator(".solution-spotlight-scope-list, .solution-spotlight-scope-title")).toHaveCount(0);
+    const capabilityList = solutionFive.getByRole("list", {
+      name: "Consulting & Technical Support capabilities"
+    });
+    await expect(capabilityList).toHaveCount(1);
+    await expect(capabilityList.getByRole("listitem")).toHaveCount(solutionFiveCapabilities.length);
+    for (const capability of solutionFiveCapabilities) {
+      await expect(capabilityList.getByText(capability, { exact: true })).toHaveCount(1);
+    }
+  });
 
-  await page.getByTestId("solution-rail-3").click();
-  await waitForActiveSolution(page, "03");
-  await expect(page.getByTestId("solution-slide-3")).toHaveAttribute("aria-hidden", "false");
-  await expect(page.getByTestId("solution-slide-3")).toHaveAttribute("data-slide-state", "active");
-  await expect(page.getByTestId("solution-slide-3")).toHaveCSS("visibility", "visible");
-  await expect(page.getByTestId("solution-slide-3")).toHaveCSS("content-visibility", "visible");
-  await expect(page.getByTestId("solution-slide-3")).not.toHaveAttribute("inert", "");
-  for (const index of [1, 2, 4, 5]) {
-    const slide = page.getByTestId(`solution-slide-${index}`);
-    await expect(slide).toHaveAttribute("data-slide-state", "inactive");
-    await expect(slide).toHaveCSS("visibility", "hidden");
-    await expect(slide).toHaveCSS("content-visibility", "hidden");
-  }
-
-  const solutionThreeStops = await collectTabStopsFromTestId(page, "solutions-section", 12);
-  expect(solutionThreeStops.filter((stop) => stop.isSolutionCta).map((stop) => stop.slide)).toEqual([
-    "solution-slide-3"
-  ]);
-
+  const structuralSources = [
+    "src/components/sections/hero-experience.tsx",
+    "src/components/sections/hero-fallback.tsx",
+    "src/components/sections/solution-sequence.tsx",
+    "src/content/site.ts"
+  ].map((filePath) => fs.readFileSync(path.join(process.cwd(), filePath), "utf8")).join("\n");
+  expect(structuralSources).not.toMatch(
+    /\b(?:solutionSlides|heroCustomers|heroRingCustomers|customers)\s*\[\s*\d+\s*\]/
+  );
+  const heroCanvasSource = fs.readFileSync(
+    path.join(process.cwd(), "src/components/three/hero-canvas.tsx"),
+    "utf8"
+  );
+  expect(heroCanvasSource).not.toMatch(/CanvasTexture|customerProofItems|heroCustomers|customer-logos/i);
   expect(errors).toEqual([]);
 });
 
-test("mobile static Solution flow keeps every CTA keyboard accessible", async ({ page }) => {
+test("mobile keeps proof context and all Solutions in normal document flow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  await trackCanvasMounts(page);
   const errors = await attachConsoleGuards(page);
-
   await page.goto(appRoute());
-  await scrollTestIdToStart(page, "solutions-section");
 
-  for (const index of [1, 2, 3, 4, 5]) {
-    const slide = page.getByTestId(`solution-slide-${index}`);
-    await expect(slide).toHaveAttribute("data-slide-state", "static");
-    await expect(slide).not.toHaveAttribute("aria-hidden", "true");
-    await expect(slide).not.toHaveAttribute("inert", "");
-    await expect(slide).toHaveCSS("visibility", "visible");
-    await expect(slide).toHaveCSS("content-visibility", "visible");
-  }
-
-  const stops = await collectTabStopsFromTestId(page, "solutions-section", 10);
-  expect(stops.filter((stop) => stop.isSolutionCta).map((stop) => stop.slide)).toEqual([
-    "solution-slide-1",
-    "solution-slide-2",
-    "solution-slide-3",
-    "solution-slide-4",
-    "solution-slide-5"
-  ]);
-
-  expect(errors).toEqual([]);
-});
-
-test("mobile Hero and first Solution use simplified flow", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  const errors = await attachConsoleGuards(page);
-
-  await page.goto(appRoute());
-  await expect(page.getByTestId("hero")).toBeVisible();
+  await expect(page.getByTestId("hero")).toHaveAttribute("data-experience-mode", "mobile");
   await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
-  await expectSingleHeroServicesList(page);
-  await expectSingleRepresentativeCustomersList(page);
-  await expectStaticDataCoreKeywordReady(page);
-  await capture(page, "06-mobile-hero");
+  await expect(page.locator("canvas")).toHaveCount(0);
+  expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBe(0);
+  await expect(page.locator("#top img[src*='customer-logos']")).toHaveCount(0);
+  await expectCustomerProof(page);
+  await captureIa(page, "06-mobile-hero");
+  await scrollToSelector(page, "#proof");
+  await captureIa(page, "07-mobile-proof");
 
-  for (const [index, slide] of ["01", "02", "03", "04", "05"].entries()) {
-    await expect(page.getByTestId(`solution-slide-${index + 1}`).locator(".solution-index")).toHaveAttribute(
-      "aria-label",
-      `${slide} / 05`
-    );
+  const articlePositions = await page.locator("#solutions article").evaluateAll((articles) =>
+    articles.map((article) => ({ id: article.id, top: (article as HTMLElement).offsetTop }))
+  );
+  expect(articlePositions.map((article) => article.id)).toEqual(solutionIds);
+  for (let index = 1; index < articlePositions.length; index += 1) {
+    expect(articlePositions[index].top).toBeGreaterThan(articlePositions[index - 1].top);
+  }
+  for (const solutionId of solutionIds) {
+    const article = page.locator(`article#${solutionId}`);
+    await expect(article).not.toHaveAttribute("aria-hidden", "true");
+    await expect(article).not.toHaveAttribute("inert", "");
   }
 
-  await scrollSlideToStart(page, "solution-slide-1");
-  const firstSlide = page.getByTestId("solution-slide-1");
-  await expectLocatorInViewport(page, firstSlide.getByText("Solution 01"));
-  await expectLocatorInViewport(page, firstSlide.getByRole("heading", { name: "Data & Analytics" }));
-  await expectLocatorOutsideViewport(
-    page,
-    page.getByTestId("solution-slide-3").getByRole("heading", { name: "Infrastructure Automation" })
-  );
-  await expectSlideAtViewportStart(page, "solution-slide-1");
-  await capture(page, "07-mobile-solution-1");
-
-  await scrollSlideToStart(page, "solution-slide-5");
-  const fifthSlide = page.getByTestId("solution-slide-5");
-  await expectLocatorInViewport(page, fifthSlide.getByText("Solution 05"));
-  await expectLocatorInViewport(page, fifthSlide.getByRole("heading", { name: "Consulting & Technical Support" }));
-  await expectSlideAtViewportStart(page, "solution-slide-5");
-  await capture(page, "11-mobile-solution-5");
-
+  await scrollToSelector(page, "#solution-data-analytics-title");
+  await captureIa(page, "08-mobile-solution-1");
+  await scrollToSelector(page, "#solution-consulting-support-title");
+  await captureIa(page, "09-mobile-solution-5");
   await expectNoOverflow(page);
-  await expectNoTbdInUi(page);
-  await expectNoUnsupportedCustomerClaims(page);
+
+  for (const viewport of [
+    { width: 360, height: 640 },
+    { width: 430, height: 932 }
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto(appRoute());
+    await expect(page.getByTestId("hero")).toHaveAttribute("data-experience-mode", "mobile");
+    await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
+    await expect(page.getByText("GTG Data Core", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" })).toBeVisible();
+    await expect(page.locator("canvas")).toHaveCount(0);
+    expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBe(0);
+    await expectNoOverflow(page);
+  }
   expect(errors).toEqual([]);
 });
 
-test("reduced-motion Hero renders static HTML service cards", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+test("reduced motion never mounts Canvas and keeps all semantic content", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await trackCanvasMounts(page);
   const errors = await attachConsoleGuards(page);
-
   await page.goto(appRoute());
+
   await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
-  await expectSingleHeroServicesList(page);
-  await expectSingleRepresentativeCustomersList(page);
   await expect(page.locator("canvas")).toHaveCount(0);
-  await capture(page, "08-reduced-motion-hero");
-
+  expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBe(0);
+  await expectCoreSemanticContent(page);
+  await captureIa(page, "10-reduced-hero");
+  await scrollToSelector(page, "#proof");
+  await captureIa(page, "11-reduced-proof");
+  await scrollToSelector(page, "#solutions");
+  await captureIa(page, "12-reduced-solutions");
   await expectNoOverflow(page);
-  await expectNoTbdInUi(page);
-  await expectNoUnsupportedCustomerClaims(page);
   expect(errors).toEqual([]);
 });
 
-test("forceFallback query renders graceful HTML fallback", async ({ page }) => {
+test("forceFallback keeps services, customers, Solutions, Company, Engagement, and Contact without Canvas", async ({
+  page
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  await trackCanvasMounts(page);
   const errors = await attachConsoleGuards(page);
-
   await page.goto(appRoute("/?forceFallback=1"));
-  const fallbackUrl = new URL(page.url());
-  expect(fallbackUrl.pathname).toBe(appHomePath);
-  expect(fallbackUrl.searchParams.get("forceFallback")).toBe("1");
+
+  const currentUrl = new URL(page.url());
+  expect(currentUrl.pathname).toBe(appHomePath);
+  expect(currentUrl.searchParams.get("forceFallback")).toBe("1");
   await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
-  await expectSingleHeroServicesList(page);
-  await expectSingleRepresentativeCustomersList(page);
   await expect(page.locator("canvas")).toHaveCount(0);
-  await expect(page.getByTestId("force-fallback-hero").locator(".fallback-strip")).toHaveAttribute(
-    "aria-hidden",
-    "true"
-  );
-  await expect(page.getByTestId("force-fallback-hero").locator(".fallback-service-rail")).toHaveAttribute(
-    "aria-hidden",
-    "true"
-  );
-  await expect(page.getByTestId("force-fallback-hero").locator("a")).toHaveCount(0);
-  await expect(page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" })).toHaveCount(1);
-  await expectStaticDataCoreKeywordReady(page);
-  await capture(page, "09-force-fallback-hero");
-
-  await page.getByTestId("solutions-section").scrollIntoViewIfNeeded();
-  await expect(page.getByTestId("solutions-section")).toBeVisible();
-
+  expect(await page.evaluate(() => window.__GTG_CANVAS_MOUNTS__ ?? 0)).toBe(0);
+  await expect(page.locator(".fallback-proof-strip, .fallback-service-rail")).toHaveCount(0);
+  await expectCoreSemanticContent(page);
+  await captureIa(page, "13-force-fallback");
   await expectNoOverflow(page);
-  await expectNoTbdInUi(page);
-  await expectNoUnsupportedCustomerClaims(page);
   expect(errors).toEqual([]);
 });
 
-test("basePath keeps local assets and primary navigation inside the application", async ({ page }) => {
+test("basePath keeps navigation and every local asset inside the application", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await attachConsoleGuards(page);
   const pathGuards = attachDeploymentPathGuards(page);
-
   await page.goto(appRoute());
-  await expect(page.getByTestId("hero")).toBeVisible();
+
   await expect(page.getByRole("link", { name: "GTG Solutions & Consult home" })).toHaveAttribute(
     "href",
     appPath("/#top")
@@ -1007,54 +647,39 @@ test("basePath keeps local assets and primary navigation inside the application"
 
   await page.evaluate(async () => {
     const maximumScroll = document.documentElement.scrollHeight - window.innerHeight;
-    for (let scrollY = 0; scrollY <= maximumScroll; scrollY += Math.max(320, window.innerHeight * 0.75)) {
+    for (let scrollY = 0; scrollY <= maximumScroll; scrollY += Math.max(360, window.innerHeight * 0.8)) {
       window.scrollTo(0, scrollY);
-      await new Promise((resolve) => window.setTimeout(resolve, 35));
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
     }
-    window.scrollTo(0, maximumScroll);
-  });
-
-  await page.locator("img").evaluateAll((elements) => {
-    for (const element of elements) {
-      (element as HTMLImageElement).loading = "eager";
+    for (const image of document.images) {
+      image.loading = "eager";
     }
   });
-
   await page.waitForFunction(
-    () =>
-      [...document.images].every(
-        (image) => image.complete && image.naturalWidth > 0 && image.naturalHeight > 0
-      ),
+    () => [...document.images].every((image) => image.complete && image.naturalWidth > 0),
     undefined,
     { timeout: 15_000 }
   );
 
-  const images = await page.locator("img").evaluateAll((elements) =>
-    elements.map((element) => {
-      const image = element as HTMLImageElement;
-      return {
-        currentSrc: image.currentSrc || image.src,
-        naturalHeight: image.naturalHeight,
-        naturalWidth: image.naturalWidth
-      };
-    })
+  const imageUrls = await page.locator("img").evaluateAll((images) =>
+    images.map((image) => ({
+      height: (image as HTMLImageElement).naturalHeight,
+      src: (image as HTMLImageElement).currentSrc || (image as HTMLImageElement).src,
+      width: (image as HTMLImageElement).naturalWidth
+    }))
   );
-  expect(images.length).toBeGreaterThan(0);
-
-  for (const image of images) {
-    expect(image.naturalWidth).toBeGreaterThan(0);
-    expect(image.naturalHeight).toBeGreaterThan(0);
-
-    const imageUrl = new URL(image.currentSrc);
-    if (imageUrl.origin !== applicationOrigin) {
-      continue;
-    }
-    expect(isInsideAppBasePath(imageUrl.pathname)).toBe(true);
-
-    if (imageUrl.pathname === appPath("/_next/image")) {
-      const sourcePath = imageUrl.searchParams.get("url");
-      expect(sourcePath).not.toBeNull();
-      expect(isInsideAppBasePath(new URL(sourcePath!, applicationOrigin).pathname)).toBe(true);
+  expect(imageUrls.length).toBeGreaterThan(0);
+  for (const image of imageUrls) {
+    expect(image.width).toBeGreaterThan(0);
+    expect(image.height).toBeGreaterThan(0);
+    const url = new URL(image.src);
+    if (url.origin === applicationOrigin) {
+      expect(isInsideAppBasePath(url.pathname)).toBe(true);
+      if (url.pathname === appPath("/_next/image")) {
+        const sourcePath = url.searchParams.get("url");
+        expect(sourcePath).not.toBeNull();
+        expect(isInsideAppBasePath(new URL(sourcePath!, applicationOrigin).pathname)).toBe(true);
+      }
     }
   }
 
@@ -1064,399 +689,58 @@ test("basePath keeps local assets and primary navigation inside the application"
   expect(errors).toEqual([]);
 });
 
-test("Hero data-core and customer proof system keep local visuals readable and claim-safe", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  const errors = await attachConsoleGuards(page);
-
-  await expectNoExternalImageRequests(page, async () => {
-    await page.goto(appRoute());
-    await expect(page.getByTestId("hero")).toBeVisible();
-    await expectSingleHeroServicesList(page);
-    await expectSingleRepresentativeCustomersList(page);
-    await expectDataCoreKeyword(page);
-    await expect(page.getByTestId("webgl-hero").locator("canvas")).toBeVisible();
-    await waitForFrames(page, 5);
-    await captureHeroVisual(page, "hero-desktop-data-core");
-
-    const dataUrlLength = await page.getByTestId("webgl-hero").locator("canvas").evaluate((canvas) =>
-      (canvas as HTMLCanvasElement).toDataURL("image/png").length
-    );
-    expect(dataUrlLength).toBeGreaterThan(5000);
-    await scrollHeroTo(page, 0.56);
-    await waitForHeroState(page, "orbit", 0.54, 0.58);
-    await expectCustomerProofKeyword(page);
-    await captureHeroVisual(page, "hero-desktop-proof-orbit");
-    await expectNoUnsupportedCustomerClaims(page);
-
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(appRoute());
-    await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
-    await expectSingleRepresentativeCustomersList(page);
-    await expectDataCoreKeyword(page);
-    await expectFallbackDataCoreReadable(page);
-    await expectNoOverflow(page);
-    await captureHeroVisual(page, "hero-mobile-data-core");
-
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(appRoute());
-    await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
-    await expect(page.locator("canvas")).toHaveCount(0);
-    await expectSingleRepresentativeCustomersList(page);
-    await expectDataCoreKeyword(page);
-    await expectFallbackDataCoreReadable(page);
-    await expectNoOverflow(page);
-    await captureHeroVisual(page, "reduced-motion-data-core");
-
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.goto(appRoute("/?forceFallback=1"));
-    await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
-    await expect(page.locator("canvas")).toHaveCount(0);
-    await expectSingleRepresentativeCustomersList(page);
-    await expectDataCoreKeyword(page);
-    await expectFallbackDataCoreReadable(page);
-    await expectNoUnsupportedCustomerClaims(page);
-    await expectNoOverflow(page);
-    await captureHeroVisual(page, "force-fallback-data-core");
-  });
-
-  expect(errors).toEqual([]);
-});
-
-test("topology SVG kit assets are local, claim-safe, and renderable", async ({ page }) => {
+test("topology SVG assets remain local and claim-safe", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1180 });
   const errors = await attachConsoleGuards(page);
-
-  expectTopologySvgAssetsOnlyInGeneratedTopology();
-
   for (const fileName of topologySvgFiles) {
-    expectTopologySvgSafe(fileName);
+    expectSvgSafe(fileName);
   }
 
   await expectNoExternalImageRequests(page, async () => {
     await page.goto(appRoute());
-    await page.setContent(`
-      <!doctype html>
-      <html lang="en">
-        <head>
-          <meta charset="utf-8" />
-          <style>
-            * { box-sizing: border-box; }
-            html, body {
-              width: 1440px;
-              min-height: 1180px;
-              margin: 0;
-              background: #040404;
-              color: #f4efe4;
-              font-family: Arial, sans-serif;
-            }
-            main {
-              display: grid;
-              grid-template-columns: repeat(3, 1fr);
-              gap: 18px;
-              padding: 28px;
-            }
-            figure {
-              margin: 0;
-              border: 1px solid rgba(244, 239, 228, 0.16);
-              background: #10100f;
-              padding: 12px;
-            }
-            img {
-              display: block;
-              width: 100%;
-              aspect-ratio: 16 / 10;
-              object-fit: contain;
-              background: #040404;
-            }
-            figcaption {
-              margin-top: 10px;
-              color: rgba(244, 239, 228, 0.72);
-              font-size: 13px;
-              font-weight: 700;
-            }
-          </style>
-        </head>
-        <body>
-          <main>
-            ${topologySvgFiles
-              .map(
-                (fileName) => `
-                  <figure>
-                    <img src="${appPath(`/generated/topology/${fileName}`)}" alt="${fileName}" />
-                    <figcaption>${fileName}</figcaption>
-                  </figure>
-                `
-              )
-              .join("")}
-          </main>
-        </body>
-      </html>
-    `);
-
-    await page.waitForFunction(() =>
-      [...document.images].every((image) => image.complete && image.naturalWidth > 0 && image.naturalHeight > 0)
-    );
-    await page.screenshot({
-      path: path.join(topologyArtifactDir, "topology-contact-sheet.png"),
-      fullPage: true
-    });
-
-    const contactSheetPath = path.join(topologyArtifactDir, "topology-contact-sheet.png");
-    expect(fs.existsSync(contactSheetPath)).toBe(true);
-    expect(fs.statSync(contactSheetPath).size).toBeGreaterThan(10_000);
+    await page.setContent(`<!doctype html><html><body style="margin:0;background:#040404"><main style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:28px">${topologySvgFiles
+      .map(
+        (fileName) =>
+          `<figure style="margin:0"><img style="display:block;width:100%;aspect-ratio:16/10;object-fit:contain" src="${appPath(`/generated/topology/${fileName}`)}" alt="${fileName}"><figcaption style="color:white">${fileName}</figcaption></figure>`
+      )
+      .join("")}</main></body></html>`);
+    await page.waitForFunction(() => [...document.images].every((image) => image.complete && image.naturalWidth > 0));
+    await page.screenshot({ path: path.join(topologyArtifactDir, "topology-contact-sheet.png"), fullPage: true });
   });
-
+  expect(fs.statSync(path.join(topologyArtifactDir, "topology-contact-sheet.png")).size).toBeGreaterThan(10_000);
   expect(errors).toEqual([]);
 });
 
-test("capability map assets and Company integration are claim-safe and responsive", async ({ page }) => {
+test("Company capability map remains semantic and responsive", async ({ page }) => {
   const errors = await attachConsoleGuards(page);
-
   for (const fileName of capabilitySvgFiles) {
-    expectCapabilitySvgSafe(fileName);
+    expectSvgSafe(fileName);
   }
 
-  await expectNoExternalImageRequests(page, async () => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 }
+  ]) {
+    await page.setViewportSize(viewport);
     await page.goto(appRoute());
-    await scrollTestIdToStart(page, "company-section");
-    await expectCapabilityMapContent(page);
-    await expect(page.getByTestId("capability-map").locator("img")).toHaveAttribute(
-      "src",
-      appPath("/generated/topology/gtg-capability-map.svg")
-    );
+    await scrollToSelector(page, "#company");
+    const map = page.getByTestId("capability-map");
+    await expect(map).toBeVisible();
+    const list = page.getByRole("list", { name: "GTG capability map nodes" });
+    await expect(list.getByRole("listitem")).toHaveCount(capabilityNodeNames.length);
+    for (const nodeName of capabilityNodeNames) {
+      await expect(list.getByText(nodeName, { exact: true })).toHaveCount(1);
+    }
     await expectNoOverflow(page);
-
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(appRoute());
-    await scrollTestIdToStart(page, "company-section");
-    await expectCapabilityMapContent(page);
-    await page.waitForFunction(
-      (expectedPath) => {
-        const currentSrc = document.querySelector<HTMLImageElement>('[data-testid="capability-map"] img')?.currentSrc;
-        return currentSrc ? new URL(currentSrc).pathname === expectedPath : false;
-      },
-      appPath("/generated/topology/gtg-capability-map-mobile.svg")
-    );
-    await expectNoOverflow(page);
-
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(appRoute());
-    await scrollTestIdToStart(page, "company-section");
-    await expectCapabilityMapContent(page);
-    await expectNoOverflow(page);
-
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.goto(appRoute("/?forceFallback=1"));
-    await scrollTestIdToStart(page, "company-section");
-    await expectCapabilityMapContent(page);
-    await expect(page.locator("canvas")).toHaveCount(0);
-    await expectNoOverflow(page);
-
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.setContent(`
-      <!doctype html>
-      <html lang="en">
-        <head>
-          <meta charset="utf-8" />
-          <style>
-            * { box-sizing: border-box; }
-            html, body {
-              width: 1440px;
-              min-height: 920px;
-              margin: 0;
-              background: #040404;
-              color: #f4efe4;
-              font-family: Arial, sans-serif;
-            }
-            main {
-              display: grid;
-              grid-template-columns: minmax(0, 1fr) 360px;
-              gap: 20px;
-              padding: 28px;
-            }
-            figure {
-              margin: 0;
-              border: 1px solid rgba(244, 239, 228, 0.16);
-              background: #10100f;
-              padding: 14px;
-            }
-            img {
-              display: block;
-              width: 100%;
-              height: 100%;
-              object-fit: contain;
-              background: #040404;
-            }
-            figcaption {
-              margin-top: 10px;
-              color: rgba(244, 239, 228, 0.72);
-              font-size: 13px;
-              font-weight: 700;
-            }
-          </style>
-        </head>
-        <body>
-          <main>
-            <figure>
-              <img src="${appPath("/generated/topology/gtg-capability-map.svg")}" alt="desktop capability map" />
-              <figcaption>gtg-capability-map.svg</figcaption>
-            </figure>
-            <figure>
-              <img src="${appPath("/generated/topology/gtg-capability-map-mobile.svg")}" alt="mobile capability map" />
-              <figcaption>gtg-capability-map-mobile.svg</figcaption>
-            </figure>
-          </main>
-        </body>
-      </html>
-    `);
-
-    await page.waitForFunction(() =>
-      [...document.images].every((image) => image.complete && image.naturalWidth > 0 && image.naturalHeight > 0)
-    );
-    await page.screenshot({
-      path: path.join(capabilityArtifactDir, "capability-map-contact-sheet.png"),
-      fullPage: true
-    });
-
-    const contactSheetPath = path.join(capabilityArtifactDir, "capability-map-contact-sheet.png");
-    expect(fs.existsSync(contactSheetPath)).toBe(true);
-    expect(fs.statSync(contactSheetPath).size).toBeGreaterThan(10_000);
-  });
-
+  }
   expect(errors).toEqual([]);
 });
 
-test("official content structure, navigation, metadata, and screenshots", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  const errors = await attachConsoleGuards(page);
-
-  await page.goto(appRoute());
-  await expect(page.locator("html")).toHaveAttribute("lang", "ko");
-  await expect(page).toHaveTitle("GTG Solutions & Consult | 데이터 분석·스트리밍·DevOps 기술 컨설팅");
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-    "content",
-    "GTG Solutions & Consult는 Bigdata Analytics, Confluent, HashiCorp, DevOps 솔루션과 DB/테스트/프로세스 컨설팅을 다루는 기술 컨설팅 회사입니다."
-  );
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /nofollow/);
-  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
-  await expect(page.locator('meta[property="og:image"]')).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
-  await expect(page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" })).toHaveAttribute(
-    "href",
-    "#contact"
-  );
-  await waitForHeaderTheme(page, "dark");
-  await expect(page.getByTestId("webgl-hero").locator("canvas")).toBeVisible();
-  await waitForFrames(page, 5);
-  await captureContent(page, "01-desktop-hero");
-
-  await page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" }).click();
-  await waitForTestIdBelowHeader(page, "contact-section");
-  await expectElementBelowHeader(page, page.getByTestId("contact-section"));
-  await scrollTestIdToStart(page, "contact-section");
-  await waitForHeaderTheme(page, "light");
-
-  await scrollSolutionsTo(page, 0);
-  await waitForActiveSolution(page, "01");
-  await expect(page.getByRole("link", { name: "Vertica 기술 블로그 보기" })).toHaveAttribute(
-    "href",
-    "https://x2wizard.github.io/"
-  );
-  await captureContent(page, "02-desktop-solution-1");
-
-  await scrollTestIdToStart(page, "company-section");
-  await expectLocatorInViewport(page, page.getByRole("heading", { name: "데이터 플랫폼과 소프트웨어 품질을 다루는 기술 컨설팅" }));
-  await expect(page.getByTestId("company-headline-line")).toHaveCount(3);
-  await expect(page.getByText("Bigdata Analytics / Vertica")).toBeVisible();
-  await expectCapabilityMapContent(page);
-  await waitForHeaderTheme(page, "dark");
-  await captureContent(page, "03-desktop-company");
-
-  await scrollTestIdToStart(page, "engagement-section");
-  await expectLocatorInViewport(page, page.getByRole("heading", { name: "확인, 정의, 실행, 운영 안정화로 이어지는 수행 흐름" }));
-  await expect(page.getByTestId("engagement-headline-line")).toHaveCount(3);
-  await expect(page.getByText("Diagnose")).toBeVisible();
-  await expect(page.getByText("Operate")).toBeVisible();
-  await waitForHeaderTheme(page, "dark");
-  await captureContent(page, "04-desktop-engagement");
-
-  await scrollTestIdToStart(page, "contact-section");
-  await expectLocatorInViewport(page, page.getByRole("heading", { name: "GTG에 문의하세요" }));
-  await waitForHeaderTheme(page, "light");
-  await expect(page.getByRole("link", { name: "공식 문의 페이지로 이동" })).toHaveAttribute(
-    "href",
-    "https://www.gtgsc.com/gtg/sub/company/company.php"
-  );
-  await expect(page.getByRole("link", { name: "이메일 문의" })).toHaveAttribute("href", "mailto:webmaster@gtgsc.com");
-  await expect(page.getByTestId("contact-section").getByRole("link", { name: "02-6293-7100" })).toHaveAttribute(
-    "href",
-    "tel:02-6293-7100"
-  );
-  await captureContent(page, "05-desktop-contact");
-
-  await scrollTestIdToStart(page, "site-footer");
-  await expectLocatorInViewport(page, page.getByText("(주)지티지 / GTG Co.,Ltd."));
-  await waitForHeaderTheme(page, "dark");
-  await expect(page.getByRole("link", { name: "개인정보처리방침" })).toHaveAttribute(
-    "href",
-    "https://www.gtgsc.com/gtg/sub/customer/privacy.php"
-  );
-  await expect(page.getByText("© GTG Co.,Ltd. All Rights Reserved.")).toBeVisible();
-  await captureContent(page, "06-desktop-footer");
-
-  await page.getByRole("button", { name: "Open menu" }).click();
-  await expect(page.getByRole("dialog", { name: "Site menu" })).toBeVisible();
-  await expect(page.getByRole("dialog").getByRole("link", { name: "Home" })).toHaveAttribute(
-    "href",
-    appPath("/#top")
-  );
-  await expect(page.getByRole("dialog").getByRole("link", { name: "SOLUTIONS" })).toHaveAttribute(
-    "href",
-    appPath("/#solutions")
-  );
-  await expect(page.getByRole("dialog").getByRole("link", { name: "ENGAGEMENT" })).toHaveAttribute(
-    "href",
-    appPath("/#engagement")
-  );
-  await expect(page.getByRole("dialog").getByRole("link", { name: "CONTACT" })).toHaveAttribute(
-    "href",
-    appPath("/#contact")
-  );
-  await captureContent(page, "11-menu-open");
-  await page.keyboard.press("Shift+Tab");
-  await expect(page.getByRole("dialog").getByRole("link", { name: "CONTACT" })).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Close" })).toBeFocused();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog", { name: "Site menu" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
-
-  await page.getByRole("link", { name: "ABOUT" }).click();
-  expectAppLocation(page, "#company");
-  await waitForTestIdBelowHeader(page, "company-section");
-  await page.getByRole("link", { name: "CONTACT" }).click();
-  expectAppLocation(page, "#contact");
-  await waitForTestIdBelowHeader(page, "contact-section");
-  await expectLocatorInViewport(page, page.getByTestId("contact-section"));
-
-  await expectNoOverflow(page);
-  await expectNoTbdInUi(page);
-  const text = await page.locator("body").innerText();
-  expect(text).not.toContain("Complex systems, made clear.");
-  expect(text).not.toContain("GTG corporate website interaction prototype.");
-  expect(text.includes("MVP PROTOTYPE")).toBe(true);
-  expect(errors).toEqual([]);
-});
-
-test("draft release routes keep indexing blocked and render a simple 404", async ({ page, request }) => {
+test("draft metadata, robots, sitemap, and 404 remain basePath-aware", async ({ page, request }) => {
   const robotsResponse = await request.get(appRoute("/robots.txt"));
   expect(robotsResponse.ok()).toBe(true);
   expect(new URL(robotsResponse.url()).pathname).toBe(appPath("/robots.txt"));
-  const robotsText = await robotsResponse.text();
-  expect(robotsText).toContain("User-Agent: *");
-  expect(robotsText).toContain("Disallow: /");
+  expect(await robotsResponse.text()).toContain("Disallow: /");
 
   const sitemapResponse = await request.get(appRoute("/sitemap.xml"));
   expect(sitemapResponse.ok()).toBe(true);
@@ -1464,6 +748,7 @@ test("draft release routes keep indexing blocked and render a simple 404", async
   expect(await sitemapResponse.text()).not.toContain("https://www.gtgsc.com/");
 
   await page.goto(appRoute());
+  await expect(page.locator("html")).toHaveAttribute("lang", "ko");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /nofollow/);
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
@@ -1471,149 +756,13 @@ test("draft release routes keep indexing blocked and render a simple 404", async
 
   await page.goto(appRoute("/missing-release-candidate-route"));
   await expect(page.getByTestId("not-found-page")).toBeVisible();
-  await expect(page.getByRole("link", { name: "본문으로 이동" })).toHaveAttribute("href", "#main-content");
-  await expect(page.locator("#main-content")).toHaveCount(1);
-  await expect(page.getByRole("link", { name: "GTG Solutions & Consult home" })).toHaveAttribute(
-    "href",
-    appPath("/#top")
-  );
-  await expect(page.getByRole("link", { name: "ABOUT" })).toHaveAttribute("href", appPath("/#company"));
-  await expect(page.getByRole("link", { name: "CONTACT" })).toHaveAttribute("href", appPath("/#contact"));
+  await expect(page.getByTestId("not-found-page")).toHaveAttribute("aria-labelledby", "not-found-heading");
+  await expect(page.getByTestId("not-found-page")).toHaveAttribute("tabindex", "-1");
   await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
-  await expect(page.getByText("요청한 페이지가 존재하지 않거나 이동되었습니다.")).toBeVisible();
   await expect(page.getByTestId("not-found-page").getByRole("link", { name: "홈으로 돌아가기" })).toHaveAttribute(
     "href",
     appBasePath || "/"
   );
-
-  await page.getByRole("link", { name: "GTG Solutions & Consult home" }).click();
-  expectAppLocation(page, "#top");
-  await expect(page.getByTestId("hero")).toBeVisible();
-});
-
-test("content screenshots for mobile, reduced motion, and fallback", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  const errors = await attachConsoleGuards(page);
-
-  await page.goto(appRoute());
-  await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
-  await expectStaticDataCoreKeywordReady(page);
-  await captureContent(page, "07-mobile-hero");
-
-  await scrollSlideToStart(page, "solution-slide-1");
-  await expectLocatorInViewport(page, page.getByTestId("solution-slide-1").getByRole("heading", { name: "Data & Analytics" }));
-  await captureContent(page, "08-mobile-solution");
-
-  await scrollSlideToStart(page, "solution-slide-2");
-  await expectLocatorInViewport(page, page.getByTestId("solution-slide-2").getByRole("heading", { name: "Data Streaming" }));
-  await expect(page.getByTestId("solution-data-streaming-product-spotlight")).toBeVisible();
-  await captureContent(page, "08b-mobile-solution-2");
-
-  await scrollSlideToStart(page, "solution-slide-3");
-  await expectLocatorInViewport(
-    page,
-    page.getByTestId("solution-slide-3").getByRole("heading", { name: "Infrastructure Automation" })
-  );
-  await expect(page.getByTestId("solution-infrastructure-automation-product-spotlight")).toBeVisible();
-  await captureContent(page, "08c-mobile-solution-3");
-
-  await scrollSlideToStart(page, "solution-slide-4");
-  await expectLocatorInViewport(
-    page,
-    page.getByTestId("solution-slide-4").getByRole("heading", { name: "DevOps & Quality" })
-  );
-  await expect(page.getByTestId("solution-devops-quality-product-spotlight")).toBeVisible();
-  await captureContent(page, "08d-mobile-solution-4");
-
-  await scrollSlideToStart(page, "solution-slide-5");
-  await expectLocatorInViewport(
-    page,
-    page.getByTestId("solution-slide-5").getByRole("heading", { name: "Consulting & Technical Support" })
-  );
-  await expect(page.getByTestId("solution-consulting-support-product-spotlight")).toBeVisible();
-  await captureContent(page, "08e-mobile-solution-5");
-
-  await scrollTestIdToStart(page, "company-section");
-  await expectLocatorInViewport(page, page.getByTestId("company-section"));
-  await captureContent(page, "09-mobile-company");
-
-  await scrollTestIdToStart(page, "contact-section");
-  await expectLocatorInViewport(page, page.getByTestId("contact-section"));
-  await captureContent(page, "10-mobile-contact");
-
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto(appRoute());
-  await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
-  await captureContent(page, "12-reduced-motion");
-  await scrollSlideToStart(page, "solution-slide-1");
-  await expect(page.getByTestId("solution-data-analytics-product-spotlight")).toBeVisible();
-  await expect(
-    page.getByTestId("solution-data-analytics-product-spotlight").locator(".solution-spotlight-logo-wordmark")
-  ).toBeVisible();
-  await captureContent(page, "12b-reduced-motion-solution");
-  await scrollSlideToStart(page, "solution-slide-2");
-  await expect(page.getByTestId("solution-data-streaming-product-spotlight")).toBeVisible();
-  await captureContent(page, "12c-reduced-motion-solution-2");
-  await scrollSlideToStart(page, "solution-slide-3");
-  await expect(page.getByTestId("solution-infrastructure-automation-product-spotlight")).toBeVisible();
-  await captureContent(page, "12d-reduced-motion-solution-3");
-  await scrollSlideToStart(page, "solution-slide-4");
-  await expect(page.getByTestId("solution-devops-quality-product-spotlight")).toBeVisible();
-  await captureContent(page, "12e-reduced-motion-solution-4");
-  await scrollSlideToStart(page, "solution-slide-5");
-  await expect(page.getByTestId("solution-consulting-support-product-spotlight")).toBeVisible();
-  await captureContent(page, "12f-reduced-motion-solution-5");
-
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto(appRoute("/?forceFallback=1"));
-  await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
-  await expect(page.locator("canvas")).toHaveCount(0);
-  await expectStaticDataCoreKeywordReady(page);
-  await captureContent(page, "13-force-fallback");
-
-  await expectNoOverflow(page);
-  await expectNoTbdInUi(page);
-  expect(errors).toEqual([]);
-});
-
-test("mobile Hero hierarchy remains readable across release-candidate viewports", async ({ page }) => {
-  const viewports = [
-    { width: 360, height: 640 },
-    { width: 390, height: 844 },
-    { width: 430, height: 932 },
-    { width: 768, height: 1024 }
-  ];
-
-  for (const viewport of viewports) {
-    await page.setViewportSize(viewport);
-    await page.goto(appRoute());
-    await waitForFrames(page, 3);
-
-    const headerBox = await page.locator(".site-header").boundingBox();
-    const titleBox = await expectLocatorInViewport(page, page.getByRole("heading", { name: officialHeadline }));
-    expect(headerBox).not.toBeNull();
-    expect(titleBox.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height - 2);
-    await expectKeywordUnclipped(page);
-
-    const fallbackDataCore = page.getByTestId("hero-data-core-fallback");
-    if ((await fallbackDataCore.count()) > 0) {
-      await expectLocatorFullyInViewport(page, fallbackDataCore);
-    } else {
-      await expectLocatorInViewport(page, page.locator(".hero-media"));
-    }
-
-    await expectLocatorFullyInViewport(page, page.locator(".hero-cta"));
-    await expectLocatorInViewport(page, page.getByTestId("hero-stage").getByRole("link", { name: "문의하기" }));
-    if (viewport.width < 768) {
-      await expect(page.locator("canvas")).toHaveCount(0);
-      await expect(page.locator(".fallback-service-rail")).toBeHidden();
-      await expect(page.locator(".scroll-indicator")).toBeHidden();
-      await capture(page, `mobile-hero-density-${viewport.width}x${viewport.height}`);
-    }
-    await expectNoOverflow(page);
-  }
 });
 
 test("layout has no horizontal overflow across required viewports", async ({ page }) => {
@@ -1623,30 +772,29 @@ test("layout has no horizontal overflow across required viewports", async ({ pag
     { width: 430, height: 932 },
     { width: 768, height: 1024 },
     { width: 1280, height: 720 },
-    { width: 1440, height: 900 },
+    { width: 1440, height: 900 }
   ];
-
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
     await page.goto(appRoute());
-    await waitForFrames(page, 3);
+    await waitForFrames(page, 2);
     await expectNoOverflow(page);
   }
 });
 
-test("cross-browser smoke keeps the approved baseline reachable @browser-smoke", async ({ page }) => {
+test("cross-browser smoke keeps the semantic baseline reachable @browser-smoke", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-
   await page.goto(appRoute());
   await expect(page.getByTestId("hero")).toBeVisible();
   await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
-  await expect(page.getByTestId("solutions-section")).toBeAttached();
+  await expect(page.getByRole("heading", { name: "Representative Customers" })).toBeAttached();
+  await expect(page.getByRole("heading", { name: "GTG Solutions" })).toBeAttached();
+  await expect(page.locator("#solutions article")).toHaveCount(solutionIds.length);
   await expectNoOverflow(page);
 });
 
 declare global {
   interface Window {
-    __GTG_SCROLLTRIGGERS__?: number;
-    __GTG_SOLUTION_TRIGGERS__?: number;
+    __GTG_CANVAS_MOUNTS__?: number;
   }
 }

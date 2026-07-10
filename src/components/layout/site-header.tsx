@@ -1,16 +1,26 @@
 "use client";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
+import { SectionAnchor } from "@/components/navigation/section-anchor";
 import { brandContent, navigationItems } from "@/content/site";
 import { withBasePath } from "@/lib/paths";
 
 const focusableSelector =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
+function headingIdForSectionHref(href: string) {
+  const fragment = href.split("#")[1];
+  if (!fragment) {
+    return undefined;
+  }
+  return fragment === "top" ? "hero-heading" : `${fragment}-heading`;
+}
+
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [headerTheme, setHeaderTheme] = useState<"dark" | "light">("dark");
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  const shouldRestoreMenuFocusRef = useRef(true);
 
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-header-theme]"));
@@ -62,6 +72,7 @@ export function SiteHeader() {
 
     const restoreTarget = buttonRef.current;
     const previousOverflow = document.body.style.overflow;
+    shouldRestoreMenuFocusRef.current = true;
     document.body.style.overflow = "hidden";
 
     const firstFocusable = overlayRef.current?.querySelector<HTMLElement>(focusableSelector);
@@ -69,7 +80,9 @@ export function SiteHeader() {
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      restoreTarget?.focus();
+      if (shouldRestoreMenuFocusRef.current) {
+        restoreTarget?.focus();
+      }
     };
   }, [isOpen]);
 
@@ -114,6 +127,10 @@ export function SiteHeader() {
   };
 
   const closeMenu = () => setIsOpen(false);
+  const closeMenuForNavigation = () => {
+    shouldRestoreMenuFocusRef.current = false;
+    setIsOpen(false);
+  };
 
   return (
     <>
@@ -122,17 +139,22 @@ export function SiteHeader() {
       </a>
       <header className="site-header" data-theme={headerTheme} aria-label="Site header">
         <nav className="header-cluster header-cluster-left" aria-label="Primary">
-          <a className="header-link" href={withBasePath("/#company")}>
+          <SectionAnchor className="header-link" href={withBasePath("/#company")} focusTargetId="company-heading">
             ABOUT
-          </a>
-          <a className="header-link" href={withBasePath("/#contact")}>
+          </SectionAnchor>
+          <SectionAnchor className="header-link" href={withBasePath("/#contact")} focusTargetId="contact-heading">
             CONTACT
-          </a>
+          </SectionAnchor>
         </nav>
 
-        <a className="header-brand" href={withBasePath("/#top")} aria-label={`${brandContent.englishName} home`}>
+        <SectionAnchor
+          className="header-brand"
+          href={withBasePath("/#top")}
+          focusTargetId="hero-heading"
+          aria-label={`${brandContent.englishName} home`}
+        >
           {brandContent.englishName}
-        </a>
+        </SectionAnchor>
 
         <div className="header-cluster header-cluster-right">
           <button
@@ -171,13 +193,22 @@ export function SiteHeader() {
             </button>
           </div>
           <nav className="menu-nav" aria-label="Menu sections">
-            <a href={withBasePath("/#top")} onClick={closeMenu}>
+            <SectionAnchor
+              href={withBasePath("/#top")}
+              focusTargetId="hero-heading"
+              onClick={closeMenuForNavigation}
+            >
               Home
-            </a>
+            </SectionAnchor>
             {navigationItems.map((item) => (
-              <a href={withBasePath(item.href)} key={item.href} onClick={closeMenu}>
+              <SectionAnchor
+                href={withBasePath(item.href)}
+                focusTargetId={headingIdForSectionHref(item.href)}
+                key={item.href}
+                onClick={closeMenuForNavigation}
+              >
                 {item.label}
-              </a>
+              </SectionAnchor>
             ))}
           </nav>
         </div>

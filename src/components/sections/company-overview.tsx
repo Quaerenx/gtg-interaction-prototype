@@ -8,11 +8,12 @@ export function CompanyOverview() {
       className="company-overview content-section"
       data-testid="company-section"
       data-header-theme="dark"
+      aria-labelledby="company-heading"
     >
       <div className="content-section-inner">
         <p className="section-eyebrow">{companyContent.eyebrow}</p>
         <div className="company-grid">
-          <h2 className="section-title" aria-label={companyContent.headline}>
+          <h2 id="company-heading" className="section-title" aria-label={companyContent.headline} tabIndex={-1}>
             {companyContent.headlineLines.desktop.map((line) => (
               <span className="headline-line" data-testid="company-headline-line" aria-hidden="true" key={line}>
                 {line}

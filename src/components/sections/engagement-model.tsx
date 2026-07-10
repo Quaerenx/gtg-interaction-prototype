@@ -7,10 +7,16 @@ export function EngagementModel() {
       className="engagement-model content-section"
       data-testid="engagement-section"
       data-header-theme="dark"
+      aria-labelledby="engagement-heading"
     >
       <div className="content-section-inner">
         <p className="section-eyebrow">{engagementContent.eyebrow}</p>
-        <h2 className="section-title section-title-narrow" aria-label={engagementContent.headline}>
+        <h2
+          id="engagement-heading"
+          className="section-title section-title-narrow"
+          aria-label={engagementContent.headline}
+          tabIndex={-1}
+        >
           {engagementContent.headlineLines.desktop.map((line) => (
             <span className="headline-line" data-testid="engagement-headline-line" aria-hidden="true" key={line}>
               {line}
@@ -19,7 +25,7 @@ export function EngagementModel() {
         </h2>
         <ol className="engagement-steps" aria-label="Engagement steps">
           {engagementContent.steps.map((step) => (
-            <li className="engagement-step" key={step.number}>
+            <li className="engagement-step" data-engagement-id={step.id} key={step.id}>
               <span className="engagement-number">{step.number}</span>
               <div>
                 <h3>{step.title}</h3>

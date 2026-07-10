@@ -2,9 +2,11 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CompanyOverview } from "@/components/sections/company-overview";
 import { ContactSection } from "@/components/sections/contact-section";
+import { CustomerProofBand } from "@/components/sections/customer-proof-band";
 import { EngagementModel } from "@/components/sections/engagement-model";
 import { HeroExperience } from "@/components/sections/hero-experience";
-import { SolutionPreview } from "@/components/sections/solution-preview";
+import { SolutionSequence } from "@/components/sections/solution-sequence";
+import { SolutionsHandoff } from "@/components/sections/solutions-handoff";
 
 type HomeSearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -19,9 +21,11 @@ export default async function Home({
   return (
     <>
       <SiteHeader />
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <HeroExperience forceFallback={forceFallback} />
-        <SolutionPreview />
+        <CustomerProofBand />
+        <SolutionsHandoff />
+        <SolutionSequence />
         <CompanyOverview />
         <EngagementModel />
         <ContactSection />

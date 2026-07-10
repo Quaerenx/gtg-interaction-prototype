@@ -25,11 +25,6 @@ export type CustomerProofItem = {
   visualAlt: string;
 };
 
-export type HeroCustomer = CustomerProofItem & {
-  label: string;
-  visual: string;
-};
-
 export type SolutionSlide = {
   id: string;
   eyebrow: string;
@@ -53,14 +48,6 @@ export type SolutionProductSpotlight = {
   variant: "data-analytics" | "data-streaming" | "infrastructure-automation" | "devops-quality" | "consulting-support";
 };
 
-export type SolutionStackItem = {
-  id: string;
-  label: string;
-  descriptor: string;
-  logoSrc?: string;
-  logoAlt?: string;
-};
-
 export type NavigationItem = {
   label: string;
   href: string;
@@ -77,10 +64,13 @@ export type CapabilityMapNode = {
   descriptor: string;
 };
 
+export type ProofMode = "blocked" | "local-only" | "public";
+
 export const siteContent = {
   isApproved: false,
   language: "ko",
-  badge: "MVP PROTOTYPE"
+  badge: "MVP PROTOTYPE",
+  proofMode: "local-only" as ProofMode
 } as const;
 
 export const brandContent = {
@@ -99,7 +89,7 @@ export const navigationItems: NavigationItem[] = [
 ];
 
 export const heroContent = {
-  eyebrow: "GTG Solutions & Consult",
+  eyebrow: "GTG Data Core",
   headline: "데이터와 인프라를 하나의 운영 구조로",
   headlineLines: ["데이터와 인프라를", "하나의 운영 구조로"],
   description:
@@ -113,7 +103,17 @@ export const heroContent = {
 export const customerProofContent = {
   headlineKeyword: "Representative Customers",
   cardLabel: "Representative customer",
-  semanticLabel: "Representative customers"
+  semanticLabel: "Representative customers",
+  description:
+    "아래 조직명과 로고는 사용자 확인을 바탕으로 구성한 로컬 프로토타입용 고객 proof입니다.",
+  disclaimer:
+    "이 목록은 특정 제품의 도입, 제품 제조사의 고객 지위, 파트너 등급, 인증 또는 보증을 의미하지 않습니다.",
+  localOnlyLabel: "관계 범위 검토 중 · 로컬 프로토타입"
+} as const;
+export const solutionsContent = {
+  eyebrow: "Solutions",
+  headline: "GTG Solutions",
+  description: "Data Core에서 이어지는 다섯 Solution 영역을 순서대로 살펴보세요."
 } as const;
 
 export const heroServices: HeroService[] = [
@@ -315,62 +315,6 @@ export const customerProofItems: CustomerProofItem[] = [
   }
 ];
 
-export const heroCustomers: HeroCustomer[] = customerProofItems.map((customer) => ({
-  ...customer,
-  label: customer.displayName,
-  visual: customer.logoSrc
-}));
-
-const heroRingCustomerIds = [
-  "kt",
-  "lg-electronics",
-  "konkuk-university-hospital",
-  "korea-university-medicine",
-  "supreme-prosecutors-office",
-  "bithumb",
-  "samsung-sds",
-  "samsung-electronics",
-  "saemaul-geumgo",
-  "shinhan-bank",
-  "ptkorea",
-  "komsco"
-] as const;
-
-const heroCustomerById = new Map(heroCustomers.map((customer) => [customer.id, customer]));
-
-export const heroRingCustomers: HeroCustomer[] = heroRingCustomerIds
-  .map((id) => heroCustomerById.get(id))
-  .filter((customer): customer is HeroCustomer => Boolean(customer));
-
-export const solutionStackItems: SolutionStackItem[] = [
-  {
-    id: "vertica",
-    label: "Vertica",
-    descriptor: "Analytics scope reference",
-    logoSrc: "/item-logo/3840px-Vertica_pos_blk_rgb.svg.webp",
-    logoAlt: "Vertica"
-  },
-  {
-    id: "confluent",
-    label: "Confluent",
-    descriptor: "Streaming scope reference",
-    logoSrc: "/item-logo/3840px-Confluent,_Inc._logo.svg.webp",
-    logoAlt: "Confluent"
-  },
-  {
-    id: "hashicorp",
-    label: "HashiCorp",
-    descriptor: "Automation scope reference"
-  },
-  {
-    id: "loadrunner",
-    label: "LoadRunner",
-    descriptor: "Testing scope reference",
-    logoSrc: "/item-logo/pngaaa.com-5227511.png",
-    logoAlt: "LoadRunner"
-  }
-];
-
 export const solutionSlides: SolutionSlide[] = [
   {
     id: "solution-data-analytics",
@@ -482,8 +426,7 @@ export const solutionSlides: SolutionSlide[] = [
     id: "solution-consulting-support",
     eyebrow: "Solution 05",
     title: "Consulting & Technical Support",
-    description:
-      "DB 컨설팅, 성능/기능 테스트 컨설팅, 프로젝트/테스트 프로세스 컨설팅, 형상관리, 기술지원, 교육 문의를 하나의 상담 흐름으로 연결합니다.",
+    description: "컨설팅과 기술지원 범위를 하나의 상담 흐름으로 연결합니다.",
     related: [
       "DB 컨설팅",
       "성능/기능 테스트 컨설팅",
@@ -494,7 +437,7 @@ export const solutionSlides: SolutionSlide[] = [
     ],
     cta: {
       label: "기술 문의하기",
-      href: "mailto:webmaster@gtgsc.com"
+      href: "#contact"
     },
     productSpotlight: {
       id: "gtg-support",
@@ -573,21 +516,25 @@ export const engagementContent = {
   },
   steps: [
     {
+      id: "diagnose",
       number: "01",
       title: "Diagnose",
       description: "현재 환경, 데이터 흐름, 품질 이슈, 운영 요구사항을 함께 확인합니다."
     },
     {
+      id: "design",
       number: "02",
       title: "Design",
       description: "적합한 솔루션 영역과 컨설팅/기술지원 범위를 정의합니다."
     },
     {
+      id: "implement",
       number: "03",
       title: "Implement",
       description: "구축, 테스트, 자동화, 운영 전환에 필요한 실행 계획을 진행합니다."
     },
     {
+      id: "operate",
       number: "04",
       title: "Operate",
       description: "운영 안정화, 교육, 기술 문의 대응으로 지속적인 활용을 지원합니다."
@@ -633,5 +580,3 @@ export const seoContent = {
   ogDescription:
     "데이터 분석, 데이터 스트리밍, 인프라 자동화, DevOps 품질, 컨설팅과 기술지원을 연결하는 GTG Solutions & Consult 공식 웹사이트입니다."
 } as const;
-
-export const firstSolution = solutionSlides[0];
