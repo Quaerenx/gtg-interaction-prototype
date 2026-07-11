@@ -1,5 +1,7 @@
 # GTG Solutions & Consult MVP Plan
 
+> **Historical plan — not a current status document.** This file records the initial implementation plan and may conflict with the current code. Start with `docs/CURRENT.md`; use `docs/DECISIONS.md` for approved product direction and `docs/INDEX.md` for document routing.
+
 This plan covers implementation after the reference-analysis step. No application code is implemented in this phase.
 
 ## Current Deliverables

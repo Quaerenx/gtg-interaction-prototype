@@ -1,0 +1,86 @@
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hero progress and pinned-stage motion */
+.hero-shell.is-motion {
+  height: calc(100svh + var(--hero-scroll-travel));
+}
+
+.hero-shell.is-motion .hero-stage {
+  position: sticky;
+  top: 0;
+}
+
+.hero-copy {
+  opacity: calc(1 - var(--hero-pullback-progress) * 0.22);
+  transform: translateY(calc(var(--hero-pullback-progress) * -12px));
+}
+
+.hero-media {
+  transform: translateY(calc(var(--hero-pullback-progress) * -18px))
+    scale(calc(1 - var(--hero-pullback-progress) * 0.055));
+  transform-origin: 68% 50%;
+}
+
+.hero-support {
+  opacity: calc(1 - var(--hero-pullback-progress) * 0.16);
+}
+
+.hero-capability-summary {
+  color: rgba(243, 241, 234, calc(0.48 + var(--hero-active-progress) * 0.3));
+}
+
+/* Topology handoff motion */
+.topology-route {
+  stroke-dashoffset: calc(1 - var(--handoff-branch-progress));
+}
+
+.topology-signal {
+  opacity: calc(0.58 + var(--handoff-progress) * 0.42);
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(calc(0.72 + var(--handoff-progress) * 0.28));
+}
+
+.topology-endpoint {
+  opacity: calc(var(--handoff-branch-progress) * 0.52);
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(calc(0.7 + var(--handoff-connect-progress) * 0.3));
+}
+
+.topology-endpoint.is-primary {
+  opacity: calc(0.22 + var(--handoff-connect-progress) * 0.78);
+}
+
+/* Solution and product reveal motion */
+.solution-article-visual {
+  opacity: 0.72;
+  transform: translateY(8px);
+  transition:
+    opacity 520ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 520ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.solution-article[data-solution-state="current"] .solution-article-visual,
+.solution-article[data-solution-state="static"] .solution-article-visual {
+  opacity: 0.94;
+  transform: translateY(0);
+}
+
+.product-reveal {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    clip-path var(--product-reveal-duration) cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity var(--product-reveal-duration) ease,
+    transform var(--product-reveal-duration) cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.product-reveal[data-reveal-state="idle"] {
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  transform: translateY(12px);
+}

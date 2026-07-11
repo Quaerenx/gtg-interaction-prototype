@@ -10,7 +10,8 @@ import {
   rangeProgress
 } from "@/components/motion/experience-motion";
 import { useMediaQuery, usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
-import { heroContent, solutionSlides } from "@/content/site";
+import { heroContent } from "@/content/brand";
+import { solutionSlides } from "@/content/solutions";
 import { supportsWebGL } from "@/lib/webgl";
 import { HeroFallback } from "./hero-fallback";
 
@@ -264,7 +265,11 @@ export function HeroExperience({ forceFallback }: { forceFallback: boolean }) {
           </SectionAnchor>
         </div>
 
-        <ul className="hero-capability-summary" aria-label="GTG Data Core capability routes">
+        <ul
+          className="hero-capability-summary"
+          style={{ "--hero-route-count": solutionSlides.length } as CSSProperties}
+          aria-label="GTG Data Core capability routes"
+        >
           {solutionSlides.map((solution) => (
             <li data-capability-id={solution.id} key={solution.id}>
               {solution.title}

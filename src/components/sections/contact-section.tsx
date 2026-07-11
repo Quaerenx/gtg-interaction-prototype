@@ -1,4 +1,4 @@
-import { contactContent } from "@/content/site";
+import { contactContent } from "@/content/contact";
 
 export function ContactSection() {
   return (

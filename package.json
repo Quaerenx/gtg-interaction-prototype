@@ -1,8 +1,9 @@
 {
   "name": "gtg-interaction-prototype",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.7.0",
   "scripts": {
     "dev": "next dev -H 127.0.0.1 -p 18150",
     "build": "next build",
@@ -13,28 +14,28 @@
     "test:e2e:webkit": "node scripts/run-playwright.mjs --project=webkit"
   },
   "dependencies": {
-    "@react-three/fiber": "latest",
-    "gsap": "latest",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "three": "latest"
+    "@react-three/fiber": "9.6.1",
+    "gsap": "3.15.0",
+    "next": "16.2.9",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "three": "0.184.0"
   },
   "devDependencies": {
-    "@eslint/js": "latest",
-    "@playwright/test": "latest",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "@types/three": "latest",
-    "autoprefixer": "latest",
-    "eslint": "latest",
-    "eslint-plugin-jsx-a11y": "latest",
-    "eslint-plugin-react-hooks": "latest",
-    "globals": "latest",
-    "postcss": "latest",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.61.0",
+    "@types/node": "26.0.0",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@types/three": "0.184.1",
+    "autoprefixer": "10.5.0",
+    "eslint": "10.5.0",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.7.0",
+    "postcss": "8.5.15",
     "tailwindcss": "3.4.17",
-    "typescript": "latest",
-    "typescript-eslint": "latest"
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.62.0"
   }
 }

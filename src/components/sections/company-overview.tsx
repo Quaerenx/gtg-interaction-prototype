@@ -1,4 +1,4 @@
-import { capabilityMapContent, companyContent } from "@/content/site";
+import { capabilityMapContent, companyContent } from "@/content/company";
 import { withBasePath } from "@/lib/paths";
 
 export function CompanyOverview() {
@@ -41,7 +41,7 @@ export function CompanyOverview() {
           </picture>
           <ul className="capability-map-list" aria-label="GTG capability map nodes">
             {capabilityMapContent.nodes.map((node) => (
-              <li key={node.id}>
+              <li data-capability-id={node.id} key={node.id}>
                 <span>{node.label}</span>
                 <small>{node.descriptor}</small>
               </li>

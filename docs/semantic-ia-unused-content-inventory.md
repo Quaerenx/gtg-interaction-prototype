@@ -28,7 +28,7 @@
 | `heroContent.eyebrow` | visible `GTG Data Core` label이 역할을 단일화 | Hero micro-label 정책을 다음 content 단계에서 확정 후 정리 |
 | `CustomerProofItem.cardSrc` | 값과 consumer 없음 | customer card 체계의 과거 계약 확인 후 제거 |
 | `CustomerProofItem.proofLabel` | 새 section heading/설명이 역할 대체 | 관계 유형 schema 확정 후 migration하고 제거 |
-| `CustomerProofItem.publicDisplayApproved` | `data-evidence-level`로만 보존 | `user-confirmed`를 public approval로 승격하지 않고 새 approval schema로 이관 |
+| `CustomerProofItem.publicDisplayApproved` | 제거·이관 완료 | 관계 증거, 프로젝트 소유자 노출 승인, 제3자 권리 상태, 승인 reference로 분리해 `user-confirmed`를 권리자 승인으로 승격하지 않음 |
 | `CustomerProofItem.visualAlt` | 인접한 visible 조직명이 accessible name 제공 | 공식 logo master와 alt 정책 확정 후 정리 |
 | `SolutionSlide.eyebrow`, `index`, `visualAlt` | 새 normal-flow article에서 미사용 | 번호 체계와 decorative image alt 정책을 다음 motion/content 단계에서 확정 |
 | `SolutionProductSpotlight.eyebrow`, `descriptor`, `logoAlt` | `id`/`label`/`logoSrc`/`variant`만 사용 | microcopy 삭제 승인과 official logo/alt 결정 후 정리 |

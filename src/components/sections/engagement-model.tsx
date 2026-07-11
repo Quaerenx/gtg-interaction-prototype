@@ -1,6 +1,9 @@
-import { engagementContent } from "@/content/site";
+import { type CSSProperties } from "react";
+import { engagementContent } from "@/content/company";
 
 export function EngagementModel() {
+  const stepNumberWidth = Math.max(2, String(engagementContent.steps.length).length);
+
   return (
     <section
       id={engagementContent.id}
@@ -23,10 +26,16 @@ export function EngagementModel() {
             </span>
           ))}
         </h2>
-        <ol className="engagement-steps" aria-label="Engagement steps">
-          {engagementContent.steps.map((step) => (
+        <ol
+          className="engagement-steps"
+          style={{ "--engagement-step-count": engagementContent.steps.length } as CSSProperties}
+          aria-label="Engagement steps"
+        >
+          {engagementContent.steps.map((step, stepIndex) => (
             <li className="engagement-step" data-engagement-id={step.id} key={step.id}>
-              <span className="engagement-number">{step.number}</span>
+              <span className="engagement-number">
+                {String(stepIndex + 1).padStart(stepNumberWidth, "0")}
+              </span>
               <div>
                 <h3>{step.title}</h3>
                 <p>{step.description}</p>

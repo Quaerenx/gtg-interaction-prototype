@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { seoContent, siteContent } from "@/content/site";
+import { seoContent, siteContent } from "@/content/brand";
 
 function isProductionEnvironment() {
   return (

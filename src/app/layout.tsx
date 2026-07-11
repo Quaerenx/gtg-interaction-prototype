@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { brandContent, seoContent, siteContent } from "@/content/site";
+import { brandContent, seoContent, siteContent } from "@/content/brand";
 import { withBasePath } from "@/lib/paths";
 import "./globals.css";
+import "@/styles/tokens.css";
+import "@/styles/base.css";
+import "@/styles/layout.css";
+import "@/styles/sections.css";
+import "@/styles/motion.css";
+import "@/styles/reduced-mobile.css";
 
 const isProductionEnvironment =
   process.env.VERCEL_ENV === "production" ||
@@ -54,7 +60,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang={siteContent.language}>
       <body>{children}</body>
     </html>
   );

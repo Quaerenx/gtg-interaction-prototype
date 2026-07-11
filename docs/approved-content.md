@@ -1,5 +1,7 @@
 # GTG Approved Website Content
 
+> **DRAFT — NOT APPROVED FOR PUBLICATION.** The filename is historical. This file is a review worksheet, not proof of brand, legal, customer-logo, product-asset, or public-use approval. Use `docs/CURRENT.md` and `docs/brand-and-rights-ledger.md` for the current approval boundary.
+
 Approval status: draft
 Approved by: [TBD]
 Approved date: [TBD]

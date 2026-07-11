@@ -7,6 +7,8 @@ function normalizeBasePath(value: string) {
 
 const basePath = normalizeBasePath(process.env.NEXT_BASE_PATH ?? "/hero");
 const defaultBaseURL = `http://127.0.0.1:18150${basePath}/`;
+const runFullChromium = process.env.GTG_FULL_CHROMIUM === "1";
+const runFullWebKit = process.env.GTG_FULL_WEBKIT === "1";
 
 const firefoxSmokeProject =
   process.env.GTG_ENABLE_FIREFOX_SMOKE === "1"
@@ -41,27 +43,29 @@ const firefoxSmokeProject =
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  globalSetup: "./tests/e2e/support/global-setup.ts",
   timeout: 60_000,
   expect: {
     timeout: 10_000
   },
   fullyParallel: false,
+  workers: 1,
   reporter: [["list"]],
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? defaultBaseURL,
-    trace: "off"
+    trace: "retain-on-failure"
   },
   projects: [
     {
       name: "chromium",
-      grepInvert: /@browser-smoke/,
+      ...(runFullChromium ? {} : { grepInvert: /@browser-smoke/ }),
       use: {
         ...devices["Desktop Chrome"]
       }
     },
     {
       name: "webkit",
-      grep: /@browser-smoke/,
+      ...(runFullWebKit ? {} : { grep: /@browser-smoke/ }),
       use: {
         ...devices["Desktop Safari"]
       }

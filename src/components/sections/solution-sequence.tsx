@@ -8,10 +8,19 @@ import {
   type ProductRevealState
 } from "@/components/motion/experience-motion";
 import { useMediaQuery, usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
-import { solutionSlides, solutionsContent, type SolutionProductSpotlight } from "@/content/site";
+import {
+  solutionSlides,
+  solutionsContent,
+  type SolutionId
+} from "@/content/solutions";
+import type { SolutionProductSpotlight } from "@/content/types";
 import { withBasePath } from "@/lib/paths";
 
 type VisualMotionMode = "pending" | "motion" | "static";
+
+function isSolutionId(value: string | undefined): value is SolutionId {
+  return solutionSlides.some((solution) => solution.id === value);
+}
 
 function ProductReveal({ mode, product }: { mode: VisualMotionMode; product: SolutionProductSpotlight }) {
   const rootRef = useRef<HTMLElement>(null);
@@ -77,10 +86,6 @@ function ProductReveal({ mode, product }: { mode: VisualMotionMode; product: Sol
     };
   }, [mode]);
 
-  if (product.variant === "consulting-support") {
-    return null;
-  }
-
   return (
     <figure
       ref={rootRef}
@@ -105,12 +110,14 @@ function ProductReveal({ mode, product }: { mode: VisualMotionMode; product: Sol
 export function SolutionSequence() {
   const rootRef = useRef<HTMLElement>(null);
   const ratiosRef = useRef(new Map<Element, number>());
-  const [activeSolutionId, setActiveSolutionId] = useState<string | null>(null);
+  const [activeSolutionId, setActiveSolutionId] = useState<SolutionId | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const isMobile = useMediaQuery(`(max-width: ${EXPERIENCE_MOTION.mobileMaxWidth}px)`);
   const mediaResolved = prefersReducedMotion !== null && isMobile !== null;
   const motionEnabled = prefersReducedMotion === false && isMobile === false;
   const visualMotionMode: VisualMotionMode = !mediaResolved ? "pending" : motionEnabled ? "motion" : "static";
+  const solutionNumberWidth = Math.max(2, String(solutionSlides.length).length);
+  const solutionTotal = String(solutionSlides.length).padStart(solutionNumberWidth, "0");
 
   useEffect(() => {
     const root = rootRef.current;
@@ -129,7 +136,8 @@ export function SolutionSequence() {
         const active = [...ratiosRef.current.entries()]
           .filter(([, ratio]) => ratio > 0)
           .sort((left, right) => right[1] - left[1])[0]?.[0] as HTMLElement | undefined;
-        setActiveSolutionId(active?.dataset.solutionId ?? null);
+        const nextSolutionId = active?.dataset.solutionId;
+        setActiveSolutionId(isSolutionId(nextSolutionId) ? nextSolutionId : null);
       },
       {
         rootMargin: EXPERIENCE_MOTION.solution.activeRootMargin,
@@ -140,8 +148,6 @@ export function SolutionSequence() {
     articles.forEach((article) => observer.observe(article));
     return () => observer.disconnect();
   }, [motionEnabled]);
-
-  const activeIndex = solutionSlides.findIndex((solution) => solution.id === activeSolutionId);
 
   return (
     <section
@@ -162,11 +168,11 @@ export function SolutionSequence() {
         </header>
 
         <nav className="solution-route-nav" aria-label="Solution routes">
-          <ol>
-            {solutionSlides.map((solution) => (
+          <ol style={{ "--solution-route-count": solutionSlides.length } as CSSProperties}>
+            {solutionSlides.map((solution, solutionIndex) => (
               <li key={solution.id}>
                 <span className="solution-route-number" aria-hidden="true">
-                  {solution.index}
+                  {String(solutionIndex + 1).padStart(solutionNumberWidth, "0")} / {solutionTotal}
                 </span>
                 <SectionAnchor
                   href={`#${solution.id}`}
@@ -181,15 +187,13 @@ export function SolutionSequence() {
         </nav>
 
         <div className="solution-articles">
-          {solutionSlides.map((solution, solutionIndex) => {
+          {solutionSlides.map((solution) => {
             const solutionState =
-              visualMotionMode !== "motion" || activeIndex < 0
+              visualMotionMode !== "motion" || activeSolutionId === null
                 ? "static"
-                : solutionIndex < activeIndex
-                  ? "before"
-                  : solutionIndex === activeIndex
-                    ? "current"
-                    : "after";
+                : solution.id === activeSolutionId
+                  ? "current"
+                  : "inactive";
 
             return (
               <article

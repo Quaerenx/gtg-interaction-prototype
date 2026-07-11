@@ -1,4 +1,5 @@
-import { brandContent, contactContent, footerContent } from "@/content/site";
+import { brandContent } from "@/content/brand";
+import { contactContent, footerContent } from "@/content/contact";
 
 export function SiteFooter() {
   return (

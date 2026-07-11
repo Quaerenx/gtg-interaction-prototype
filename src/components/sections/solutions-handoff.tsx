@@ -8,15 +8,21 @@ import {
   rangeProgress
 } from "@/components/motion/experience-motion";
 import { useMediaQuery, usePrefersReducedMotion } from "@/components/motion/use-prefers-reduced-motion";
-import { solutionSlides } from "@/content/site";
+import {
+  PRIMARY_SOLUTION_ID,
+  solutionSlides,
+  type SolutionId
+} from "@/content/solutions";
 
-const routeGeometry: Record<string, { endpointX: number; path: string }> = {
+type RouteGeometry = { endpointX: number; path: string };
+
+const routeGeometry = {
   "solution-data-analytics": { endpointX: 110, path: "M 500 38 C 500 92, 168 92, 110 188" },
   "solution-data-streaming": { endpointX: 305, path: "M 500 38 C 500 104, 348 104, 305 188" },
   "solution-infrastructure-automation": { endpointX: 500, path: "M 500 38 L 500 188" },
   "solution-devops-quality": { endpointX: 695, path: "M 500 38 C 500 104, 652 104, 695 188" },
   "solution-consulting-support": { endpointX: 890, path: "M 500 38 C 500 92, 832 92, 890 188" }
-};
+} satisfies Record<SolutionId, RouteGeometry>;
 
 export function SolutionsHandoff() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -93,7 +99,7 @@ export function SolutionsHandoff() {
           <g data-route-id={solution.id} key={solution.id}>
             <path className="topology-route" d={routeGeometry[solution.id].path} pathLength="1" />
             <circle
-              className={`topology-endpoint ${solution.id === "solution-data-analytics" ? "is-primary" : ""}`}
+              className={`topology-endpoint ${solution.id === PRIMARY_SOLUTION_ID ? "is-primary" : ""}`}
               cx={routeGeometry[solution.id].endpointX}
               cy="188"
               r="5"

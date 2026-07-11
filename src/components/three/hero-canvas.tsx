@@ -13,6 +13,7 @@ import {
 } from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { EXPERIENCE_MOTION, rangeProgress } from "@/components/motion/experience-motion";
+import type { SolutionId } from "@/content/solutions";
 
 type Triple = [number, number, number];
 
@@ -28,10 +29,12 @@ type BoundaryProps = {
 };
 
 type ExitRoute = {
-  id: string;
+  id: SolutionId;
   bend: Triple;
   end: Triple;
 };
+
+type ExitRouteGeometry = Omit<ExitRoute, "id">;
 
 const SYMBOL_SOURCE_CENTER: Triple = [2014.97, 1424.725, 0];
 const SYMBOL_GEOMETRY_SCALE = 0.00098;
@@ -92,33 +95,32 @@ function makeSymbolGeometries() {
   );
 }
 
-const exitRoutes: ExitRoute[] = [
-  {
-    id: "solution-data-analytics",
+const exitRouteGeometry = {
+  "solution-data-analytics": {
     bend: [-1.46, 0.56, 0.42],
     end: [-3.05, 0.98, -0.32]
   },
-  {
-    id: "solution-data-streaming",
+  "solution-data-streaming": {
     bend: [-1.24, -0.12, 0.48],
     end: [-2.38, -0.48, 0.08]
   },
-  {
-    id: "solution-infrastructure-automation",
+  "solution-infrastructure-automation": {
     bend: [0, 0.76, 0.54],
     end: [0, 1.48, -0.42]
   },
-  {
-    id: "solution-devops-quality",
+  "solution-devops-quality": {
     bend: [1.24, -0.12, 0.48],
     end: [2.38, -0.48, 0.08]
   },
-  {
-    id: "solution-consulting-support",
+  "solution-consulting-support": {
     bend: [1.46, 0.56, 0.42],
     end: [3.05, 0.98, -0.32]
   }
-];
+} satisfies Record<SolutionId, ExitRouteGeometry>;
+
+const exitRoutes: ExitRoute[] = (
+  Object.entries(exitRouteGeometry) as [SolutionId, ExitRouteGeometry][]
+).map(([id, geometry]) => ({ id, ...geometry }));
 
 function SymbolCore() {
   const geometries = useMemo(() => makeSymbolGeometries(), []);

@@ -1,0 +1,3 @@
+# Preserve intentional Markdown hard-break spaces in immutable and future planning snapshots.
+docs/archive/** whitespace=-trailing-space
+docs/future/** whitespace=-trailing-space

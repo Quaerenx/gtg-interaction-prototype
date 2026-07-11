@@ -1,7 +1,7 @@
 "use client";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { SectionAnchor } from "@/components/navigation/section-anchor";
-import { brandContent, navigationItems } from "@/content/site";
+import { brandContent, navigationItems } from "@/content/brand";
 import { withBasePath } from "@/lib/paths";
 
 const focusableSelector =

@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { customerProofContent, customerProofItems, siteContent } from "@/content/site";
+import { siteContent } from "@/content/brand";
+import { customerProofContent, customerProofItems } from "@/content/customers";
 import { withBasePath } from "@/lib/paths";
 
 export function CustomerProofBand() {
@@ -38,7 +39,10 @@ export function CustomerProofBand() {
             <li
               className="customer-proof-item"
               data-customer-id={customer.id}
-              data-evidence-level={customer.publicDisplayApproved}
+              data-relationship-evidence={customer.relationshipEvidenceLevel}
+              data-project-display-approval={customer.projectOwnerDisplayApproval}
+              data-third-party-rights={customer.thirdPartyRightsStatus}
+              data-approval-reference={customer.approvalReference}
               data-release-status={siteContent.proofMode}
               key={customer.id}
             >
