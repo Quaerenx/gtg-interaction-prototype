@@ -1,5 +1,4 @@
-import { capabilityMapContent, companyContent } from "@/content/company";
-import { withBasePath } from "@/lib/paths";
+import { capabilityMapContent, companyContent } from "@/content/site";
 
 export function CompanyOverview() {
   return (
@@ -8,12 +7,11 @@ export function CompanyOverview() {
       className="company-overview content-section"
       data-testid="company-section"
       data-header-theme="dark"
-      aria-labelledby="company-heading"
     >
       <div className="content-section-inner">
         <p className="section-eyebrow">{companyContent.eyebrow}</p>
         <div className="company-grid">
-          <h2 id="company-heading" className="section-title" aria-label={companyContent.headline} tabIndex={-1}>
+          <h2 className="section-title" aria-label={companyContent.headline}>
             {companyContent.headlineLines.desktop.map((line) => (
               <span className="headline-line" data-testid="company-headline-line" aria-hidden="true" key={line}>
                 {line}
@@ -36,12 +34,12 @@ export function CompanyOverview() {
             <p>{capabilityMapContent.description}</p>
           </div>
           <picture className="capability-map-visual" aria-hidden="true">
-            <source media="(max-width: 767px)" srcSet={withBasePath(capabilityMapContent.mobileVisual)} />
-            <img src={withBasePath(capabilityMapContent.desktopVisual)} alt="" loading="lazy" />
+            <source media="(max-width: 767px)" srcSet={capabilityMapContent.mobileVisual} />
+            <img src={capabilityMapContent.desktopVisual} alt="" loading="lazy" />
           </picture>
           <ul className="capability-map-list" aria-label="GTG capability map nodes">
             {capabilityMapContent.nodes.map((node) => (
-              <li data-capability-id={node.id} key={node.id}>
+              <li key={node.id}>
                 <span>{node.label}</span>
                 <small>{node.descriptor}</small>
               </li>

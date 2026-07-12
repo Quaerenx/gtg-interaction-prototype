@@ -9,68 +9,68 @@ importers:
   .:
     dependencies:
       '@react-three/fiber':
-        specifier: 9.6.1
+        specifier: latest
         version: 9.6.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(three@0.184.0)
       gsap:
-        specifier: 3.15.0
+        specifier: latest
         version: 3.15.0
       next:
-        specifier: 16.2.9
+        specifier: latest
         version: 16.2.9(@babel/core@7.29.7)(@playwright/test@1.61.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react:
-        specifier: 19.2.7
+        specifier: latest
         version: 19.2.7
       react-dom:
-        specifier: 19.2.7
+        specifier: latest
         version: 19.2.7(react@19.2.7)
       three:
-        specifier: 0.184.0
+        specifier: latest
         version: 0.184.0
     devDependencies:
       '@eslint/js':
-        specifier: 10.0.1
+        specifier: latest
         version: 10.0.1(eslint@10.5.0(jiti@1.21.7))
       '@playwright/test':
-        specifier: 1.61.0
+        specifier: latest
         version: 1.61.0
       '@types/node':
-        specifier: 26.0.0
+        specifier: latest
         version: 26.0.0
       '@types/react':
-        specifier: 19.2.17
+        specifier: latest
         version: 19.2.17
       '@types/react-dom':
-        specifier: 19.2.3
+        specifier: latest
         version: 19.2.3(@types/react@19.2.17)
       '@types/three':
-        specifier: 0.184.1
+        specifier: latest
         version: 0.184.1
       autoprefixer:
-        specifier: 10.5.0
+        specifier: latest
         version: 10.5.0(postcss@8.5.15)
       eslint:
-        specifier: 10.5.0
+        specifier: latest
         version: 10.5.0(jiti@1.21.7)
       eslint-plugin-jsx-a11y:
-        specifier: 6.10.2
+        specifier: latest
         version: 6.10.2(eslint@10.5.0(jiti@1.21.7))
       eslint-plugin-react-hooks:
-        specifier: 7.1.1
+        specifier: latest
         version: 7.1.1(eslint@10.5.0(jiti@1.21.7))
       globals:
-        specifier: 17.7.0
+        specifier: latest
         version: 17.7.0
       postcss:
-        specifier: 8.5.15
+        specifier: latest
         version: 8.5.15
       tailwindcss:
         specifier: 3.4.17
         version: 3.4.17
       typescript:
-        specifier: 6.0.3
+        specifier: latest
         version: 6.0.3
       typescript-eslint:
-        specifier: 8.62.0
+        specifier: latest
         version: 8.62.0(eslint@10.5.0(jiti@1.21.7))(typescript@6.0.3)
 
 packages:

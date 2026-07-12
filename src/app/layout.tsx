@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { brandContent, seoContent, siteContent } from "@/content/brand";
-import { withBasePath } from "@/lib/paths";
+import { brandContent, seoContent, siteContent } from "@/content/site";
 import "./globals.css";
-import "@/styles/tokens.css";
-import "@/styles/base.css";
-import "@/styles/layout.css";
-import "@/styles/sections.css";
-import "@/styles/motion.css";
-import "@/styles/reduced-mobile.css";
 
 const isProductionEnvironment =
   process.env.VERCEL_ENV === "production" ||
@@ -49,8 +42,8 @@ export const metadata: Metadata = {
     description: seoContent.ogDescription
   },
   icons: {
-    icon: withBasePath(brandContent.favicon),
-    apple: withBasePath(brandContent.favicon)
+    icon: brandContent.favicon,
+    apple: brandContent.favicon
   }
 };
 
@@ -60,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang={siteContent.language}>
+    <html lang="ko">
       <body>{children}</body>
     </html>
   );

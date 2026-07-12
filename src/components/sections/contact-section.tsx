@@ -1,4 +1,4 @@
-import { contactContent } from "@/content/contact";
+import { contactContent } from "@/content/site";
 
 export function ContactSection() {
   return (
@@ -7,13 +7,10 @@ export function ContactSection() {
       className="contact-section"
       data-testid="contact-section"
       data-header-theme="light"
-      aria-labelledby="contact-heading"
     >
       <div className="contact-inner">
         <p className="section-eyebrow">Contact</p>
-        <h2 id="contact-heading" className="contact-title" tabIndex={-1}>
-          {contactContent.headline}
-        </h2>
+        <h2 className="contact-title">{contactContent.headline}</h2>
         <p className="contact-description">{contactContent.description}</p>
         <div className="contact-actions" aria-label="Contact actions">
           <a className="contact-primary" href={contactContent.primaryCta.href}>

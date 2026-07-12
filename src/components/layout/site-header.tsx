@@ -1,26 +1,15 @@
 "use client";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
-import { SectionAnchor } from "@/components/navigation/section-anchor";
-import { brandContent, navigationItems } from "@/content/brand";
-import { withBasePath } from "@/lib/paths";
+import { brandContent, navigationItems } from "@/content/site";
 
 const focusableSelector =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
-
-function headingIdForSectionHref(href: string) {
-  const fragment = href.split("#")[1];
-  if (!fragment) {
-    return undefined;
-  }
-  return fragment === "top" ? "hero-heading" : `${fragment}-heading`;
-}
 
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [headerTheme, setHeaderTheme] = useState<"dark" | "light">("dark");
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
-  const shouldRestoreMenuFocusRef = useRef(true);
 
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-header-theme]"));
@@ -72,7 +61,6 @@ export function SiteHeader() {
 
     const restoreTarget = buttonRef.current;
     const previousOverflow = document.body.style.overflow;
-    shouldRestoreMenuFocusRef.current = true;
     document.body.style.overflow = "hidden";
 
     const firstFocusable = overlayRef.current?.querySelector<HTMLElement>(focusableSelector);
@@ -80,9 +68,7 @@ export function SiteHeader() {
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      if (shouldRestoreMenuFocusRef.current) {
-        restoreTarget?.focus();
-      }
+      restoreTarget?.focus();
     };
   }, [isOpen]);
 
@@ -127,10 +113,6 @@ export function SiteHeader() {
   };
 
   const closeMenu = () => setIsOpen(false);
-  const closeMenuForNavigation = () => {
-    shouldRestoreMenuFocusRef.current = false;
-    setIsOpen(false);
-  };
 
   return (
     <>
@@ -139,22 +121,17 @@ export function SiteHeader() {
       </a>
       <header className="site-header" data-theme={headerTheme} aria-label="Site header">
         <nav className="header-cluster header-cluster-left" aria-label="Primary">
-          <SectionAnchor className="header-link" href={withBasePath("/#company")} focusTargetId="company-heading">
+          <a className="header-link" href="/#company">
             ABOUT
-          </SectionAnchor>
-          <SectionAnchor className="header-link" href={withBasePath("/#contact")} focusTargetId="contact-heading">
+          </a>
+          <a className="header-link" href="/#contact">
             CONTACT
-          </SectionAnchor>
+          </a>
         </nav>
 
-        <SectionAnchor
-          className="header-brand"
-          href={withBasePath("/#top")}
-          focusTargetId="hero-heading"
-          aria-label={`${brandContent.englishName} home`}
-        >
+        <a className="header-brand" href="/#top" aria-label={`${brandContent.englishName} home`}>
           {brandContent.englishName}
-        </SectionAnchor>
+        </a>
 
         <div className="header-cluster header-cluster-right">
           <button
@@ -193,22 +170,13 @@ export function SiteHeader() {
             </button>
           </div>
           <nav className="menu-nav" aria-label="Menu sections">
-            <SectionAnchor
-              href={withBasePath("/#top")}
-              focusTargetId="hero-heading"
-              onClick={closeMenuForNavigation}
-            >
+            <a href="/#top" onClick={closeMenu}>
               Home
-            </SectionAnchor>
+            </a>
             {navigationItems.map((item) => (
-              <SectionAnchor
-                href={withBasePath(item.href)}
-                focusTargetId={headingIdForSectionHref(item.href)}
-                key={item.href}
-                onClick={closeMenuForNavigation}
-              >
+              <a href={item.href} key={item.href} onClick={closeMenu}>
                 {item.label}
-              </SectionAnchor>
+              </a>
             ))}
           </nav>
         </div>

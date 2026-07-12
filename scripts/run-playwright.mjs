@@ -10,13 +10,6 @@ const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
 const playwrightBin = path.join(root, "node_modules", "@playwright", "test", "cli.js");
 const playwrightArgs = process.argv.slice(2);
 
-function normalizeBasePath(value) {
-  const normalized = value.trim().replace(/^\/+|\/+$/g, "");
-  return normalized ? `/${normalized}` : "";
-}
-
-const basePath = normalizeBasePath(process.env.NEXT_BASE_PATH ?? "/hero");
-
 function canListen(port) {
   return new Promise((resolve) => {
     const probe = net.createServer();
@@ -41,7 +34,7 @@ async function findAvailablePort(startPort = 3000) {
 function spawnServer(port) {
   const server = spawn(node, [nextBin, "start", "-p", String(port), "-H", "127.0.0.1"], {
     cwd: root,
-    env: { ...process.env, NEXT_BASE_PATH: basePath, NODE_ENV: "production" },
+    env: { ...process.env, NODE_ENV: "production" },
     stdio: ["ignore", "pipe", "pipe"]
   });
 
@@ -87,8 +80,7 @@ function runPlaywright(serverUrl) {
 }
 
 const port = await findAvailablePort();
-const serverOrigin = `http://127.0.0.1:${port}`;
-const serverUrl = `${serverOrigin}${basePath}/`;
+const serverUrl = `http://127.0.0.1:${port}`;
 const server = spawnServer(port);
 
 let exitCode;
