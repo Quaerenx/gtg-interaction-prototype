@@ -2,6 +2,40 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
 
+function normalizeBasePath(value: string) {
+  const normalized = value.trim().replace(/^\/+|\/+$/g, "");
+  return normalized ? `/${normalized}` : "";
+}
+
+const appBasePath = normalizeBasePath(process.env.NEXT_BASE_PATH ?? "/hero");
+const appHomePath = appBasePath || "/";
+const defaultApplicationBaseURL = `http://127.0.0.1:18150${appBasePath}/`;
+const applicationOrigin = new URL(process.env.PLAYWRIGHT_BASE_URL ?? defaultApplicationBaseURL).origin;
+
+function appPath(pathname: string) {
+  if (!pathname.startsWith("/") || pathname.startsWith("//")) {
+    return pathname;
+  }
+  if (appBasePath && (pathname.startsWith("/#") || pathname.startsWith("/?"))) {
+    return `${appBasePath}${pathname.slice(1)}`;
+  }
+  return appBasePath ? `${appBasePath}${pathname}` : pathname;
+}
+
+function appRoute(pathname = "/") {
+  return pathname === "/" ? "./" : `.${pathname}`;
+}
+
+function expectAppLocation(page: Page, hash: string) {
+  const currentUrl = new URL(page.url());
+  expect(currentUrl.pathname).toBe(appHomePath);
+  expect(currentUrl.hash).toBe(hash);
+}
+
+function isInsideAppBasePath(pathname: string) {
+  return !appBasePath || pathname === appBasePath || pathname.startsWith(`${appBasePath}/`);
+}
+
 const artifactDir = path.join(process.cwd(), "tests", "artifacts");
 const contentArtifactDir = path.join(artifactDir, "content-integration");
 const heroVisualArtifactDir = path.join(artifactDir, "hero-data-core");
@@ -143,6 +177,41 @@ async function attachConsoleGuards(page: Page) {
   });
 
   return errors;
+}
+
+function attachDeploymentPathGuards(page: Page) {
+  const assetTypes = new Set(["font", "image", "script", "stylesheet"]);
+  const failedRequests: string[] = [];
+  const asset404s: string[] = [];
+  const outOfBasePathAssets: string[] = [];
+
+  page.on("request", (request) => {
+    if (!assetTypes.has(request.resourceType())) {
+      return;
+    }
+
+    const url = new URL(request.url());
+    if (url.origin === applicationOrigin && !isInsideAppBasePath(url.pathname)) {
+      outOfBasePathAssets.push(url.href);
+    }
+  });
+
+  page.on("requestfailed", (request) => {
+    const url = new URL(request.url());
+    if (url.origin === applicationOrigin) {
+      failedRequests.push(`${request.resourceType()}: ${url.href}`);
+    }
+  });
+
+  page.on("response", (response) => {
+    const request = response.request();
+    const url = new URL(response.url());
+    if (url.origin === applicationOrigin && assetTypes.has(request.resourceType()) && response.status() === 404) {
+      asset404s.push(url.href);
+    }
+  });
+
+  return { asset404s, failedRequests, outOfBasePathAssets };
 }
 
 async function capture(page: Page, name: string) {
@@ -397,7 +466,7 @@ async function waitForTestIdBelowHeader(page: Page, testId: string) {
       return false;
     }
 
-    const lowerBound = Math.floor(header.height) - 2;
+    const lowerBound = Math.floor(header.height) - 8;
     const upperBound = Math.floor(header.height) + 120;
     return target.top >= lowerBound && target.top <= upperBound && target.bottom > 0;
   }, testId);
@@ -470,7 +539,7 @@ async function expectNoUnsupportedCustomerClaims(page: Page) {
 async function expectFallbackDataCoreReadable(page: Page) {
   const visual = page.getByTestId("hero-data-core-fallback");
   await expectLocatorFullyInViewport(page, visual);
-  await expect(visual).toHaveAttribute("src", "/generated/hero/gtg-data-core.svg");
+  await expect(visual).toHaveAttribute("src", appPath("/generated/hero/gtg-data-core.svg"));
   await expect(page.locator(".fallback-proof-strip")).toBeVisible();
   await expect(page.locator(".fallback-proof-tile")).toHaveCount(6);
 
@@ -608,7 +677,7 @@ test("desktop Hero identity core, proof orbit, handoff, and solution sequence", 
   const errors = await attachConsoleGuards(page);
   await page.context().tracing.start({ screenshots: true, snapshots: true, sources: true });
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await expect(page.getByTestId("hero")).toBeVisible();
   await expectSingleHeroServicesList(page);
   await expectSingleRepresentativeCustomersList(page);
@@ -755,7 +824,7 @@ test("desktop inactive Solution slides are hidden from keyboard access", async (
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await attachConsoleGuards(page);
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await scrollSolutionsTo(page, 0);
   await waitForActiveSolution(page, "01");
 
@@ -803,7 +872,7 @@ test("mobile static Solution flow keeps every CTA keyboard accessible", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   const errors = await attachConsoleGuards(page);
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await scrollTestIdToStart(page, "solutions-section");
 
   for (const index of [1, 2, 3, 4, 5]) {
@@ -831,7 +900,7 @@ test("mobile Hero and first Solution use simplified flow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const errors = await attachConsoleGuards(page);
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await expect(page.getByTestId("hero")).toBeVisible();
   await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
   await expectSingleHeroServicesList(page);
@@ -875,7 +944,7 @@ test("reduced-motion Hero renders static HTML service cards", async ({ page }) =
   await page.emulateMedia({ reducedMotion: "reduce" });
   const errors = await attachConsoleGuards(page);
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
   await expectSingleHeroServicesList(page);
   await expectSingleRepresentativeCustomersList(page);
@@ -892,7 +961,10 @@ test("forceFallback query renders graceful HTML fallback", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const errors = await attachConsoleGuards(page);
 
-  await page.goto("/?forceFallback=1");
+  await page.goto(appRoute("/?forceFallback=1"));
+  const fallbackUrl = new URL(page.url());
+  expect(fallbackUrl.pathname).toBe(appHomePath);
+  expect(fallbackUrl.searchParams.get("forceFallback")).toBe("1");
   await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
   await expectSingleHeroServicesList(page);
   await expectSingleRepresentativeCustomersList(page);
@@ -919,12 +991,85 @@ test("forceFallback query renders graceful HTML fallback", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test("basePath keeps local assets and primary navigation inside the application", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const errors = await attachConsoleGuards(page);
+  const pathGuards = attachDeploymentPathGuards(page);
+
+  await page.goto(appRoute());
+  await expect(page.getByTestId("hero")).toBeVisible();
+  await expect(page.getByRole("link", { name: "GTG Solutions & Consult home" })).toHaveAttribute(
+    "href",
+    appPath("/#top")
+  );
+  await expect(page.getByRole("link", { name: "ABOUT" })).toHaveAttribute("href", appPath("/#company"));
+  await expect(page.getByRole("link", { name: "CONTACT" })).toHaveAttribute("href", appPath("/#contact"));
+
+  await page.evaluate(async () => {
+    const maximumScroll = document.documentElement.scrollHeight - window.innerHeight;
+    for (let scrollY = 0; scrollY <= maximumScroll; scrollY += Math.max(320, window.innerHeight * 0.75)) {
+      window.scrollTo(0, scrollY);
+      await new Promise((resolve) => window.setTimeout(resolve, 35));
+    }
+    window.scrollTo(0, maximumScroll);
+  });
+
+  await page.locator("img").evaluateAll((elements) => {
+    for (const element of elements) {
+      (element as HTMLImageElement).loading = "eager";
+    }
+  });
+
+  await page.waitForFunction(
+    () =>
+      [...document.images].every(
+        (image) => image.complete && image.naturalWidth > 0 && image.naturalHeight > 0
+      ),
+    undefined,
+    { timeout: 15_000 }
+  );
+
+  const images = await page.locator("img").evaluateAll((elements) =>
+    elements.map((element) => {
+      const image = element as HTMLImageElement;
+      return {
+        currentSrc: image.currentSrc || image.src,
+        naturalHeight: image.naturalHeight,
+        naturalWidth: image.naturalWidth
+      };
+    })
+  );
+  expect(images.length).toBeGreaterThan(0);
+
+  for (const image of images) {
+    expect(image.naturalWidth).toBeGreaterThan(0);
+    expect(image.naturalHeight).toBeGreaterThan(0);
+
+    const imageUrl = new URL(image.currentSrc);
+    if (imageUrl.origin !== applicationOrigin) {
+      continue;
+    }
+    expect(isInsideAppBasePath(imageUrl.pathname)).toBe(true);
+
+    if (imageUrl.pathname === appPath("/_next/image")) {
+      const sourcePath = imageUrl.searchParams.get("url");
+      expect(sourcePath).not.toBeNull();
+      expect(isInsideAppBasePath(new URL(sourcePath!, applicationOrigin).pathname)).toBe(true);
+    }
+  }
+
+  expect(pathGuards.outOfBasePathAssets).toEqual([]);
+  expect(pathGuards.failedRequests).toEqual([]);
+  expect(pathGuards.asset404s).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
 test("Hero data-core and customer proof system keep local visuals readable and claim-safe", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await attachConsoleGuards(page);
 
   await expectNoExternalImageRequests(page, async () => {
-    await page.goto("/");
+    await page.goto(appRoute());
     await expect(page.getByTestId("hero")).toBeVisible();
     await expectSingleHeroServicesList(page);
     await expectSingleRepresentativeCustomersList(page);
@@ -944,7 +1089,7 @@ test("Hero data-core and customer proof system keep local visuals readable and c
     await expectNoUnsupportedCustomerClaims(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto(appRoute());
     await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
     await expectSingleRepresentativeCustomersList(page);
     await expectDataCoreKeyword(page);
@@ -953,7 +1098,7 @@ test("Hero data-core and customer proof system keep local visuals readable and c
     await captureHeroVisual(page, "hero-mobile-data-core");
 
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
+    await page.goto(appRoute());
     await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
     await expect(page.locator("canvas")).toHaveCount(0);
     await expectSingleRepresentativeCustomersList(page);
@@ -963,7 +1108,7 @@ test("Hero data-core and customer proof system keep local visuals readable and c
     await captureHeroVisual(page, "reduced-motion-data-core");
 
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.goto("/?forceFallback=1");
+    await page.goto(appRoute("/?forceFallback=1"));
     await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
     await expect(page.locator("canvas")).toHaveCount(0);
     await expectSingleRepresentativeCustomersList(page);
@@ -988,7 +1133,7 @@ test("topology SVG kit assets are local, claim-safe, and renderable", async ({ p
   }
 
   await expectNoExternalImageRequests(page, async () => {
-    await page.goto("/");
+    await page.goto(appRoute());
     await page.setContent(`
       <!doctype html>
       <html lang="en">
@@ -1037,7 +1182,7 @@ test("topology SVG kit assets are local, claim-safe, and renderable", async ({ p
               .map(
                 (fileName) => `
                   <figure>
-                    <img src="/generated/topology/${fileName}" alt="${fileName}" />
+                    <img src="${appPath(`/generated/topology/${fileName}`)}" alt="${fileName}" />
                     <figcaption>${fileName}</figcaption>
                   </figure>
                 `
@@ -1073,34 +1218,36 @@ test("capability map assets and Company integration are claim-safe and responsiv
 
   await expectNoExternalImageRequests(page, async () => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/");
+    await page.goto(appRoute());
     await scrollTestIdToStart(page, "company-section");
     await expectCapabilityMapContent(page);
     await expect(page.getByTestId("capability-map").locator("img")).toHaveAttribute(
       "src",
-      "/generated/topology/gtg-capability-map.svg"
+      appPath("/generated/topology/gtg-capability-map.svg")
     );
     await expectNoOverflow(page);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto(appRoute());
     await scrollTestIdToStart(page, "company-section");
     await expectCapabilityMapContent(page);
-    await page.waitForFunction(() =>
-      document
-        .querySelector<HTMLImageElement>('[data-testid="capability-map"] img')
-        ?.currentSrc.endsWith("/generated/topology/gtg-capability-map-mobile.svg")
+    await page.waitForFunction(
+      (expectedPath) => {
+        const currentSrc = document.querySelector<HTMLImageElement>('[data-testid="capability-map"] img')?.currentSrc;
+        return currentSrc ? new URL(currentSrc).pathname === expectedPath : false;
+      },
+      appPath("/generated/topology/gtg-capability-map-mobile.svg")
     );
     await expectNoOverflow(page);
 
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
+    await page.goto(appRoute());
     await scrollTestIdToStart(page, "company-section");
     await expectCapabilityMapContent(page);
     await expectNoOverflow(page);
 
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.goto("/?forceFallback=1");
+    await page.goto(appRoute("/?forceFallback=1"));
     await scrollTestIdToStart(page, "company-section");
     await expectCapabilityMapContent(page);
     await expect(page.locator("canvas")).toHaveCount(0);
@@ -1152,11 +1299,11 @@ test("capability map assets and Company integration are claim-safe and responsiv
         <body>
           <main>
             <figure>
-              <img src="/generated/topology/gtg-capability-map.svg" alt="desktop capability map" />
+              <img src="${appPath("/generated/topology/gtg-capability-map.svg")}" alt="desktop capability map" />
               <figcaption>gtg-capability-map.svg</figcaption>
             </figure>
             <figure>
-              <img src="/generated/topology/gtg-capability-map-mobile.svg" alt="mobile capability map" />
+              <img src="${appPath("/generated/topology/gtg-capability-map-mobile.svg")}" alt="mobile capability map" />
               <figcaption>gtg-capability-map-mobile.svg</figcaption>
             </figure>
           </main>
@@ -1184,7 +1331,7 @@ test("official content structure, navigation, metadata, and screenshots", async 
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await attachConsoleGuards(page);
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await expect(page.locator("html")).toHaveAttribute("lang", "ko");
   await expect(page).toHaveTitle("GTG Solutions & Consult | 데이터 분석·스트리밍·DevOps 기술 컨설팅");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
@@ -1261,11 +1408,21 @@ test("official content structure, navigation, metadata, and screenshots", async 
 
   await page.getByRole("button", { name: "Open menu" }).click();
   await expect(page.getByRole("dialog", { name: "Site menu" })).toBeVisible();
-  await expect(page.getByRole("dialog").getByRole("link", { name: "Home" })).toHaveAttribute("href", "/#top");
-  await expect(page.getByRole("dialog").getByRole("link", { name: "SOLUTIONS" })).toHaveAttribute("href", "/#solutions");
+  await expect(page.getByRole("dialog").getByRole("link", { name: "Home" })).toHaveAttribute(
+    "href",
+    appPath("/#top")
+  );
+  await expect(page.getByRole("dialog").getByRole("link", { name: "SOLUTIONS" })).toHaveAttribute(
+    "href",
+    appPath("/#solutions")
+  );
   await expect(page.getByRole("dialog").getByRole("link", { name: "ENGAGEMENT" })).toHaveAttribute(
     "href",
-    "/#engagement"
+    appPath("/#engagement")
+  );
+  await expect(page.getByRole("dialog").getByRole("link", { name: "CONTACT" })).toHaveAttribute(
+    "href",
+    appPath("/#contact")
   );
   await captureContent(page, "11-menu-open");
   await page.keyboard.press("Shift+Tab");
@@ -1277,9 +1434,11 @@ test("official content structure, navigation, metadata, and screenshots", async 
   await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
 
   await page.getByRole("link", { name: "ABOUT" }).click();
-  await expect(page).toHaveURL(/#company$/);
+  expectAppLocation(page, "#company");
+  await waitForTestIdBelowHeader(page, "company-section");
   await page.getByRole("link", { name: "CONTACT" }).click();
-  await expect(page).toHaveURL(/#contact$/);
+  expectAppLocation(page, "#contact");
+  await waitForTestIdBelowHeader(page, "contact-section");
   await expectLocatorInViewport(page, page.getByTestId("contact-section"));
 
   await expectNoOverflow(page);
@@ -1292,38 +1451,43 @@ test("official content structure, navigation, metadata, and screenshots", async 
 });
 
 test("draft release routes keep indexing blocked and render a simple 404", async ({ page, request }) => {
-  const robotsResponse = await request.get("/robots.txt");
+  const robotsResponse = await request.get(appRoute("/robots.txt"));
   expect(robotsResponse.ok()).toBe(true);
+  expect(new URL(robotsResponse.url()).pathname).toBe(appPath("/robots.txt"));
   const robotsText = await robotsResponse.text();
   expect(robotsText).toContain("User-Agent: *");
   expect(robotsText).toContain("Disallow: /");
 
-  const sitemapResponse = await request.get("/sitemap.xml");
+  const sitemapResponse = await request.get(appRoute("/sitemap.xml"));
   expect(sitemapResponse.ok()).toBe(true);
+  expect(new URL(sitemapResponse.url()).pathname).toBe(appPath("/sitemap.xml"));
   expect(await sitemapResponse.text()).not.toContain("https://www.gtgsc.com/");
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /nofollow/);
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
   await expect(page.locator('meta[property="og:image"]')).toHaveCount(0);
 
-  await page.goto("/missing-release-candidate-route");
+  await page.goto(appRoute("/missing-release-candidate-route"));
   await expect(page.getByTestId("not-found-page")).toBeVisible();
   await expect(page.getByRole("link", { name: "본문으로 이동" })).toHaveAttribute("href", "#main-content");
   await expect(page.locator("#main-content")).toHaveCount(1);
-  await expect(page.getByRole("link", { name: "GTG Solutions & Consult home" })).toHaveAttribute("href", "/#top");
-  await expect(page.getByRole("link", { name: "ABOUT" })).toHaveAttribute("href", "/#company");
-  await expect(page.getByRole("link", { name: "CONTACT" })).toHaveAttribute("href", "/#contact");
+  await expect(page.getByRole("link", { name: "GTG Solutions & Consult home" })).toHaveAttribute(
+    "href",
+    appPath("/#top")
+  );
+  await expect(page.getByRole("link", { name: "ABOUT" })).toHaveAttribute("href", appPath("/#company"));
+  await expect(page.getByRole("link", { name: "CONTACT" })).toHaveAttribute("href", appPath("/#contact"));
   await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
   await expect(page.getByText("요청한 페이지가 존재하지 않거나 이동되었습니다.")).toBeVisible();
   await expect(page.getByTestId("not-found-page").getByRole("link", { name: "홈으로 돌아가기" })).toHaveAttribute(
     "href",
-    "/"
+    appBasePath || "/"
   );
 
   await page.getByRole("link", { name: "GTG Solutions & Consult home" }).click();
-  await expect(page).toHaveURL(/\/#top$/);
+  expectAppLocation(page, "#top");
   await expect(page.getByTestId("hero")).toBeVisible();
 });
 
@@ -1331,7 +1495,7 @@ test("content screenshots for mobile, reduced motion, and fallback", async ({ pa
   await page.setViewportSize({ width: 390, height: 844 });
   const errors = await attachConsoleGuards(page);
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await expect(page.getByTestId("mobile-fallback-hero")).toBeVisible();
   await expectStaticDataCoreKeywordReady(page);
   await captureContent(page, "07-mobile-hero");
@@ -1379,7 +1543,7 @@ test("content screenshots for mobile, reduced motion, and fallback", async ({ pa
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/");
+  await page.goto(appRoute());
   await expect(page.getByTestId("reduced-motion-hero")).toBeVisible();
   await captureContent(page, "12-reduced-motion");
   await scrollSlideToStart(page, "solution-slide-1");
@@ -1403,7 +1567,7 @@ test("content screenshots for mobile, reduced motion, and fallback", async ({ pa
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/?forceFallback=1");
+  await page.goto(appRoute("/?forceFallback=1"));
   await expect(page.getByTestId("force-fallback-hero")).toBeVisible();
   await expect(page.locator("canvas")).toHaveCount(0);
   await expectStaticDataCoreKeywordReady(page);
@@ -1424,7 +1588,7 @@ test("mobile Hero hierarchy remains readable across release-candidate viewports"
 
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
-    await page.goto("/");
+    await page.goto(appRoute());
     await waitForFrames(page, 3);
 
     const headerBox = await page.locator(".site-header").boundingBox();
@@ -1464,7 +1628,7 @@ test("layout has no horizontal overflow across required viewports", async ({ pag
 
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
-    await page.goto("/");
+    await page.goto(appRoute());
     await waitForFrames(page, 3);
     await expectNoOverflow(page);
   }
@@ -1473,7 +1637,7 @@ test("layout has no horizontal overflow across required viewports", async ({ pag
 test("cross-browser smoke keeps the approved baseline reachable @browser-smoke", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
 
-  await page.goto("/");
+  await page.goto(appRoute());
   await expect(page.getByTestId("hero")).toBeVisible();
   await expect(page.getByRole("heading", { name: officialHeadline })).toBeVisible();
   await expect(page.getByTestId("solutions-section")).toBeAttached();

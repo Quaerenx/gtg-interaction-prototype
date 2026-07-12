@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { HeroCustomer, heroServices } from "@/content/site";
+import { withBasePath } from "@/lib/paths";
 
 export function HeroFallback({
   customers,
@@ -24,7 +25,7 @@ export function HeroFallback({
         <img
           className="fallback-data-core-asset"
           data-testid="hero-data-core-fallback"
-          src="/generated/hero/gtg-data-core.svg"
+          src={withBasePath("/generated/hero/gtg-data-core.svg")}
           alt=""
           width="1200"
           height="620"
@@ -34,7 +35,7 @@ export function HeroFallback({
       <div className="fallback-proof-strip" aria-hidden="true">
         {proofCustomers.map((customer) => (
           <span className="fallback-proof-tile" key={customer.id}>
-            <Image src={customer.visual} alt="" width={220} height={92} />
+            <Image src={withBasePath(customer.visual)} alt="" width={220} height={92} />
           </span>
         ))}
       </div>

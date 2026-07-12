@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { brandContent, seoContent, siteContent } from "@/content/site";
+import { withBasePath } from "@/lib/paths";
 import "./globals.css";
 
 const isProductionEnvironment =
@@ -42,8 +43,8 @@ export const metadata: Metadata = {
     description: seoContent.ogDescription
   },
   icons: {
-    icon: brandContent.favicon,
-    apple: brandContent.favicon
+    icon: withBasePath(brandContent.favicon),
+    apple: withBasePath(brandContent.favicon)
   }
 };
 

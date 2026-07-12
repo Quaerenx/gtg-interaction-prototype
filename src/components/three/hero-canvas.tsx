@@ -15,6 +15,7 @@ import {
 } from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { HeroCustomer } from "@/content/site";
+import { withBasePath } from "@/lib/paths";
 
 type Triple = [number, number, number];
 
@@ -184,7 +185,7 @@ function makeProofTexture(item: HeroCustomer, index: number) {
     drawProofLogo(context, image);
     texture.needsUpdate = true;
   };
-  image.src = item.visual;
+  image.src = withBasePath(item.visual);
 
   return texture;
 }

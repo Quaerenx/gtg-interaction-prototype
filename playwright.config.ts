@@ -1,5 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
+function normalizeBasePath(value: string) {
+  const normalized = value.trim().replace(/^\/+|\/+$/g, "");
+  return normalized ? `/${normalized}` : "";
+}
+
+const basePath = normalizeBasePath(process.env.NEXT_BASE_PATH ?? "/hero");
+const defaultBaseURL = `http://127.0.0.1:18150${basePath}/`;
+
 const firefoxSmokeProject =
   process.env.GTG_ENABLE_FIREFOX_SMOKE === "1"
     ? [
@@ -40,7 +48,7 @@ export default defineConfig({
   fullyParallel: false,
   reporter: [["list"]],
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? defaultBaseURL,
     trace: "off"
   },
   projects: [
