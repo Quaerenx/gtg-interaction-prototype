@@ -21,6 +21,7 @@
 | D-008 | **5개 Solutions, Company/Capability, Engagement, Contact**는 유지한다. | 현재 단일 페이지의 핵심 정보 구조이며 Canvas 없이도 읽을 수 있다. | 승인 |
 | D-009 | CMS/API/DB와 문의 저장 기능은 명시적인 운영 요구가 생길 때까지 보류한다. | 현재 사용자·운영 workflow와 데이터 책임이 정의되지 않았다. 미래 기획 문서를 현재 구현 범위로 승격하지 않는다. | 승인 |
 | D-010 | `/hero`가 preview 경로인지 production 경로인지 별도 운영 결정으로 남긴다. | 코드의 root canonical 후보와 현재 `/hero` reverse proxy mount는 서로 다른 맥락이다. hosting/domain 결정 없이 코드로 정책을 확정하지 않는다. | 별도 결정 승인·경로 미결정 |
+| D-011 | customer proof trust band는 **수동 HTML/CSS 캐러셀**로 표시한다. | 18개 항목은 모두 semantic list에 유지하고 버튼·키보드·터치 스와이프를 제공한다. autoplay, WebGL customer orbit, pin/scrub은 사용하지 않는다. | 2026-07-12 사용자 승인 |
 
 ## 2. Hero와 customer proof 대안 비교
 
@@ -63,6 +64,7 @@ Hero의 연속감을 중시할 때 가능한 차선책이다. customer proof는 
 1. Header
 2. GTG Data Core WebGL Hero
 3. 짧은 semantic HTML customer proof trust band
+   - autoplay 없는 수동 캐러셀로 표현하되 18개 항목을 DOM에서 제거하거나 비활성화하지 않음
 4. GTG topology signal 기반 Solutions handoff
 5. 5개 Solutions
    - 승인된 각 product logo는 대응하는 Solution에서 한 번만 강하게 표현

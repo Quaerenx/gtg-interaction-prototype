@@ -331,7 +331,8 @@ customer logo, product logo, black reset은 Hero progress에 존재하지 않는
 ### 11.2 CustomerProofBand
 
 - progress state가 없다.
-- pin/scrub/auto-carousel을 사용하지 않는다.
+- pin/scrub/autoplay를 사용하지 않는다.
+- 18개 항목을 semantic list에 유지하는 수동 HTML/CSS 캐러셀은 허용한다. 이전·다음 버튼, 키보드, 터치 스와이프를 지원하고 비활성 slide를 `aria-hidden` 또는 `inert`로 숨기지 않는다.
 - section 진입 즉시 heading, qualifier, 항목이 읽힌다.
 
 ### 11.3 SolutionsHandoff local progress

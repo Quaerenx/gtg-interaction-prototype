@@ -79,6 +79,48 @@ test("customer proof is contextual and product marks belong only to stable Solut
   expect(errors).toEqual([]);
 });
 
+test("customer proof carousel is manual, keyboard accessible, and keeps every customer semantic", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const errors = await attachConsoleGuards(page);
+  await page.goto(appRoute());
+  await expectCustomerProof(page);
+
+  const carousel = page.getByRole("group", { name: "Representative Customers" });
+  const track = page.locator("#customer-proof-track");
+  const previousButton = carousel.getByRole("button", { name: "이전 고객사 보기" });
+  const nextButton = carousel.getByRole("button", { name: "다음 고객사 보기" });
+  const initialScrollLeft = await track.evaluate((element) => element.scrollLeft);
+
+  await expect(previousButton).toBeDisabled();
+  await expect(nextButton).toBeEnabled();
+  await page.waitForTimeout(500);
+  expect(await track.evaluate((element) => element.scrollLeft)).toBe(initialScrollLeft);
+
+  await nextButton.focus();
+  await expect(nextButton).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect.poll(() => track.evaluate((element) => element.scrollLeft)).toBeGreaterThan(initialScrollLeft);
+  await expect(previousButton).toBeEnabled();
+  await expect(carousel.getByText("현재 고객사 2 / 18", { exact: true })).toHaveCount(1);
+  await expect(track.locator("[aria-hidden='true'], [inert]")).toHaveCount(0);
+  await expect(track.getByRole("listitem")).toHaveCount(18);
+  expect(errors).toEqual([]);
+});
+
+test("reduced motion customer carousel moves without smooth scrolling", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(appRoute());
+
+  const carousel = page.getByRole("group", { name: "Representative Customers" });
+  const track = page.locator("#customer-proof-track");
+  await carousel.getByRole("button", { name: "다음 고객사 보기" }).click();
+
+  await expect(track).toHaveCSS("scroll-behavior", "auto");
+  await expect.poll(() => track.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  await expect(carousel.getByText("현재 고객사 2 / 18", { exact: true })).toHaveCount(1);
+});
+
 test("each product reveal runs once and stays seen through boundary jitter", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   const errors = await attachConsoleGuards(page);

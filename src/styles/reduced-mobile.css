@@ -1,6 +1,6 @@
 @media (min-width: 1600px) {
   .customer-proof-list {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-columns: calc((100% - 3px) / 4);
   }
 }
 
@@ -18,7 +18,7 @@
   }
 
   .customer-proof-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-columns: calc((100% - 1px) / 2);
   }
 
   .solution-route-nav ol {
@@ -192,8 +192,11 @@
   }
 
   .customer-proof-list {
-    grid-template-columns: 1fr;
-    margin-top: 36px;
+    grid-auto-columns: min(84vw, 320px);
+  }
+
+  .customer-proof-carousel {
+    margin-top: 32px;
   }
 
   .customer-proof-item figure {
@@ -326,7 +329,7 @@
 
 @media (min-width: 380px) and (max-width: 767px) {
   .customer-proof-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-columns: min(72vw, 300px);
   }
 
   .customer-proof-item figure {
@@ -375,5 +378,13 @@
 
   .topology-route {
     stroke-dashoffset: 0;
+  }
+
+  .customer-proof-list {
+    scroll-behavior: auto;
+  }
+
+  .customer-proof-control {
+    transition: none;
   }
 }
