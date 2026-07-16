@@ -1644,9 +1644,283 @@ test("cross-browser smoke keeps the approved baseline reachable @browser-smoke",
   await expectNoOverflow(page);
 });
 
+test("hero2 redesigned route keeps GTG content clear and isolated", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const errors = await attachConsoleGuards(page);
+
+  await page.goto(appRoute("/hero2"));
+  expect(new URL(page.url()).pathname).toBe(appPath("/hero2"));
+
+  const root = page.getByTestId("hero2-page");
+  await expect(root).toBeVisible();
+  await expect(root.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(root.getByRole("heading", { level: 1, name: officialHeadline })).toBeVisible();
+  await expect(root.getByTestId("solutions-section")).toBeAttached();
+  await expect(root.locator("[data-testid^='solution-slide-']")).toHaveCount(5);
+  await expect(root.getByTestId("company-section")).toBeAttached();
+  await expect(root.getByTestId("engagement-section")).toBeAttached();
+  await expect(root.getByTestId("contact-section")).toBeAttached();
+  await expect(root.getByTestId("hero2-customer-proof").getByRole("listitem")).toHaveCount(12);
+
+  await expect(root.getByTestId("webgl-hero").locator("canvas")).toBeVisible();
+  await expect(root.getByTestId("hero").locator("canvas")).toHaveCount(1);
+  await expect(root.locator("main > section:not([data-testid='hero']) canvas")).toHaveCount(0);
+
+  const visibleText = await root.innerText();
+  expect(visibleText).not.toMatch(/[—–]/);
+  expect(visibleText).not.toContain("MVP PROTOTYPE");
+  expect(visibleText).not.toContain("01 / 05");
+  expect(visibleText).not.toContain("Scroll to explore");
+
+  await root.getByTestId("hero").evaluate((element) =>
+    Promise.all(element.getAnimations({ subtree: true }).map((animation) => animation.finished.catch(() => undefined)))
+  );
+  await capture(page, "hero2-desktop-hero");
+  await scrollTestIdToStart(page, "solutions-section");
+  await capture(page, "hero2-desktop-solutions");
+  await scrollTestIdToStart(page, "solution-slide-1");
+  await capture(page, "hero2-desktop-solution-1");
+  await scrollTestIdToStart(page, "company-section");
+  await capture(page, "hero2-desktop-company");
+  await scrollTestIdToStart(page, "capability-map");
+  await capture(page, "hero2-desktop-capability-map");
+  await scrollTestIdToStart(page, "engagement-section");
+  await capture(page, "hero2-desktop-engagement");
+  await scrollTestIdToStart(page, "contact-section");
+  await capture(page, "hero2-desktop-contact");
+
+  await root.getByTestId("hero").getByRole("link", { name: "문의하기" }).click();
+  await expect.poll(() => new URL(page.url()).hash).toBe("#contact");
+  await page.waitForFunction(() => {
+    const header = document.querySelector<HTMLElement>('[data-testid="hero2-header"]')?.getBoundingClientRect();
+    const contact = document.querySelector<HTMLElement>('[data-testid="contact-section"]')?.getBoundingClientRect();
+    return Boolean(header && contact && contact.top >= header.height - 4 && contact.top < header.height + 100);
+  });
+
+  await expectNoOverflow(page);
+  expect(errors).toEqual([]);
+});
+
+test("hero2 mobile and reduced-motion modes stay static and readable", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(appRoute("/hero2"));
+
+  const root = page.getByTestId("hero2-page");
+  await expect(root.locator("canvas")).toHaveCount(0);
+  await expect(root.getByTestId("hero2-hero-fallback")).toBeVisible();
+  await expectLocatorFullyInViewport(page, root.getByRole("heading", { level: 1, name: officialHeadline }));
+  await expectLocatorFullyInViewport(page, root.getByTestId("hero").getByRole("link", { name: "문의하기" }));
+  await root.getByTestId("hero").evaluate((element) =>
+    Promise.all(element.getAnimations({ subtree: true }).map((animation) => animation.finished.catch(() => undefined)))
+  );
+  await capture(page, "hero2-mobile-hero");
+  await root.getByTestId("hero2-header").getByText("MENU").click();
+  await expect(root.getByRole("navigation", { name: "Mobile primary" })).toBeVisible();
+  await expect(root.getByRole("navigation", { name: "Mobile primary" }).getByRole("link")).toHaveCount(4);
+
+  const solutionPositions = await root.locator("[data-testid^='solution-slide-']").evaluateAll((slides) =>
+    slides.map((slide) => window.getComputedStyle(slide).position)
+  );
+  expect(solutionPositions.every((position) => position !== "sticky" && position !== "fixed")).toBe(true);
+  await expectNoOverflow(page);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(appRoute("/hero2"));
+  await expect(root.locator("canvas")).toHaveCount(0);
+  await expect(root.getByTestId("hero2-hero-fallback")).toBeVisible();
+  const motionStyles = await root.getByTestId("hero2-visual").evaluate((element) => {
+    const computed = window.getComputedStyle(element);
+    return { animationName: computed.animationName, transform: computed.transform };
+  });
+  expect(motionStyles.animationName).toBe("none");
+  expect(motionStyles.transform).toBe("none");
+  expect(await page.evaluate(() => window.__GTG_SCROLLTRIGGERS__ ?? 0)).toBe(0);
+  expect(await page.evaluate(() => window.__GTG_SOLUTION_TRIGGERS__ ?? 0)).toBe(0);
+  await expectNoOverflow(page);
+});
+
+test("hero2 remains reachable across browser engines @browser-smoke", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto(appRoute("/hero2"));
+
+  const root = page.getByTestId("hero2-page");
+  await expect(root.getByTestId("hero")).toBeVisible();
+  await expect(root.getByRole("heading", { level: 1, name: officialHeadline })).toBeVisible();
+  await expect(root.getByTestId("solutions-section")).toBeAttached();
+  await expectNoOverflow(page);
+});
+
+test("hero3 asset-free redesign is interactive and isolated", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const errors = await attachConsoleGuards(page);
+  const imageRequests: string[] = [];
+  const forbiddenAssetRequests: string[] = [];
+  const externalRequests: string[] = [];
+
+  page.on("request", (request) => {
+    const requestUrl = new URL(request.url());
+    if (request.resourceType() === "image") {
+      imageRequests.push(requestUrl.href);
+    }
+    if (
+      /\/_next\/image|\/generated\/|\/brand\/|\/item-logo\/|\.(?:svg|png|webp|jpe?g|gif|avif)(?:$|\?)/i.test(
+        requestUrl.pathname
+      )
+    ) {
+      forbiddenAssetRequests.push(requestUrl.href);
+    }
+    if (requestUrl.origin !== applicationOrigin) {
+      externalRequests.push(requestUrl.href);
+    }
+  });
+
+  await page.goto(appRoute("/hero3"));
+  expect(new URL(page.url()).pathname).toBe(appPath("/hero3"));
+
+  const root = page.getByTestId("hero3-page");
+  await expect(root).toBeVisible();
+  await expect(root.locator("main")).toHaveCount(1);
+  await expect(root.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(root.getByRole("heading", { level: 1, name: officialHeadline })).toBeVisible();
+  await expect(root.getByTestId("hero3-solutions")).toBeAttached();
+  await expect(root.getByTestId("company-section")).toBeAttached();
+  await expect(root.getByTestId("engagement-section")).toBeAttached();
+  await expect(root.getByTestId("hero3-contact")).toBeAttached();
+
+  await expect(root.getByTestId("hero3-hero").locator("canvas")).toBeVisible();
+  await expect(root.locator("main > section:not([data-testid='hero3-hero']) canvas")).toHaveCount(0);
+  await expect(root.locator("img, picture, video, object, embed")).toHaveCount(0);
+  await expect(page.locator('head link[rel~="icon"], head link[rel="apple-touch-icon"]')).toHaveCount(0);
+  await expect(
+    page.locator(
+      'head [href*="/brand/"], head [content*="/brand/"], head [href$=".png"], head [href$=".svg"], head [href$=".webp"]'
+    )
+  ).toHaveCount(0);
+
+  const switcher = root.getByTestId("hero3-signal-switcher");
+  const analyticsTab = switcher.getByRole("tab", { name: /Analytics/ });
+  const consultingTab = switcher.getByRole("tab", { name: /Consulting/ });
+  const streamingTab = switcher.getByRole("tab", { name: /Streaming/ });
+  await expect(analyticsTab).toHaveAttribute("aria-selected", "true");
+  await analyticsTab.focus();
+  await page.keyboard.press("End");
+  await expect(consultingTab).toHaveAttribute("aria-selected", "true");
+  await expect(switcher.getByRole("tabpanel").getByRole("heading", { name: "Consulting & Technical Support" })).toBeVisible();
+  await streamingTab.click();
+  await expect(streamingTab).toHaveAttribute("aria-selected", "true");
+  await expect(switcher.getByRole("tabpanel").getByRole("heading", { name: "Data Streaming" })).toBeVisible();
+
+  const visibleText = await root.innerText();
+  expect(visibleText).not.toMatch(/[—–]/);
+  expect(visibleText).not.toContain("MVP PROTOTYPE");
+  expect(visibleText).not.toContain("Scroll to explore");
+
+  await scrollTestIdToStart(page, "hero3-hero");
+  await root.getByTestId("hero3-hero").evaluate((element) =>
+    Promise.all(element.getAnimations({ subtree: true }).map((animation) => animation.finished.catch(() => undefined)))
+  );
+  await capture(page, "hero3-desktop-hero");
+  await scrollTestIdToStart(page, "hero3-solutions");
+  await capture(page, "hero3-desktop-solutions");
+  await scrollTestIdToStart(page, "company-section");
+  await capture(page, "hero3-desktop-company");
+  await scrollTestIdToStart(page, "engagement-section");
+  await capture(page, "hero3-desktop-engagement");
+  await scrollTestIdToStart(page, "hero3-contact");
+  await capture(page, "hero3-desktop-contact");
+
+  const cssAssetUrls = await root.evaluate((node) => {
+    const values: string[] = [];
+    const elements = [node, ...node.querySelectorAll("*")];
+    for (const element of elements) {
+      for (const pseudo of [null, "::before", "::after"] as const) {
+        const style = window.getComputedStyle(element, pseudo);
+        for (const value of [style.backgroundImage, style.maskImage, style.getPropertyValue("-webkit-mask-image")]) {
+          if (value.includes("url(")) {
+            values.push(value);
+          }
+        }
+      }
+    }
+    return values;
+  });
+  expect(cssAssetUrls).toEqual([]);
+
+  await root.getByTestId("hero3-hero").getByRole("link", { name: "문의하기" }).click();
+  expect(new URL(page.url()).pathname).toBe(appPath("/hero3"));
+  await expect.poll(() => new URL(page.url()).hash).toBe("#contact");
+  await expectNoOverflow(page);
+  expect(imageRequests).toEqual([]);
+  expect(forbiddenAssetRequests).toEqual([]);
+  expect(externalRequests).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("hero3 mobile and reduced-motion modes remain static and accessible", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__HERO3_CANVAS_SEEN__ = false;
+    new MutationObserver(() => {
+      if (document.querySelector('[data-testid="hero3-page"] canvas')) {
+        window.__HERO3_CANVAS_SEEN__ = true;
+      }
+    }).observe(document, { childList: true, subtree: true });
+  });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(appRoute("/hero3"));
+
+  const root = page.getByTestId("hero3-page");
+  await expect(root.locator("canvas")).toHaveCount(0);
+  await expect(root.getByTestId("hero3-hero-fallback")).toBeVisible();
+  await expectLocatorFullyInViewport(page, root.getByRole("heading", { level: 1, name: officialHeadline }));
+  await expectLocatorFullyInViewport(page, root.getByTestId("hero3-hero").getByRole("link", { name: "문의하기" }));
+  await root.getByTestId("hero3-hero").evaluate((element) =>
+    Promise.all(element.getAnimations({ subtree: true }).map((animation) => animation.finished.catch(() => undefined)))
+  );
+  await capture(page, "hero3-mobile-hero");
+
+  await root.getByTestId("hero3-header").getByText("MENU").click();
+  await expect(root.getByRole("navigation", { name: "Mobile primary" })).toBeVisible();
+  await expect(root.getByRole("navigation", { name: "Mobile primary" }).getByRole("link")).toHaveCount(4);
+  await root.getByTestId("hero3-signal-switcher").getByRole("tab", { name: /Streaming/ }).click();
+  await expect(root.getByTestId("hero3-signal-switcher").getByRole("tabpanel")).toContainText("Data Streaming");
+
+  const processPositions = await root.getByTestId("engagement-section").locator("*").evaluateAll((elements) =>
+    elements.map((element) => window.getComputedStyle(element).position)
+  );
+  expect(processPositions.every((position) => position !== "sticky" && position !== "fixed")).toBe(true);
+  await expectNoOverflow(page);
+  expect(await page.evaluate(() => window.__HERO3_CANVAS_SEEN__)).toBe(false);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(appRoute("/hero3"));
+  await expect(root.locator("canvas")).toHaveCount(0);
+  await expect(root.getByTestId("hero3-hero-fallback")).toBeVisible();
+  expect(await page.evaluate(() => window.__HERO3_CANVAS_SEEN__)).toBe(false);
+  const runningAnimations = await root.evaluate(
+    (element) => element.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length
+  );
+  expect(runningAnimations).toBe(0);
+  await expectNoOverflow(page);
+});
+
+test("hero3 remains reachable across browser engines @browser-smoke", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto(appRoute("/hero3"));
+
+  const root = page.getByTestId("hero3-page");
+  await expect(root.getByTestId("hero3-hero")).toBeVisible();
+  await expect(root.getByRole("heading", { level: 1, name: officialHeadline })).toBeVisible();
+  await expect(root.getByTestId("hero3-solutions")).toBeAttached();
+  await expectNoOverflow(page);
+});
+
 declare global {
   interface Window {
     __GTG_SCROLLTRIGGERS__?: number;
     __GTG_SOLUTION_TRIGGERS__?: number;
+    __HERO3_CANVAS_SEEN__?: boolean;
   }
 }
